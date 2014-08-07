@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from rosidl_generator_dds_opensplice_cpp import generate_dds_opensplice_cpp
+from rosidl_typesupport_opensplice_cpp import generate_dds_opensplice_cpp
 
 
 def main(argv=sys.argv[1:]):
