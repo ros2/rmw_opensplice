@@ -24,6 +24,6 @@ install(
   DESTINATION lib/rosidl_typesupport_opensplice_cpp
 )
 install(
-  DIRECTORY cmake
+  DIRECTORY cmake resource
   DESTINATION share/${PROJECT_NAME}
 )

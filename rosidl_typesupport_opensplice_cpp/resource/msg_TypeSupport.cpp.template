@@ -1,0 +1,142 @@
+@###############################################
+@#
+@# ROS message type support code generation for C++
+@#
+@# EmPy template for generating <msg>_TypeSupport.cpp files
+@#
+@###############################################
+@# Start of Template
+@#
+@# Context:
+@#  - spec (rosidl_parser.MessageSpecification)
+@#    Parsed specification of the .msg file
+@###############################################
+
+#ifndef __@(spec.base_type.pkg_name)__@(spec.base_type.type)_TypeSupport__h__
+#define __@(spec.base_type.pkg_name)__@(spec.base_type.type)_TypeSupport__h__
+
+#include <iostream>
+
+#include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
+#include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
+#include "rosidl_generator_cpp/MessageTypeSupport.h"
+#include "ros_middleware_opensplice_cpp/MessageTypeSupport.h"
+
+@[for field in spec.fields]@
+@[if not field.type.is_primitive_type()]@
+struct @(field.type.pkg_name)::dds_opensplice::@(field.type.type)_;
+namespace @(field.type.pkg_name) {
+namespace type_support {
+void convert_ros_message_to_dds__@(field.type.type)(const @(field.type.pkg_name)::@(field.type.type)&, @(field.type.pkg_name)::dds_opensplice::@(field.type.type)_&);
+}  // namespace type_support
+}  // namespace @(field.type.pkg_name)
+@[end if]@
+@[end for]@
+
+namespace @(spec.base_type.pkg_name)
+{
+
+namespace type_support
+{
+
+void register_type__@(spec.base_type.type)(DDS::DomainParticipant * participant, const char * type_name)
+{
+    std::cout << "  @(spec.base_type.pkg_name)::type_support::register_type__@(spec.base_type.type)()" << std::endl;
+    @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_TypeSupport * ros_message_ts = new @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_TypeSupport();
+    DDS::ReturnCode_t status = ros_message_ts->register_type(participant, type_name);
+    if (status != DDS::RETCODE_OK) {
+        printf("register_type() failed. Status = %d\n", status);
+        throw std::runtime_error("register_type failed");
+    };
+    //delete ros_message_ts;
+}
+
+void convert_ros_message_to_dds__@(spec.base_type.type)(const void * untyped_ros_message, @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_& dds_message)
+{
+    //std::cout << "  @(spec.base_type.pkg_name)::type_support::convert_ros_message_to_dds__@(spec.base_type.type)()" << std::endl;
+    const @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message = *(const @(spec.base_type.pkg_name)::@(spec.base_type.type) *)untyped_ros_message;
+@[for field in spec.fields]@
+    // field.name @(field.name)
+    // field.type @(field.type)
+    // field.type.is_array @(field.type.is_array)
+@[if field.type.array_size]@
+    // field.type.array_size @(field.type.array_size)
+@[else]@
+    // field.type.array_size dynamic
+@[end if]@
+@[if field.type.is_array]@
+    {
+@[if field.type.array_size]@
+        size_t size = @(field.type.array_size);
+@[else]@
+        size_t size = ros_message.@(field.name).size();
+        dds_message.@(field.name)_.length(size);
+@[end if]@
+        for (size_t i = 0; i < size; i++) {
+@[if field.type.is_primitive_type()]@
+            dds_message.@(field.name)_[i] = ros_message.@(field.name)[i];
+@[else]@
+            //::dds_impl::DDSTypeResolver<@(field.type.pkg_name)::@(field.type.type)>::convert_ros_message_to_dds(ros_message.@(field.name)[i], dds_message.@(field.name)_[i]);
+            @(field.type.pkg_name)::type_support::convert_ros_message_to_dds__@(field.type.type)(ros_message.@(field.name)[i], dds_message.@(field.name)_[i]);
+@[end if]@
+        }
+    }
+@[elif field.type.is_primitive_type()]@
+      dds_message.@(field.name)_ = ros_message.@(field.name);
+@[else]@
+      //::dds_impl::DDSTypeResolver<@(field.type.pkg_name)::@(field.type.type)>::convert_ros_message_to_dds(ros_message.@(field.name), dds_message.@(field.name)_);
+      @(field.type.pkg_name)::type_support::convert_ros_message_to_dds__@(field.type.type)(ros_message.@(field.name), dds_message.@(field.name)_);
+@[end if]@
+
+@[end for]@
+}
+
+void publish__@(spec.base_type.type)(DDS::DataWriter * topic_writer, const void * ros_message)
+{
+    //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)()" << std::endl;
+
+    //@(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_ dds_message;
+    @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_ * dds_message = new @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_();
+    convert_ros_message_to_dds__@(spec.base_type.type)(ros_message, *dds_message);
+
+    @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_DataWriter * data_writer = @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_DataWriter::_narrow(topic_writer);
+    //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)() write dds message" << std::endl;
+    DDS::ReturnCode_t status = data_writer->write(*dds_message, DDS::HANDLE_NIL);
+    if (status != DDS::RETCODE_OK) {
+        printf("write() failed. Status = %d\n", status);
+        throw std::runtime_error("write failed");
+    };
+
+    delete dds_message;
+}
+
+
+static ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks callbacks = {
+    "@(spec.base_type.pkg_name)",
+    "@(spec.base_type.type)",
+    &register_type__@(spec.base_type.type),
+    &publish__@(spec.base_type.type)
+};
+
+static rosidl_generator_cpp::MessageTypeSupportHandle handle = {
+    "opensplice_static",
+    &callbacks
+};
+
+}  // namespace type_support
+
+}  // namespace @(spec.base_type.pkg_name)
+
+
+namespace ros_middleware_opensplice_cpp
+{
+
+template<>
+const rosidl_generator_cpp::MessageTypeSupportHandle& get_type_support_handle<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
+{
+    return @(spec.base_type.pkg_name)::type_support::handle;
+}
+
+}  // namespace ros_middleware_opensplice_cpp
+
+#endif  // __@(spec.base_type.pkg_name)__@(spec.base_type.type)_TypeSupport__h__

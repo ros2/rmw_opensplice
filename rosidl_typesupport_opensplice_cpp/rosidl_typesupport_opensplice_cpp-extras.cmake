@@ -7,3 +7,4 @@ ament_register_extension("rosidl_generate_interfaces" "rosidl_typesupport_opensp
 find_package(opensplice REQUIRED COMPONENTS CXX)
 
 set(rosidl_typesupport_opensplice_cpp_BIN "${rosidl_typesupport_opensplice_cpp_DIR}/../../../lib/rosidl_typesupport_opensplice_cpp/rosidl_typesupport_opensplice_cpp")
+set(rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR "${rosidl_typesupport_opensplice_cpp_DIR}/../resource")
