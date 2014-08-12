@@ -92,6 +92,10 @@ add_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
 )
 add_dependencies(
+  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
+  ${rosidl_generate_interfaces_TARGET}__cpp
+)
+add_dependencies(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
 )
