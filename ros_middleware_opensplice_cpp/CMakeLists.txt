@@ -24,7 +24,7 @@ ament_package()
 include_directories(include ${ros_middleware_interface_INCLUDE_DIRS} ${rosidl_generator_cpp_INCLUDE_DIRS} ${rosidl_typesupport_opensplice_cpp_INCLUDE_DIRS} ${OPENSPLICE_INCLUDE_DIRS})
 add_definitions(${OPENSPLICE_DEFINITIONS})
 add_library(ros_middleware_opensplice_cpp SHARED src/functions.cpp)
-target_link_libraries(ros_middleware_opensplice_cpp ${std_msgs_LIBRARIES} ${rosidl_typesupport_opensplice_cpp_LIBRARIES} ${OPENSPLICE_LIBRARIES})
+target_link_libraries(ros_middleware_opensplice_cpp ${rosidl_typesupport_opensplice_cpp_LIBRARIES} ${OPENSPLICE_LIBRARIES})
 
 install(
   DIRECTORY include/
