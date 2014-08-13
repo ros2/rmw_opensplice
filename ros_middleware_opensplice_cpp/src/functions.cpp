@@ -173,7 +173,6 @@ ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& n
     DDS::DomainParticipant * participant = (DDS::DomainParticipant *)node_handle._data;
 
 
-    //TODOD ## Checked to here
 
     ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = (ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks*)type_support_handle._data;
     std::string type_name = std::string(callbacks->_package_name) + "/" + callbacks->_message_name;
@@ -181,7 +180,7 @@ ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& n
 
     std::cout << "  create_subscriber() invoke register callback" << std::endl;
     callbacks->_register_type(participant, type_name.c_str());
-    // Needed ^^^^^?
+
 
     DDS::SubscriberQos subscriber_qos;
     DDS::ReturnCode_t status = participant->get_default_subscriber_qos(subscriber_qos);
@@ -241,28 +240,113 @@ ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& n
     };
     return subscriber_handle;
 
-
-#warning In progress
 }
 
 void take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, const void * ros_message)
 {
-#error TODO
+#error UNIMPLEMENTED
+  /* TODO FIXME 
+  if (subscriber_handle.implementation_identifier_ != _prismtech_opensplice_identifier)
+  {
+    printf("subscriber handle not from this implementation\n");
+    printf("but from: %s\n", subscriber_handle.implementation_identifier_);
+    throw std::runtime_error("subscriber handle not from this implementation");
+  }
+
+  //std::cout << "  take() extract data writer and type code from opaque subscriber handle" << std::endl;
+  CustomSubscriberInfo* custom_subscriber_info = new CustomSubscriberInfo();
+  DDS::DataReader * data_reader = custom_subscriber_info->topic_reader_;
+
+
+
+  DDS::SampleInfo sample_info;
+  DDS::ReturnCode_t status = data_reader->take_next_sample(*ros_message, sample_info);
+  if (status != DDS::RETCODE_OK) {
+    printf("take_next_sample() failed. Status = %d\n", status);
+    throw std::runtime_error("take next sample failed");
+  };
+
+  */
 }
 
 ros_middleware_interface::GuardConditionHandle create_guard_condition()
 {
-#error TODO
+  ros_middleware_interface::GuardConditionHandle guard_condition_handle;
+  guard_condition_handle.implementation_identifier_ = _prismtech_opensplice_identifier;
+  guard_condition_handle.data_ = new DDS::GuardCondition();
+  return guard_condition_handle;
 }
 
 void trigger_guard_condition(const ros_middleware_interface::GuardConditionHandle& guard_condition_handle)
 {
-#error TODO
+  if (guard_condition_handle.implementation_identifier_ != _prismtech_opensplice_identifier)
+  {
+    printf("guard condition handle not from this implementation\n");
+    printf("but from: %s\n", guard_condition_handle.implementation_identifier_);
+    throw std::runtime_error("guard condition handle not from this implementation");
+  }
+
+  DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)guard_condition_handle.data_;
+  guard_condition->set_trigger_value(true);
 }
 
 void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles)
 {
-#error TODO
+  DDS::WaitSet waitset;
+  
+  // add a condition for each subscriber
+  for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
+  {
+    void * data = subscriber_handles.subscribers_[i];
+    CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)data;
+    DDS::DataReader * topic_reader = custom_subscriber_info->topic_reader_;
+    waitset.attach_condition(topic_reader->get_statuscondition());
+  }
+  
+  // add a condition for each guard condition
+  for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
+  {
+    void * data = guard_condition_handles.guard_conditions_[i];
+    DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)data;
+    waitset.attach_condition(guard_condition);
+  }
+  
+  // invoke wait until one of the conditions triggers
+  DDS::ConditionSeq active_conditions;
+  DDS::Duration_t timeout;
+  timeout.sec = 1;
+  DDS::ReturnCode_t status = DDS::RETCODE_TIMEOUT;
+  while (DDS::RETCODE_TIMEOUT == status)
+  {
+    status = waitset.wait(active_conditions, timeout);
+    if (DDS::RETCODE_TIMEOUT == status) {
+      continue;
+    };
+    if (status != DDS::RETCODE_OK) {
+      printf("wait() failed. Status = %d\n", status);
+      throw std::runtime_error("wait failed");
+    };
+  }
+
+  // set subscriber handles to zero for all not triggered conditions
+  for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
+  {
+    void * data = subscriber_handles.subscribers_[i];
+    if (!active_conditions[i]->get_trigger_value())
+    {
+      data = 0;
+    }
+  }
+
+  // set subscriber handles to zero for all not triggered conditions
+  for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
+  {
+    void * data = guard_condition_handles.guard_conditions_[subscriber_handles.subscriber_count_ + i];
+    if (!active_conditions[i]->get_trigger_value())
+    {
+      data = 0;
+    }
+  }
 }
 
 }
