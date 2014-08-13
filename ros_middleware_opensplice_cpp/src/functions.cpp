@@ -152,9 +152,97 @@ void publish(const ros_middleware_interface::PublisherHandle& publisher_handle, 
     callbacks->_publish(topic_writer, ros_message);
 }
 
+struct CustomSubscriberInfo {
+  DDS::DataReader * topic_reader_;
+  ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks_;
+};
+
 ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& node_handle, const rosidl_generator_cpp::MessageTypeSupportHandle & type_support_handle, const char * topic_name)
 {
-#error TODO
+  std::cout << "create_subscriber()" << std::endl;
+  
+    if (node_handle._implementation_identifier != _prismtech_opensplice_identifier)
+    {
+        printf("node handle not from this implementation\n");
+        printf("but from: %s\n", node_handle._implementation_identifier);
+        throw std::runtime_error("node handle not from this implementation");
+    }
+    std::cout << "create_subscriber() " << node_handle._implementation_identifier << std::endl;
+
+    std::cout << "  create_subscriber() extract participant from opaque node handle" << std::endl;
+    DDS::DomainParticipant * participant = (DDS::DomainParticipant *)node_handle._data;
+
+
+    //TODOD ## Checked to here
+
+    ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = (ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks*)type_support_handle._data;
+    std::string type_name = std::string(callbacks->_package_name) + "/" + callbacks->_message_name;
+
+
+    std::cout << "  create_subscriber() invoke register callback" << std::endl;
+    callbacks->_register_type(participant, type_name.c_str());
+    // Needed ^^^^^?
+
+    DDS::SubscriberQos subscriber_qos;
+    DDS::ReturnCode_t status = participant->get_default_subscriber_qos(subscriber_qos);
+    if (status != DDS::RETCODE_OK) {
+        printf("get_default_subscriber_qos() failed. Status = %d\n", status);
+        throw std::runtime_error("get default subscriber qos failed");
+    };
+
+    std::cout << "  create_subscriber() create dds subscriber" << std::endl;
+    DDS::Subscriber * dds_subscriber = participant->create_subscriber(
+        subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
+    if (!dds_subscriber) {
+        printf("  create_subscriber() could not create subscriber\n");
+        throw std::runtime_error("could not create subscriber");
+    };
+
+
+    DDS::TopicQos default_topic_qos;
+    status = participant->get_default_topic_qos(default_topic_qos);
+    if (status != DDS::RETCODE_OK) {
+        printf("get_default_topic_qos() failed. Status = %d\n", status);
+        throw std::runtime_error("get default topic qos failed");
+    };
+
+    std::cout << "  create_subscriber() create topic" << std::endl;
+    DDS::Topic * topic = participant->create_topic(
+        topic_name, type_name.c_str(), default_topic_qos, NULL,
+        DDS::STATUS_MASK_NONE
+    );
+    if (!topic) {
+        printf("  create_topic() could not create topic\n");
+        throw std::runtime_error("could not create topic");
+    };
+
+
+    DDS::DataReaderQos default_datareader_qos;
+    status = dds_subscriber->get_default_datareader_qos(default_datareader_qos);
+    if (status != DDS::RETCODE_OK) {
+        printf("get_default_datareader_qos() failed. Status = %d\n", status);
+        throw std::runtime_error("get default datareader qos failed");
+    };
+
+    std::cout << "  create_subscriber() create data reader" << std::endl;
+    DDS::DataReader * topic_reader = dds_subscriber->create_datareader(
+        topic, default_datareader_qos,
+        NULL, DDS::STATUS_MASK_NONE);
+
+
+    std::cout << "  create_subscriber() build opaque subscriber handle" << std::endl;
+    CustomSubscriberInfo* custom_subscriber_info = new CustomSubscriberInfo();
+    custom_subscriber_info->topic_reader_ = topic_reader;
+    custom_subscriber_info->callbacks_ = callbacks;
+
+    ros_middleware_interface::SubscriberHandle subscriber_handle = {
+        _prismtech_opensplice_identifier,
+        custom_subscriber_info
+    };
+    return subscriber_handle;
+
+
+#warning In progress
 }
 
 void take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, const void * ros_message)
