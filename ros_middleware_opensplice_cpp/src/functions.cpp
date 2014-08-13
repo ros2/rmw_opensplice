@@ -152,4 +152,29 @@ void publish(const ros_middleware_interface::PublisherHandle& publisher_handle, 
     callbacks->_publish(topic_writer, ros_message);
 }
 
+ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& node_handle, const rosidl_generator_cpp::MessageTypeSupportHandle & type_support_handle, const char * topic_name)
+{
+#error TODO
+}
+
+void take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, const void * ros_message)
+{
+#error TODO
+}
+
+ros_middleware_interface::GuardConditionHandle create_guard_condition()
+{
+#error TODO
+}
+
+void trigger_guard_condition(const ros_middleware_interface::GuardConditionHandle& guard_condition_handle)
+{
+#error TODO
+}
+
+void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles)
+{
+#error TODO
+}
+
 }
