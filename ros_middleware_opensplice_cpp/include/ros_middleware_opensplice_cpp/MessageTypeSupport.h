@@ -24,6 +24,7 @@ typedef struct MessageTypeSupportCallbacks {
   const char * _message_name;
   void (*_register_type)(DDS::DomainParticipant * participant, const char * type_name);
   void (*_publish)(DDS::DataWriter * topic_writer, const void * ros_message);
+  void (*_take)(DDS::DataReader * topic_reader, const void * ros_message);
 } MessageTypeSupportCallbacks;
 
 template<typename T>

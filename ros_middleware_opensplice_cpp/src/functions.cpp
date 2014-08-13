@@ -244,8 +244,6 @@ ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& n
 
 void take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, const void * ros_message)
 {
-#error UNIMPLEMENTED
-  /* TODO FIXME 
   if (subscriber_handle.implementation_identifier_ != _prismtech_opensplice_identifier)
   {
     printf("subscriber handle not from this implementation\n");
@@ -255,18 +253,12 @@ void take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, c
 
   //std::cout << "  take() extract data writer and type code from opaque subscriber handle" << std::endl;
   CustomSubscriberInfo* custom_subscriber_info = new CustomSubscriberInfo();
-  DDS::DataReader * data_reader = custom_subscriber_info->topic_reader_;
+  DDS::DataReader * topic_reader = custom_subscriber_info->topic_reader_;
+  const ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = custom_subscriber_info->callbacks_;
 
 
-
-  DDS::SampleInfo sample_info;
-  DDS::ReturnCode_t status = data_reader->take_next_sample(*ros_message, sample_info);
-  if (status != DDS::RETCODE_OK) {
-    printf("take_next_sample() failed. Status = %d\n", status);
-    throw std::runtime_error("take next sample failed");
-  };
-
-  */
+  std::cout << "  take() invoke take callback" << std::endl;
+  return callbacks->_take(topic_reader, ros_message);
 }
 
 ros_middleware_interface::GuardConditionHandle create_guard_condition()
@@ -300,6 +292,8 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     void * data = subscriber_handles.subscribers_[i];
     CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)data;
     DDS::DataReader * topic_reader = custom_subscriber_info->topic_reader_;
+    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
+    condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(topic_reader->get_statuscondition());
   }
   
@@ -332,19 +326,47 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
   for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
   {
     void * data = subscriber_handles.subscribers_[i];
-    if (!active_conditions[i]->get_trigger_value())
+    CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)data;
+    DDS::DataReader* topic_reader = custom_subscriber_info->topic_reader_;
+    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
+
+    // search for subscriber condition in active set
+    unsigned long j = 0;
+    for (; j < active_conditions.length(); ++j)
     {
-      data = 0;
+      if (active_conditions[j] == condition)
+      {
+        break;
+      }
+    }
+    // if subscriber condition is not found in the active set
+    // reset the subscriber handle
+    if (!j < active_conditions.length())
+    {
+      subscriber_handles.subscribers_[i] = 0;
     }
   }
 
   // set subscriber handles to zero for all not triggered conditions
   for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
   {
-    void * data = guard_condition_handles.guard_conditions_[subscriber_handles.subscriber_count_ + i];
-    if (!active_conditions[i]->get_trigger_value())
+    void * data = guard_condition_handles.guard_conditions_[i];
+    DDS::Condition * condition = (DDS::Condition*)data;
+
+    // search for guard condition in active set
+    unsigned long j = 0;
+    for (; j < active_conditions.length(); ++j)
     {
-      data = 0;
+      if (active_conditions[j] == condition)
+      {
+        break;
+      }
+    }
+    // if guard condition is not found in the active set
+    // reset the guard handle
+    if (!j < active_conditions.length())
+    {
+      guard_condition_handles.guard_conditions_[i] = 0;
     }
   }
 }
