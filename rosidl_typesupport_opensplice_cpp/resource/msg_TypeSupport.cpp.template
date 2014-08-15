@@ -160,12 +160,22 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * ros_mes
 {
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)()" << std::endl;
 
-    @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_ dds_message;
-
     @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_DataReader * data_reader = @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)() write dds message" << std::endl;
-    DDS::SampleInfo sample_info;
-    DDS::ReturnCode_t status = data_reader->take_next_sample(dds_message, sample_info);
+
+    //DDS::ReturnCode_t status = data_reader->take_next_sample(dds_message, sample_info);
+
+    @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_Seq dds_messages;
+    DDS::SampleInfoSeq sample_infos;
+
+    DDS::ReturnCode_t status = data_reader->take(
+        dds_messages,
+        sample_infos,
+        1,
+        DDS::ANY_SAMPLE_STATE,
+        DDS::ANY_VIEW_STATE,
+        DDS::ALIVE_INSTANCE_STATE);
+
     if (status == DDS::RETCODE_NO_DATA) {
         return false;
     }
@@ -179,6 +189,7 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * ros_mes
         throw std::runtime_error("invalid ROS message pointer");
     };
 
+    @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_& dds_message = dds_messages[0];
 
     convert_dds_message_to_ros__@(spec.base_type.type)(dds_message, ros_message);
     return true;
