@@ -171,7 +171,7 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * ros_mes
     }
     if (status != DDS::RETCODE_OK) {
         printf("take() failed. Status = %d\n", status);
-        throw std::runtime_error("write failed");
+        throw std::runtime_error("Read failed");
     };
 
     if (ros_message == 0) {
@@ -188,7 +188,8 @@ static ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks callbacks = {
     "@(spec.base_type.pkg_name)",
     "@(spec.base_type.type)",
     &register_type__@(spec.base_type.type),
-    &publish__@(spec.base_type.type)
+    &publish__@(spec.base_type.type),
+    &take__@(spec.base_type.type)
 };
 
 static rosidl_generator_cpp::MessageTypeSupportHandle handle = {

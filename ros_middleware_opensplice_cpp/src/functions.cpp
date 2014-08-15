@@ -228,6 +228,7 @@ ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& n
         topic, default_datareader_qos,
         NULL, DDS::STATUS_MASK_NONE);
 
+    std::cout << "  topic reader" << topic_reader << std::endl;
 
     std::cout << "  create_subscriber() build opaque subscriber handle" << std::endl;
     CustomSubscriberInfo* custom_subscriber_info = new CustomSubscriberInfo();
@@ -252,7 +253,7 @@ bool take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, v
   }
 
   //std::cout << "  take() extract data writer and type code from opaque subscriber handle" << std::endl;
-  CustomSubscriberInfo* custom_subscriber_info = new CustomSubscriberInfo();
+  CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)subscriber_handle.data_;
   DDS::DataReader * topic_reader = custom_subscriber_info->topic_reader_;
   const ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = custom_subscriber_info->callbacks_;
 
