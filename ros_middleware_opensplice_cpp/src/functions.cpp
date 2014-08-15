@@ -25,7 +25,7 @@ ros_middleware_interface::NodeHandle create_node()
 
     DDS::DomainId_t domain = 0;
 
-    std::cout << "  create_node() create_participant" << std::endl;
+    std::cout << "  create_node() create_participant in domain " << domain  << std::endl;
     DDS::DomainParticipant * participant = dpf_->create_participant(
         domain, PARTICIPANT_QOS_DEFAULT, NULL,
         DDS::STATUS_MASK_NONE);
