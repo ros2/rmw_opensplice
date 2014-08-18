@@ -24,8 +24,10 @@
 
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@
-struct @(field.type.pkg_name)::dds_opensplice::@(field.type.type)_;
 namespace @(field.type.pkg_name) {
+namespace dds_opensplice {
+struct @(field.type.type)_;
+}  // namespace dds_opensplice
 namespace type_support {
 void convert_ros_message_to_dds__@(field.type.type)(const @(field.type.pkg_name)::@(field.type.type)&, @(field.type.pkg_name)::dds_opensplice::@(field.type.type)_&);
 void convert_dds_message_to_ros__@(field.type.type)(const @(field.type.pkg_name)::dds_opensplice::@(field.type.type)_&, @(field.type.pkg_name)::@(field.type.type)&);
@@ -168,6 +170,7 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * ros_mes
     @(spec.base_type.pkg_name)::dds_opensplice::@(spec.base_type.type)_Seq dds_messages;
     DDS::SampleInfoSeq sample_infos;
 
+    // TODO must call return_loan
     DDS::ReturnCode_t status = data_reader->take(
         dds_messages,
         sample_infos,

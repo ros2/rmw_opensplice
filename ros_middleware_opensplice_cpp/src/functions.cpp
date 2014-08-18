@@ -347,7 +347,7 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     }
     // if subscriber condition is not found in the active set
     // reset the subscriber handle
-    if (!j < active_conditions.length())
+    if (!(j < active_conditions.length()))
     {
       subscriber_handles.subscribers_[i] = 0;
     }
@@ -370,7 +370,7 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     }
     // if guard condition is not found in the active set
     // reset the guard handle
-    if (!j < active_conditions.length())
+    if (!(j < active_conditions.length()))
     {
       guard_condition_handles.guard_conditions_[i] = 0;
     }
