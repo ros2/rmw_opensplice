@@ -11,7 +11,8 @@ rosidl_generate_dds_interfaces(
 )
 
 set(_dds_idl_files "")
-set(_dds_idl_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_dds_idl/${PROJECT_NAME}/dds_opensplice")
+set(_dds_idl_base_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_dds_idl")
+set(_dds_idl_path "${_dds_idl_base_path}/${PROJECT_NAME}/dds_opensplice")
 foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(name "${_idl_file}" NAME_WE)
   list(APPEND _dds_idl_files "${_dds_idl_path}/${name}_.idl")
@@ -52,7 +53,8 @@ add_custom_command(
   COMMAND ${PYTHON_EXECUTABLE} ${rosidl_typesupport_opensplice_cpp_BIN}
   --pkg-name ${PROJECT_NAME}
   --ros-interface-files ${rosidl_generate_interfaces_IDL_FILES}
-  --interface-files ${_dds_idl_files}
+  --dds-interface-files ${_dds_idl_files}
+  --dds-interface-base-path ${_dds_idl_base_path}
   --deps ${_dependencies}
   --output-dir "${_output_path}"
   --idl-pp "${OPENSPLICE_IDLPP}"

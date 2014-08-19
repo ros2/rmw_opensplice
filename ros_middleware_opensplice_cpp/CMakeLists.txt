@@ -9,9 +9,6 @@ find_package(rosidl_typesupport_opensplice_cpp REQUIRED)
 
 find_package(opensplice REQUIRED COMPONENTS CXX)
 
-message("OPENSPLICE_DEFINITIONS ${OPENSPLICE_DEFINITIONS}")
-message("OPENSPLICE_INCLUDE_DIRS ${OPENSPLICE_INCLUDE_DIRS}")
-message("OPENSPLICE_LIBRARIES ${OPENSPLICE_LIBRARIES}")
 ament_export_definitions(${OPENSPLICE_DEFINITIONS})
 ament_export_dependencies(ros_middleware_interface rosidl_generator_cpp rosidl_typesupport_opensplice_cpp)
 ament_export_include_directories(include include/${PROJECT_NAME}/impl ${OPENSPLICE_INCLUDE_DIRS})
