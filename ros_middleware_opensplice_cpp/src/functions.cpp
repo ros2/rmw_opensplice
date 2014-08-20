@@ -258,7 +258,6 @@ bool take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, v
   const ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = custom_subscriber_info->callbacks_;
 
 
-  std::cout << "  take() invoke take callback" << std::endl;
   return callbacks->_take(topic_reader, ros_message);
 }
 
@@ -287,8 +286,6 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
 {
   DDS::WaitSet waitset;
 
-  std::cout<<"Begin Wait"<< std::endl;
-  
   // add a condition for each subscriber
   for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
   {
@@ -298,9 +295,8 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     DDS::StatusCondition * condition = topic_reader->get_statuscondition();
     condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(condition);
-    std::cout<<"attached "<< i << std::endl;
   }
-  
+
   // add a condition for each guard condition
   for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
   {
@@ -308,7 +304,7 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)data;
     waitset.attach_condition(guard_condition);
   }
-  
+
   // invoke wait until one of the conditions triggers
   DDS::ConditionSeq active_conditions;
   DDS::Duration_t timeout;
@@ -316,12 +312,10 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
   DDS::ReturnCode_t status = DDS::RETCODE_TIMEOUT;
   while (DDS::RETCODE_TIMEOUT == status)
   {
-    std::cout<<"about to wait"<< std::endl;
     status = waitset.wait(active_conditions, timeout);
     if (DDS::RETCODE_TIMEOUT == status) {
       continue;
     };
-    std::cout<<"about to wait11"<< std::endl;
     if (status != DDS::RETCODE_OK) {
       printf("wait() failed. Status = %d\n", status);
       throw std::runtime_error("wait failed");
@@ -375,7 +369,6 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
       guard_condition_handles.guard_conditions_[i] = 0;
     }
   }
-  std::cout<<"End Wait"<< std::endl;
 }
 
 }
