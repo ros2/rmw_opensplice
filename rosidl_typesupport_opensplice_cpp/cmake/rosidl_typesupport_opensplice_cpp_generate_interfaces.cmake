@@ -7,7 +7,7 @@ rosidl_generate_dds_interfaces(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
   IDL_FILES ${rosidl_generate_interfaces_IDL_FILES}
   DEPENDENCY_PACKAGE_NAMES ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}
-  NAMESPACES "dds_opensplice"
+  OUTPUT_SUBFOLDERS "dds_opensplice"
 )
 
 set(_dds_idl_files "")

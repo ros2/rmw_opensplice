@@ -65,7 +65,7 @@ ros_middleware_interface::PublisherHandle create_publisher(const ros_middleware_
     DDS::DomainParticipant * participant = (DDS::DomainParticipant *)node_handle._data;
 
     ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = (ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks*)type_support_handle._data;
-    std::string type_name = std::string(callbacks->_package_name) + "/" + callbacks->_message_name;
+    std::string type_name = std::string(callbacks->_package_name) + "::dds_::" + callbacks->_message_name + "_";
 
 
     std::cout << "  create_publisher() invoke register callback" << std::endl;
@@ -175,7 +175,7 @@ ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& n
 
 
     ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = (ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks*)type_support_handle._data;
-    std::string type_name = std::string(callbacks->_package_name) + "/" + callbacks->_message_name;
+    std::string type_name = std::string(callbacks->_package_name) + "::dds_::" + callbacks->_message_name + "_";
 
 
     std::cout << "  create_subscriber() invoke register callback" << std::endl;
