@@ -164,12 +164,8 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped
     @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader * data_reader = @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)() write dds message" << std::endl;
 
-    //DDS::ReturnCode_t status = data_reader->take_next_sample(dds_message, sample_info);
-
     @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_Seq dds_messages;
     DDS::SampleInfoSeq sample_infos;
-
-    // TODO must call return_loan
     DDS::ReturnCode_t status = data_reader->take(
         dds_messages,
         sample_infos,
@@ -191,9 +187,11 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped
         throw std::runtime_error("invalid ROS message pointer");
     };
 
-    @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_& dds_message = dds_messages[0];
     @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message = *(@(spec.base_type.pkg_name)::@(spec.base_type.type) *)untyped_ros_message;
-    convert_dds_message_to_ros(dds_message, ros_message);
+    convert_dds_message_to_ros(dds_messages[0], ros_message);
+
+    data_reader->return_loan(dds_messages, sample_infos);
+
     return true;
 }
 
