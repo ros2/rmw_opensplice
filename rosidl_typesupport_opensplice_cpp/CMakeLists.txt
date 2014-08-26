@@ -10,6 +10,7 @@ find_package(opensplice REQUIRED COMPONENTS CXX)
 
 ament_export_dependencies(rosidl_cmake)
 ament_export_dependencies(rosidl_generator_dds_idl)
+ament_export_include_directories(include)
 
 ament_environment_hooks(env_hook/opensplice.sh.in)
 
@@ -26,4 +27,8 @@ install(
 install(
   DIRECTORY cmake resource
   DESTINATION share/${PROJECT_NAME}
+)
+install(
+  DIRECTORY include/
+  DESTINATION include
 )

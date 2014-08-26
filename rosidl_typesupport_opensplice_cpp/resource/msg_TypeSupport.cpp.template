@@ -24,6 +24,10 @@
 
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@
+@[if field.type.pkg_name == 'builtin_msgs']@
+#include "rosidl_typesupport_opensplice_cpp/Duration_TypeSupport.h"
+#include "rosidl_typesupport_opensplice_cpp/Time_TypeSupport.h"
+@[else]@
 namespace @(field.type.pkg_name) {
 namespace dds_ {
 struct @(field.type.type)_;
@@ -33,6 +37,7 @@ void convert_ros_message_to_dds(const @(field.type.pkg_name)::@(field.type.type)
 void convert_dds_message_to_ros(const @(field.type.pkg_name)::dds_::@(field.type.type)_&, @(field.type.pkg_name)::@(field.type.type)&);
 }  // namespace type_support
 }  // namespace @(field.type.pkg_name)
+@[end if]@
 @[end if]@
 @[end for]@
 

@@ -3,11 +3,15 @@ message("   - target: ${rosidl_generate_interfaces_TARGET}")
 message("   - interface files: ${rosidl_generate_interfaces_IDL_FILES}")
 message("   - dependency package names: ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}")
 
+# avoid generating any opensplice specific stuff for builtin_msgs
+if(NOT "${PROJECT_NAME}" STREQUAL "builtin_msgs")
+
 rosidl_generate_dds_interfaces(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
   IDL_FILES ${rosidl_generate_interfaces_IDL_FILES}
   DEPENDENCY_PACKAGE_NAMES ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}
   OUTPUT_SUBFOLDERS "dds_opensplice"
+  EXTENSION "rosidl_typesupport_opensplice_cpp.rosidl_generator_dds_idl_extension"
 )
 
 set(_dds_idl_files "")
@@ -38,10 +42,13 @@ set(_dependency_files "")
 set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   foreach(_idl_file ${${_pkg_name}_INTERFACE_FILES})
-    get_filename_component(name "${_idl_file}" NAME_WE)
-    set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/${name}_.idl")
-    list(APPEND _dependency_files "${_abs_idl_file}")
-    list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
+    # ignore builtin_msgs since it does not have any idl files
+    if(NOT "${_pkg_name}" STREQUAL "builtin_msgs")
+      get_filename_component(name "${_idl_file}" NAME_WE)
+      set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/${name}_.idl")
+      list(APPEND _dependency_files "${_abs_idl_file}")
+      list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
+    endif()
   endforeach()
 endforeach()
 
@@ -76,6 +83,7 @@ target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   PUBLIC ${OPENSPLICE_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_cpp
+  ${rosidl_typesupport_opensplice_cpp_INCLUDE_DIRS}
   ${rosidl_generator_cpp_INCLUDE_DIRS}
 )
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
@@ -111,5 +119,8 @@ install(
   DESTINATION "lib"
 )
 
-ament_export_include_directories(include)
 ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OPENSPLICE_LIBRARIES})
+
+endif()
+
+ament_export_include_directories(include)
