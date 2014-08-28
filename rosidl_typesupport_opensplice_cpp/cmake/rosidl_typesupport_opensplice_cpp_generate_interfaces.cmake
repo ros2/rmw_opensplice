@@ -82,24 +82,23 @@ link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED ${_generated_files})
 target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   PUBLIC
-  ${OpenSplice_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_cpp
-  ${rosidl_typesupport_opensplice_cpp_INCLUDE_DIRS}
-  ${rosidl_generator_cpp_INCLUDE_DIRS}
 )
-#target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-#  PUBLIC ${OpenSplice_DEFINITIONS})
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PUBLIC
-    ${${_pkg_name}_INCLUDE_DIRS}
     ${${_pkg_name}_DIR}/../../../include/${_pkg_name}/dds_opensplice
   )
-  target_link_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-    ${${_pkg_name}_LIBRARIES})
+  ament_target_dependencies(
+    ${rosidl_generate_interfaces_TARGET}${_target_suffix}
+    ${_pkg_name})
 endforeach()
-target_link_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})
+ament_target_dependencies(
+  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
+  "OpenSplice"
+  "rosidl_typesupport_opensplice_cpp"
+  "rosidl_generator_cpp")
 
 add_dependencies(
   ${rosidl_generate_interfaces_TARGET}
