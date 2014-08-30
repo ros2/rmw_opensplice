@@ -16,6 +16,8 @@ ros_middleware_interface::NodeHandle create_node()
 {
     std::cout << "create_node()" << std::endl;
 
+    std::cout << "  create_node() " << _prismtech_opensplice_identifier << std::endl;
+
     std::cout << "  create_node() get_instance" << std::endl;
     DDS::DomainParticipantFactory_var dpf_ = DDS::DomainParticipantFactory::get_instance();
     if (!dpf_) {
@@ -95,7 +97,11 @@ ros_middleware_interface::PublisherHandle create_publisher(const ros_middleware_
         throw std::runtime_error("get default topic qos failed");
     };
 
-    std::cout << "  create_publisher() create topic" << std::endl;
+    std::cout << "  create_publisher() create topic: " << topic_name << std::endl;
+    if (std::string(topic_name).find("/") != std::string::npos)
+    {
+      throw std::runtime_error("topic_name contains a '/'");
+    }
     DDS::Topic * topic = participant->create_topic(
         topic_name, type_name.c_str(), default_topic_qos, NULL,
         DDS::STATUS_MASK_NONE
@@ -160,7 +166,7 @@ struct CustomSubscriberInfo {
 ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& node_handle, const rosidl_generator_cpp::MessageTypeSupportHandle & type_support_handle, const char * topic_name)
 {
   std::cout << "create_subscriber()" << std::endl;
-  
+
     if (node_handle._implementation_identifier != _prismtech_opensplice_identifier)
     {
         printf("node handle not from this implementation\n");
@@ -363,6 +369,8 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     {
       if (active_conditions[j] == condition)
       {
+        DDS::GuardCondition *guard = (DDS::GuardCondition*)data;
+        guard->set_trigger_value(false);
         break;
       }
     }
