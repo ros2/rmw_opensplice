@@ -7,6 +7,7 @@ find_package(ament_cmake REQUIRED)
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 find_package(OpenSplice MODULE)
 if(OpenSplice_HOME)
+  normalize_path(OpenSplice_HOME "${OpenSplice_HOME}")
   ament_environment_hooks(env_hook/opensplice.sh.in)
 endif()
 
