@@ -16,6 +16,8 @@ ros_middleware_interface::NodeHandle create_node()
 {
     std::cout << "create_node()" << std::endl;
 
+    std::cout << "  create_node() " << _prismtech_opensplice_identifier << std::endl;
+
     std::cout << "  create_node() get_instance" << std::endl;
     DDS::DomainParticipantFactory_var dpf_ = DDS::DomainParticipantFactory::get_instance();
     if (!dpf_) {
@@ -160,7 +162,7 @@ struct CustomSubscriberInfo {
 ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& node_handle, const rosidl_generator_cpp::MessageTypeSupportHandle & type_support_handle, const char * topic_name)
 {
   std::cout << "create_subscriber()" << std::endl;
-  
+
     if (node_handle._implementation_identifier != _prismtech_opensplice_identifier)
     {
         printf("node handle not from this implementation\n");
