@@ -97,7 +97,11 @@ ros_middleware_interface::PublisherHandle create_publisher(const ros_middleware_
         throw std::runtime_error("get default topic qos failed");
     };
 
-    std::cout << "  create_publisher() create topic" << std::endl;
+    std::cout << "  create_publisher() create topic: " << topic_name << std::endl;
+    if (std::string(topic_name).find("/") != std::string::npos)
+    {
+      throw std::runtime_error("topic_name contains a '/'");
+    }
     DDS::Topic * topic = participant->create_topic(
         topic_name, type_name.c_str(), default_topic_qos, NULL,
         DDS::STATUS_MASK_NONE
