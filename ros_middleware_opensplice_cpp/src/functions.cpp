@@ -12,6 +12,17 @@ namespace ros_middleware_interface
 
 const char * _prismtech_opensplice_identifier = "opensplice_static";
 
+void init()
+{
+    std::cout << "init()" << std::endl;
+    std::cout << "  init() get_instance" << std::endl;
+    DDS::DomainParticipantFactory_var dpf_ = DDS::DomainParticipantFactory::get_instance();
+    if (!dpf_) {
+        printf("  init() could not get participant factory\n");
+        throw std::runtime_error("could not get participant factory");
+    };
+}
+
 ros_middleware_interface::NodeHandle create_node()
 {
     std::cout << "create_node()" << std::endl;
