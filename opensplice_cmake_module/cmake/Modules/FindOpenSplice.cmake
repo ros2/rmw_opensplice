@@ -29,12 +29,12 @@ set(OpenSplice_FOUND FALSE)
 
 # check if provided OSPL_HOME is from an "official" binary package
 set(_ospl_home "$ENV{OSPL_HOME}")
-if(NOT "${_ospl_home}" STREQUAL "" AND
+if(NOT "${_ospl_home} " STREQUAL " " AND
     NOT EXISTS "${_ospl_home}/release.com")
   set(_ospl_home "")
 endif()
 
-if(NOT "${_ospl_home}" STREQUAL "")
+if(NOT "${_ospl_home} " STREQUAL " ")
   # look inside of OSPL_HOME if defined
   message(STATUS "Found PrismTech OpenSplice: $ENV{OSPL_HOME}")
   set(OpenSplice_INCLUDE_DIRS

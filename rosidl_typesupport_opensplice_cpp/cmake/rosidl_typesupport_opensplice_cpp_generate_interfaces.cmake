@@ -4,7 +4,7 @@ message("   - interface files: ${rosidl_generate_interfaces_IDL_FILES}")
 message("   - dependency package names: ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}")
 
 # avoid generating any opensplice specific stuff for builtin_msgs
-if(NOT "${PROJECT_NAME}" STREQUAL "builtin_msgs")
+if(NOT "${PROJECT_NAME} " STREQUAL "builtin_msgs ")
 
 rosidl_generate_dds_interfaces(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
@@ -43,7 +43,7 @@ set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   foreach(_idl_file ${${_pkg_name}_INTERFACE_FILES})
     # ignore builtin_msgs since it does not have any idl files
-    if(NOT "${_pkg_name}" STREQUAL "builtin_msgs")
+    if(NOT "${_pkg_name} " STREQUAL "builtin_msgs ")
       get_filename_component(name "${_idl_file}" NAME_WE)
       set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/${name}_.idl")
       normalize_path(_abs_idl_file "${_abs_idl_file}")
