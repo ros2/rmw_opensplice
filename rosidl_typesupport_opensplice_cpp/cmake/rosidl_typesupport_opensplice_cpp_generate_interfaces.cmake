@@ -87,11 +87,8 @@ target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_cpp
 )
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
-  set(_include_dir "${${_pkg_name}_DIR}")
-  get_filename_component(_include_dir "${_include_dir}" DIRECTORY)
-  get_filename_component(_include_dir "${_include_dir}" DIRECTORY)
-  get_filename_component(_include_dir "${_include_dir}" DIRECTORY)
-  set(_include_dir "${_include_dir}/include/${_pkg_name}/dds_opensplice")
+  set(_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/dds_opensplice")
+  normalize_path(_include_dir "${_include_dir}")
   target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PUBLIC
     "${_include_dir}"
