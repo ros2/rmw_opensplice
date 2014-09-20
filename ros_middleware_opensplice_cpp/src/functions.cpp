@@ -326,6 +326,7 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
   DDS::ConditionSeq active_conditions;
   DDS::Duration_t timeout;
   timeout.sec = non_blocking ? 0 : 1;
+  timeout.nanosec = 0;
   DDS::ReturnCode_t status = DDS::RETCODE_TIMEOUT;
   while (DDS::RETCODE_TIMEOUT == status)
   {
@@ -343,53 +344,36 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
     };
   }
 
-  // set subscriber handles to zero for all not triggered conditions
+  // set subscriber handles to zero for all not triggered status conditions
   for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
   {
     void * data = subscriber_handles.subscribers_[i];
     CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)data;
     DDS::DataReader* topic_reader = custom_subscriber_info->topic_reader_;
     DDS::StatusCondition * condition = topic_reader->get_statuscondition();
-
-    // search for subscriber condition in active set
-    unsigned long j = 0;
-    for (; j < active_conditions.length(); ++j)
+    if (!condition->get_trigger_value())
     {
-      if (active_conditions[j] == condition)
-      {
-        break;
-      }
-    }
-    // if subscriber condition is not found in the active set
-    // reset the subscriber handle
-    if (!(j < active_conditions.length()))
-    {
+      // if the status condition was not triggered
+      // reset the subscriber handle
       subscriber_handles.subscribers_[i] = 0;
     }
   }
 
-  // set subscriber handles to zero for all not triggered conditions
+  // set guard condition handles to zero for all not triggered guard conditions
   for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
   {
     void * data = guard_condition_handles.guard_conditions_[i];
-    DDS::Condition * condition = (DDS::Condition*)data;
-
-    // search for guard condition in active set
-    unsigned long j = 0;
-    for (; j < active_conditions.length(); ++j)
+    DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)data;
+    if (!guard_condition->get_trigger_value())
     {
-      if (active_conditions[j] == condition)
-      {
-        DDS::GuardCondition *guard = (DDS::GuardCondition*)data;
-        guard->set_trigger_value(false);
-        break;
-      }
-    }
-    // if guard condition is not found in the active set
-    // reset the guard handle
-    if (!(j < active_conditions.length()))
-    {
+      // if the guard condition was not triggered
+      // reset the guard condition handle
       guard_condition_handles.guard_conditions_[i] = 0;
+    }
+    else
+    {
+      // reset the trigger value
+      guard_condition->set_trigger_value(false);
     }
   }
 }
