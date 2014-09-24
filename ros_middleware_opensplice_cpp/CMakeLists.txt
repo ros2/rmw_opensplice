@@ -19,11 +19,6 @@ find_package(rosidl_typesupport_opensplice_cpp REQUIRED)
 ament_export_definitions(${OpenSplice_DEFINITIONS})
 ament_export_dependencies(ros_middleware_interface rosidl_generator_cpp rosidl_typesupport_opensplice_cpp)
 ament_export_include_directories(include/${PROJECT_NAME}/impl ${OpenSplice_INCLUDE_DIRS})
-ament_export_libraries(ros_middleware_opensplice_cpp ${OpenSplice_LIBRARIES})
-
-register_ros_middleware_implementation()
-
-ament_package()
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(ros_middleware_opensplice_cpp SHARED src/functions.cpp)
@@ -32,6 +27,12 @@ ament_target_dependencies(ros_middleware_opensplice_cpp
   "rosidl_generator_cpp"
   "rosidl_typesupport_opensplice_cpp"
   "OpenSplice")
+
+ament_export_libraries(ros_middleware_opensplice_cpp ${OpenSplice_LIBRARIES})
+
+register_ros_middleware_implementation()
+
+ament_package()
 
 install(
   DIRECTORY include/
