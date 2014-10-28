@@ -40,7 +40,8 @@ if(NOT "${_ospl_home} " STREQUAL " ")
   set(OpenSplice_INCLUDE_DIRS
     "$ENV{OSPL_HOME}/include"
     "$ENV{OSPL_HOME}/include/sys"
-    "$ENV{OSPL_HOME}/include/dcps/C++/SACPP")
+    "$ENV{OSPL_HOME}/include/dcps/C++/SACPP"
+    "$ENV{OSPL_HOME}/include/dcps/C++/isocpp")
   set(OpenSplice_LIBRARIES
     "cmxml"
     "commonserv"
@@ -72,6 +73,8 @@ else()
     message(STATUS "Found PrismTech OpenSplice: ${opensplice_DIR}")
     set(OpenSplice_HOME "${OPENSPLICE_PREFIX}")
     set(OpenSplice_INCLUDE_DIRS ${OPENSPLICE_INCLUDE_DIRS})
+    # adding isoccp includes
+    list(APPEND OpenSplice_INCLUDE_DIRS "${OPENSPLICE_PREFIX}/include/opensplice/dcps/C++/isocpp")
     set(OpenSplice_LIBRARIES ${OPENSPLICE_LIBRARIES})
     set(OpenSplice_LIBRARY_DIRS "")
     set(OpenSplice_DEFINITIONS ${OPENSPLICE_DEFINITIONS})
