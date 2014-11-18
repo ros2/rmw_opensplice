@@ -3,326 +3,422 @@
 
 #include <ccpp_dds_dcps.h>
 
-#include "rosidl_generator_cpp/MessageTypeSupport.h"
-#include "ros_middleware_interface/handles.h"
-#include "ros_middleware_interface/functions.h"
-#include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
+#include <ros_middleware_interface/allocators.h>
+#include <ros_middleware_interface/error_handling.h>
+#include <ros_middleware_interface/rmw.h>
+#include <rosidl_generator_c/message_type_support.h>
 
-#include "rosidl_generator_cpp/ServiceTypeSupport.h"
-#include "rosidl_typesupport_opensplice_cpp/ServiceTypeSupport.h"
+#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 
-namespace ros_middleware_interface
+const char * opensplice_cpp_identifier = "opensplice_static";
+
+rmw_ret_t
+rmw_init()
 {
-
-const char * _prismtech_opensplice_identifier = "opensplice_static";
-
-void init()
-{
-    std::cout << "init()" << std::endl;
-    std::cout << "  init() get_instance" << std::endl;
-    DDS::DomainParticipantFactory_var dpf_ = DDS::DomainParticipantFactory::get_instance();
-    if (!dpf_) {
-        printf("  init() could not get participant factory\n");
-        throw std::runtime_error("could not get participant factory");
-    };
+  DDS::DomainParticipantFactory_var dpf_ = \
+    DDS::DomainParticipantFactory::get_instance();
+  if (!dpf_)
+  {
+    rmw_set_error_string("failed to get domain participant factory");
+    return RMW_RET_ERROR;
+  };
+  return RMW_RET_OK;
 }
 
-ros_middleware_interface::NodeHandle create_node()
+rmw_node_t *
+rmw_create_node(const char * name)
 {
-    std::cout << "create_node()" << std::endl;
+  DDS::DomainParticipantFactory_var dpf_ = \
+    DDS::DomainParticipantFactory::get_instance();
+  if (!dpf_)
+  {
+    rmw_set_error_string("failed to get domain participant factory");
+    return nullptr;
+  };
 
-    std::cout << "  create_node() " << _prismtech_opensplice_identifier << std::endl;
+  // TODO: take the domain id from configuration
+  DDS::DomainId_t domain = 0;
 
-    std::cout << "  create_node() get_instance" << std::endl;
-    DDS::DomainParticipantFactory_var dpf_ = DDS::DomainParticipantFactory::get_instance();
-    if (!dpf_) {
-        printf("  create_node() could not get participant factory\n");
-        throw std::runtime_error("could not get participant factory");
-    };
+  DDS::DomainParticipant * participant = dpf_->create_participant(
+    domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE
+  );
+  if (!participant)
+  {
+    rmw_set_error_string("failed to create domain participant");
+    return nullptr;
+  };
 
-    DDS::DomainId_t domain = 0;
-
-    std::cout << "  create_node() create_participant in domain " << domain  << std::endl;
-    DDS::DomainParticipant * participant = dpf_->create_participant(
-        domain, PARTICIPANT_QOS_DEFAULT, NULL,
-        DDS::STATUS_MASK_NONE);
-    if (!participant) {
-        printf("  create_node() could not create participant\n");
-        throw std::runtime_error("could not create participant");
-    };
-
-    std::cout << "  create_node() pass opaque node handle" << std::endl;
-
-    ros_middleware_interface::NodeHandle node_handle = {
-        _prismtech_opensplice_identifier,
-        participant
-    };
-    return node_handle;
+  rmw_node_t * node = rmw_node_allocate();
+  if (!node)
+  {
+    rmw_set_error_string("failed to allocate rmw_node_t");
+    return nullptr;
+  }
+  node->implementation_identifier = opensplice_cpp_identifier;
+  node->data = participant;
+  return node;
 }
 
-struct CustomPublisherInfo {
-  DDS::DataWriter * topic_writer_;
-  ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks_;
+rmw_ret_t
+rmw_destroy_node(rmw_node_t * node)
+{
+  if (!node)
+  {
+    // Would not be able to teardown, so return error code
+    rmw_set_error_string("received null pointer");
+    return RMW_RET_ERROR;
+  }
+  // TODO: do DDS specific teardown
+  rmw_node_free(node);
+  return RMW_RET_OK;
+}
+
+struct OpenSpliceStaticPublisherInfo
+{
+  DDS::DataWriter * topic_writer;
+  const message_type_support_callbacks_t * callbacks;
 };
 
-ros_middleware_interface::PublisherHandle create_publisher(const ros_middleware_interface::NodeHandle& node_handle, const rosidl_generator_cpp::MessageTypeSupportHandle & type_support_handle, const char * topic_name)
+rmw_publisher_t *
+rmw_create_publisher(const rmw_node_t * node,
+                     const rosidl_message_type_support_t * type_support,
+                     const char * topic_name,
+                     size_t queue_size)
 {
-    std::cout << "create_publisher()" << std::endl;
+  if (node->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("node does not share this implementation");
+    // printf("node handle not from this implementation\n");
+    // printf("but from: %s\n", node_handle._implementation_identifier);
+    return nullptr;
+  }
 
-    if (node_handle._implementation_identifier != _prismtech_opensplice_identifier)
-    {
-        printf("node handle not from this implementation\n");
-        printf("but from: %s\n", node_handle._implementation_identifier);
-        throw std::runtime_error("node handle not from this implementation");
-    }
+  DDS::DomainParticipant * participant = \
+    static_cast<DDS::DomainParticipant *>(node->data);
 
-    std::cout << "create_publisher() " << node_handle._implementation_identifier << std::endl;
+  const message_type_support_callbacks_t * callbacks = \
+    static_cast<const message_type_support_callbacks_t *>(type_support->data);
+  std::string type_name = std::string(callbacks->package_name) + \
+                          "::dds_::" + callbacks->message_name + "_";
 
-    std::cout << "  create_publisher() extract participant from opaque node handle" << std::endl;
-    DDS::DomainParticipant * participant = (DDS::DomainParticipant *)node_handle._data;
+  callbacks->register_type(participant, type_name.c_str());
 
-    ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = (ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks*)type_support_handle._data;
-    std::string type_name = std::string(callbacks->_package_name) + "::dds_::" + callbacks->_message_name + "_";
+  DDS::PublisherQos publisher_qos;
+  DDS::ReturnCode_t status;
+  status = participant->get_default_publisher_qos(publisher_qos);
+  if (status != DDS::RETCODE_OK)
+  {
+    rmw_set_error_string("failed to get default publisher qos");
+    // printf("get_default_publisher_qos() failed. Status = %d\n", status);
+    return nullptr;
+  };
 
+  DDS::Publisher * dds_publisher = participant->create_publisher(
+    publisher_qos, NULL, DDS::STATUS_MASK_NONE);
+  if (!dds_publisher)
+  {
+    rmw_set_error_string("failed to create publisher");
+    // printf("  create_publisher() could not create publisher\n");
+    return nullptr;
+  };
 
-    std::cout << "  create_publisher() invoke register callback" << std::endl;
-    callbacks->_register_type(participant, type_name.c_str());
+  DDS::TopicQos default_topic_qos;
+  status = participant->get_default_topic_qos(default_topic_qos);
+  if (status != DDS::RETCODE_OK)
+  {
+    rmw_set_error_string("failed to get default topic qos");
+    // printf("get_default_topic_qos() failed. Status = %d\n", status);
+    return nullptr;
+  };
 
+  if (std::string(topic_name).find("/") != std::string::npos)
+  {
+    rmw_set_error_string("topic_name contains a '/'");
+    return nullptr;
+  }
+  DDS::Topic * topic = participant->create_topic(
+    topic_name, type_name.c_str(), default_topic_qos, NULL,
+    DDS::STATUS_MASK_NONE
+  );
+  if (!topic)
+  {
+    rmw_set_error_string("failed to create topic");
+    // printf("  create_topic() could not create topic\n");
+    return nullptr;
+  };
 
-    DDS::PublisherQos publisher_qos;
-    DDS::ReturnCode_t status = participant->get_default_publisher_qos(publisher_qos);
-    if (status != DDS::RETCODE_OK) {
-        printf("get_default_publisher_qos() failed. Status = %d\n", status);
-        throw std::runtime_error("get default publisher qos failed");
-    };
+  DDS::DataWriterQos default_datawriter_qos;
+  status = dds_publisher->get_default_datawriter_qos(default_datawriter_qos);
+  if (status != DDS::RETCODE_OK)
+  {
+    rmw_set_error_string("failed to get default datawriter qos");
+    // printf("get_default_datawriter_qos() failed. Status = %d\n", status);
+    return nullptr;
+  };
 
-    std::cout << "  create_publisher() create dds publisher" << std::endl;
-    DDS::Publisher * dds_publisher = participant->create_publisher(
-        publisher_qos, NULL, DDS::STATUS_MASK_NONE);
-    if (!dds_publisher) {
-        printf("  create_publisher() could not create publisher\n");
-        throw std::runtime_error("could not create publisher");
-    };
+  DDS::DataWriter * topic_writer = dds_publisher->create_datawriter(
+    topic, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE
+  );
+  if (!topic_writer)
+  {
+    rmw_set_error_string("failed to create datawriter");
+    return nullptr;
+  }
 
+  OpenSpliceStaticPublisherInfo * publisher_info = \
+    static_cast<OpenSpliceStaticPublisherInfo *>(rmw_allocate(
+      sizeof(OpenSpliceStaticPublisherInfo)));
+  publisher_info->topic_writer = topic_writer;
+  publisher_info->callbacks = callbacks;
 
-    DDS::TopicQos default_topic_qos;
-    status = participant->get_default_topic_qos(default_topic_qos);
-    if (status != DDS::RETCODE_OK) {
-        printf("get_default_topic_qos() failed. Status = %d\n", status);
-        throw std::runtime_error("get default topic qos failed");
-    };
+  rmw_publisher_t * publisher = rmw_publisher_allocate();
+  if (!publisher)
+  {
+    rmw_set_error_string("failed to allocate rmw_publisher_t");
+    return nullptr;
+  }
+  publisher->implementation_identifier = opensplice_cpp_identifier;
+  publisher->data = publisher_info;
 
-    std::cout << "  create_publisher() create topic: " << topic_name << std::endl;
-    if (std::string(topic_name).find("/") != std::string::npos)
-    {
-      throw std::runtime_error("topic_name contains a '/'");
-    }
-    DDS::Topic * topic = participant->create_topic(
-        topic_name, type_name.c_str(), default_topic_qos, NULL,
-        DDS::STATUS_MASK_NONE
-    );
-    if (!topic) {
-        printf("  create_topic() could not create topic\n");
-        throw std::runtime_error("could not create topic");
-    };
-
-
-    DDS::DataWriterQos default_datawriter_qos;
-    status = dds_publisher->get_default_datawriter_qos(default_datawriter_qos);
-    if (status != DDS::RETCODE_OK) {
-        printf("get_default_datawriter_qos() failed. Status = %d\n", status);
-        throw std::runtime_error("get default datawriter qos failed");
-    };
-
-    std::cout << "  create_publisher() create data writer" << std::endl;
-    DDS::DataWriter * topic_writer = dds_publisher->create_datawriter(
-        topic, default_datawriter_qos,
-        NULL, DDS::STATUS_MASK_NONE);
-
-
-    std::cout << "  create_publisher() build opaque publisher handle" << std::endl;
-    CustomPublisherInfo* custom_publisher_info = new CustomPublisherInfo();
-    custom_publisher_info->topic_writer_ = topic_writer;
-    custom_publisher_info->callbacks_ = callbacks;
-
-    ros_middleware_interface::PublisherHandle publisher_handle = {
-        _prismtech_opensplice_identifier,
-        custom_publisher_info
-    };
-    return publisher_handle;
+  return publisher;
 }
 
-void publish(const ros_middleware_interface::PublisherHandle& publisher_handle, const void * ros_message)
+rmw_ret_t
+rmw_destroy_publisher(rmw_publisher_t * publisher)
 {
-    //std::cout << "publish()" << std::endl;
-
-    if (publisher_handle._implementation_identifier != _prismtech_opensplice_identifier)
-    {
-        printf("publisher handle not from this implementation\n");
-        printf("but from: %s\n", publisher_handle._implementation_identifier);
-        throw std::runtime_error("publisher handle not from this implementation");
-    }
-
-    //std::cout << "  publish() extract data writer and type code from opaque publisher handle" << std::endl;
-    CustomPublisherInfo * custom_publisher_info = (CustomPublisherInfo*)publisher_handle._data;
-    DDS::DataWriter * topic_writer = custom_publisher_info->topic_writer_;
-    const ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = custom_publisher_info->callbacks_;
-
-
-    //std::cout << "  publish() invoke publish callback" << std::endl;
-    callbacks->_publish(topic_writer, ros_message);
+  if (!publisher)
+  {
+    // Would not be able to teardown, so return error code
+    rmw_set_error_string("received null pointer");
+    return RMW_RET_ERROR;
+  }
+  // TODO: do DDS specific teardown
+  rmw_publisher_free(publisher);
+  return RMW_RET_OK;
 }
 
-struct CustomSubscriberInfo {
-  DDS::DataReader * topic_reader_;
-  ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks_;
+rmw_ret_t
+rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
+{
+  if (publisher->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("publisher does not share this implementation");
+    return RMW_RET_ERROR;
+  }
+
+  const OpenSpliceStaticPublisherInfo * publisher_info = \
+    static_cast<const OpenSpliceStaticPublisherInfo *>(publisher->data);
+  DDS::DataWriter * topic_writer = publisher_info->topic_writer;
+  const message_type_support_callbacks_t * callbacks = \
+    publisher_info->callbacks;
+
+  callbacks->publish(topic_writer, ros_message);
+  return RMW_RET_OK;
+}
+
+struct OpenSpliceStaticSubscriberInfo
+{
+  DDS::DataReader * topic_reader;
+  const message_type_support_callbacks_t * callbacks;
 };
 
-ros_middleware_interface::SubscriberHandle create_subscriber(const NodeHandle& node_handle, const rosidl_generator_cpp::MessageTypeSupportHandle & type_support_handle, const char * topic_name)
+rmw_subscription_t *
+rmw_create_subscription(const rmw_node_t * node,
+                        const rosidl_message_type_support_t * type_support,
+                        const char * topic_name,
+                        size_t queue_size)
 {
-  std::cout << "create_subscriber()" << std::endl;
-
-    if (node_handle._implementation_identifier != _prismtech_opensplice_identifier)
-    {
-        printf("node handle not from this implementation\n");
-        printf("but from: %s\n", node_handle._implementation_identifier);
-        throw std::runtime_error("node handle not from this implementation");
-    }
-    std::cout << "create_subscriber() " << node_handle._implementation_identifier << std::endl;
-
-    std::cout << "  create_subscriber() extract participant from opaque node handle" << std::endl;
-    DDS::DomainParticipant * participant = (DDS::DomainParticipant *)node_handle._data;
-
-
-
-    ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = (ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks*)type_support_handle._data;
-    std::string type_name = std::string(callbacks->_package_name) + "::dds_::" + callbacks->_message_name + "_";
-
-
-    std::cout << "  create_subscriber() invoke register callback" << std::endl;
-    callbacks->_register_type(participant, type_name.c_str());
-
-
-    DDS::SubscriberQos subscriber_qos;
-    DDS::ReturnCode_t status = participant->get_default_subscriber_qos(subscriber_qos);
-    if (status != DDS::RETCODE_OK) {
-        printf("get_default_subscriber_qos() failed. Status = %d\n", status);
-        throw std::runtime_error("get default subscriber qos failed");
-    };
-
-    std::cout << "  create_subscriber() create dds subscriber" << std::endl;
-    DDS::Subscriber * dds_subscriber = participant->create_subscriber(
-        subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
-    if (!dds_subscriber) {
-        printf("  create_subscriber() could not create subscriber\n");
-        throw std::runtime_error("could not create subscriber");
-    };
-
-
-    DDS::TopicQos default_topic_qos;
-    status = participant->get_default_topic_qos(default_topic_qos);
-    if (status != DDS::RETCODE_OK) {
-        printf("get_default_topic_qos() failed. Status = %d\n", status);
-        throw std::runtime_error("get default topic qos failed");
-    };
-
-    std::cout << "  create_subscriber() create topic" << std::endl;
-    DDS::Topic * topic = participant->create_topic(
-        topic_name, type_name.c_str(), default_topic_qos, NULL,
-        DDS::STATUS_MASK_NONE
-    );
-    if (!topic) {
-        printf("  create_topic() could not create topic\n");
-        throw std::runtime_error("could not create topic");
-    };
-
-
-    DDS::DataReaderQos default_datareader_qos;
-    status = dds_subscriber->get_default_datareader_qos(default_datareader_qos);
-    if (status != DDS::RETCODE_OK) {
-        printf("get_default_datareader_qos() failed. Status = %d\n", status);
-        throw std::runtime_error("get default datareader qos failed");
-    };
-
-    std::cout << "  create_subscriber() create data reader" << std::endl;
-    DDS::DataReader * topic_reader = dds_subscriber->create_datareader(
-        topic, default_datareader_qos,
-        NULL, DDS::STATUS_MASK_NONE);
-
-    std::cout << "  topic reader" << topic_reader << std::endl;
-
-    std::cout << "  create_subscriber() build opaque subscriber handle" << std::endl;
-    CustomSubscriberInfo* custom_subscriber_info = new CustomSubscriberInfo();
-    custom_subscriber_info->topic_reader_ = topic_reader;
-    custom_subscriber_info->callbacks_ = callbacks;
-
-    ros_middleware_interface::SubscriberHandle subscriber_handle = {
-        _prismtech_opensplice_identifier,
-        custom_subscriber_info
-    };
-    return subscriber_handle;
-
-}
-
-bool take(const ros_middleware_interface::SubscriberHandle& subscriber_handle, void * ros_message)
-{
-  if (subscriber_handle.implementation_identifier_ != _prismtech_opensplice_identifier)
+  if (node->implementation_identifier != opensplice_cpp_identifier)
   {
-    printf("subscriber handle not from this implementation\n");
-    printf("but from: %s\n", subscriber_handle.implementation_identifier_);
-    throw std::runtime_error("subscriber handle not from this implementation");
+    rmw_set_error_string("node does not share this implementation");
+    return nullptr;
   }
 
-  //std::cout << "  take() extract data writer and type code from opaque subscriber handle" << std::endl;
-  CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)subscriber_handle.data_;
-  DDS::DataReader * topic_reader = custom_subscriber_info->topic_reader_;
-  const ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks * callbacks = custom_subscriber_info->callbacks_;
+  DDS::DomainParticipant * participant = \
+    static_cast<DDS::DomainParticipant *>(node->data);
 
+  const message_type_support_callbacks_t * callbacks = \
+    static_cast<const message_type_support_callbacks_t *>(type_support->data);
+  std::string type_name = std::string(callbacks->package_name) + \
+                          "::dds_::" + callbacks->message_name + "_";
 
-  return callbacks->_take(topic_reader, ros_message);
-}
+  callbacks->register_type(participant, type_name.c_str());
 
-ros_middleware_interface::GuardConditionHandle create_guard_condition()
-{
-  ros_middleware_interface::GuardConditionHandle guard_condition_handle;
-  guard_condition_handle.implementation_identifier_ = _prismtech_opensplice_identifier;
-  guard_condition_handle.data_ = new DDS::GuardCondition();
-  return guard_condition_handle;
-}
-
-void trigger_guard_condition(const ros_middleware_interface::GuardConditionHandle& guard_condition_handle)
-{
-  if (guard_condition_handle.implementation_identifier_ != _prismtech_opensplice_identifier)
+  DDS::SubscriberQos subscriber_qos;
+  DDS::ReturnCode_t status = \
+    participant->get_default_subscriber_qos(subscriber_qos);
+  if (status != DDS::RETCODE_OK)
   {
-    printf("guard condition handle not from this implementation\n");
-    printf("but from: %s\n", guard_condition_handle.implementation_identifier_);
-    throw std::runtime_error("guard condition handle not from this implementation");
+    rmw_set_error_string("failed to get default subscriber qos");
+    // printf("get_default_subscriber_qos() failed. Status = %d\n", status);
+    return nullptr;
   }
 
-  DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)guard_condition_handle.data_;
-  guard_condition->set_trigger_value(true);
+  DDS::Subscriber * dds_subscriber = participant->create_subscriber(
+    subscriber_qos, NULL, DDS::STATUS_MASK_NONE
+  );
+  if (!dds_subscriber)
+  {
+    rmw_set_error_string("failed to create subscriber");
+    // printf("  create_subscriber() could not create subscriber\n");
+    return nullptr;
+  }
+
+  DDS::TopicQos default_topic_qos;
+  status = participant->get_default_topic_qos(default_topic_qos);
+  if (status != DDS::RETCODE_OK)
+  {
+    rmw_set_error_string("faield to get default topic qos");
+    // printf("get_default_topic_qos() failed. Status = %d\n", status);
+    return nullptr;
+  }
+
+  DDS::Topic * topic = participant->create_topic(
+    topic_name, type_name.c_str(), default_topic_qos, NULL,
+    DDS::STATUS_MASK_NONE
+  );
+  if (!topic)
+  {
+    rmw_set_error_string("failed to create topic");
+    // printf("  create_topic() could not create topic\n");
+    return nullptr;
+  }
+
+  DDS::DataReaderQos default_datareader_qos;
+  status = dds_subscriber->get_default_datareader_qos(default_datareader_qos);
+  if (status != DDS::RETCODE_OK)
+  {
+    rmw_set_error_string("failed to get default datareader qos");
+    // printf("get_default_datareader_qos() failed. Status = %d\n", status);
+    return nullptr;
+  }
+
+  DDS::DataReader * topic_reader = dds_subscriber->create_datareader(
+    topic, default_datareader_qos, NULL, DDS::STATUS_MASK_NONE
+  );
+
+  OpenSpliceStaticSubscriberInfo * subscriber_info = \
+    static_cast<OpenSpliceStaticSubscriberInfo *>(rmw_allocate(
+      sizeof(OpenSpliceStaticSubscriberInfo)));
+  subscriber_info->topic_reader = topic_reader;
+  subscriber_info->callbacks = callbacks;
+
+  rmw_subscription_t * subscription = rmw_subscription_allocate();
+  if (!subscription)
+  {
+    rmw_set_error_string("failed to allocate rmw_subscription_t");
+    return nullptr;
+  }
+  subscription->implementation_identifier = opensplice_cpp_identifier;
+  subscription->data = subscriber_info;
+  return subscription;
 }
 
-void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles, ServiceHandles& service_handles, ClientHandles& client_handles, bool non_blocking)
+rmw_ret_t
+rmw_destroy_subscription(rmw_subscription_t * subscription)
+{
+  if (!subscription)
+  {
+    // Would not be able to teardown, so return error code
+    rmw_set_error_string("received null pointer");
+    return RMW_RET_ERROR;
+  }
+  // TODO: do DDS specific teardown
+  rmw_subscription_free(subscription);
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_take(const rmw_subscription_t * subscription, void * ros_message)
+{
+  if (subscription->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("subscription does not share this implementation");
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticSubscriberInfo * subscriber_info = \
+    static_cast<OpenSpliceStaticSubscriberInfo *>(subscription->data);
+  DDS::DataReader * topic_reader = subscriber_info->topic_reader;
+  const message_type_support_callbacks_t * callbacks = \
+    subscriber_info->callbacks;
+
+  return callbacks->take(topic_reader, ros_message);
+}
+
+rmw_guard_condition_t *
+rmw_create_guard_condition()
+{
+  rmw_guard_condition_t * guard_condition = rmw_guard_condition_allocate();
+  guard_condition->implementation_identifier = opensplice_cpp_identifier;
+  guard_condition->data = static_cast<DDS::GuardCondition *>(
+    rmw_allocate(sizeof(DDS::GuardCondition)));
+  // Ensure constructor with "placement new"
+  new (guard_condition->data) DDS::GuardCondition();
+  return guard_condition;
+}
+
+rmw_ret_t
+rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
+{
+  if (!guard_condition)
+  {
+    // Would not be able to teardown, so return error code
+    rmw_set_error_string("received null pointer");
+    return RMW_RET_ERROR;
+  }
+  // TODO: do DDS specific teardown
+  // Explicitly call destructor since the "placement new" was used
+  DDS::GuardCondition * dds_guard_condition = \
+    static_cast<DDS::GuardCondition *>(guard_condition->data);
+  dds_guard_condition->~GuardCondition();
+  rmw_free(guard_condition->data);
+  rmw_guard_condition_free(guard_condition);
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition)
+{
+  if (guard_condition->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("guard_condition does not share this implementation");
+    return RMW_RET_ERROR;
+  }
+
+  DDS::GuardCondition * dds_guard_condition = \
+    static_cast<DDS::GuardCondition *>(guard_condition->data);
+  dds_guard_condition->set_trigger_value(true);
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_wait(rmw_subscriptions_t * subscriptions,
+         rmw_guard_conditions_t * guard_conditions,
+         rmw_service_t * services,
+         rmw_client_t * clients,
+         bool non_blocking)
 {
   DDS::WaitSet waitset;
 
   // add a condition for each subscriber
-  for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
+  for (size_t i = 0; i < subscriptions->subscriber_count; ++i)
   {
-    void * data = subscriber_handles.subscribers_[i];
-    CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)data;
-    DDS::DataReader * topic_reader = custom_subscriber_info->topic_reader_;
+    OpenSpliceStaticSubscriberInfo * subscriber_info = \
+      static_cast<OpenSpliceStaticSubscriberInfo *>(
+        subscriptions->subscribers[i]);
+    DDS::DataReader * topic_reader = subscriber_info->topic_reader;
     DDS::StatusCondition * condition = topic_reader->get_statuscondition();
     condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(condition);
   }
 
   // add a condition for each guard condition
-  for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
+  for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i)
   {
-    void * data = guard_condition_handles.guard_conditions_[i];
-    DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)data;
+    DDS::GuardCondition * guard_condition = \
+      static_cast<DDS::GuardCondition *>(
+        guard_conditions->guard_conditions[i]);
     waitset.attach_condition(guard_condition);
   }
 
@@ -335,44 +431,49 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
   while (DDS::RETCODE_TIMEOUT == status)
   {
     status = waitset.wait(active_conditions, timeout);
-    if (DDS::RETCODE_TIMEOUT == status) {
+    if (DDS::RETCODE_TIMEOUT == status)
+    {
       if (non_blocking)
       {
         break;
       }
       continue;
     };
-    if (status != DDS::RETCODE_OK) {
-      printf("wait() failed. Status = %d\n", status);
-      throw std::runtime_error("wait failed");
+    if (status != DDS::RETCODE_OK)
+    {
+      rmw_set_error_string("failed to wait on waitset");
+      // printf("wait() failed. Status = %d\n", status);
+      return RMW_RET_ERROR;
     };
   }
 
   // set subscriber handles to zero for all not triggered status conditions
-  for (unsigned long i = 0; i < subscriber_handles.subscriber_count_; ++i)
+  for (size_t i = 0; i < subscriptions->subscriber_count; ++i)
   {
-    void * data = subscriber_handles.subscribers_[i];
-    CustomSubscriberInfo * custom_subscriber_info = (CustomSubscriberInfo*)data;
-    DDS::DataReader* topic_reader = custom_subscriber_info->topic_reader_;
+    OpenSpliceStaticSubscriberInfo * subscriber_info = \
+      static_cast<OpenSpliceStaticSubscriberInfo *>(
+        subscriptions->subscribers[i]);
+    DDS::DataReader* topic_reader = subscriber_info->topic_reader;
     DDS::StatusCondition * condition = topic_reader->get_statuscondition();
     if (!condition->get_trigger_value())
     {
       // if the status condition was not triggered
       // reset the subscriber handle
-      subscriber_handles.subscribers_[i] = 0;
+      subscriptions->subscribers[i] = 0;
     }
   }
 
   // set guard condition handles to zero for all not triggered guard conditions
-  for (unsigned long i = 0; i < guard_condition_handles.guard_condition_count_; ++i)
+  for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i)
   {
-    void * data = guard_condition_handles.guard_conditions_[i];
-    DDS::GuardCondition * guard_condition = (DDS::GuardCondition*)data;
+    DDS::GuardCondition * guard_condition = \
+      static_cast<DDS::GuardCondition *>(
+        guard_conditions->guard_conditions[i]);
     if (!guard_condition->get_trigger_value())
     {
       // if the guard condition was not triggered
       // reset the guard condition handle
-      guard_condition_handles.guard_conditions_[i] = 0;
+      guard_conditions->guard_conditions[i] = 0;
     }
     else
     {
@@ -380,6 +481,7 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
       guard_condition->set_trigger_value(false);
     }
   }
+  return RMW_RET_OK;
 }
 
 ros_middleware_interface::ClientHandle create_client(
@@ -429,6 +531,4 @@ void send_response(
   const ros_middleware_interface::ServiceHandle& service_handle, void * ros_request,
   void * ros_response)
 {
-}
-
 }
