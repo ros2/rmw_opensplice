@@ -12,9 +12,6 @@
 @#    Parsed specification of the .msg file
 @###############################################
 
-#ifndef __@(spec.base_type.pkg_name)__@(spec.base_type.type)_TypeSupport__h__
-#define __@(spec.base_type.pkg_name)__@(spec.base_type.type)_TypeSupport__h__
-
 #include <iostream>
 
 #include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
@@ -228,5 +225,3 @@ const rosidl_generator_cpp::MessageTypeSupportHandle& get_type_support_handle<@(
 }
 
 }  // namespace ros_middleware_opensplice_cpp
-
-#endif  // __@(spec.base_type.pkg_name)__@(spec.base_type.type)_TypeSupport__h__
