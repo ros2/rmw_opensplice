@@ -15,9 +15,9 @@ const char * opensplice_cpp_identifier = "opensplice_static";
 rmw_ret_t
 rmw_init()
 {
-  DDS::DomainParticipantFactory_var dpf_ = \
+  DDS::DomainParticipantFactory_var dp_factory = \
     DDS::DomainParticipantFactory::get_instance();
-  if (!dpf_)
+  if (!dp_factory)
   {
     rmw_set_error_string("failed to get domain participant factory");
     return RMW_RET_ERROR;
@@ -28,9 +28,9 @@ rmw_init()
 rmw_node_t *
 rmw_create_node(const char * name)
 {
-  DDS::DomainParticipantFactory_var dpf_ = \
+  DDS::DomainParticipantFactory_var dp_factory = \
     DDS::DomainParticipantFactory::get_instance();
-  if (!dpf_)
+  if (!dp_factory)
   {
     rmw_set_error_string("failed to get domain participant factory");
     return nullptr;
@@ -39,7 +39,7 @@ rmw_create_node(const char * name)
   // TODO: take the domain id from configuration
   DDS::DomainId_t domain = 0;
 
-  DDS::DomainParticipant * participant = dpf_->create_participant(
+  DDS::DomainParticipant * participant = dp_factory->create_participant(
     domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE
   );
   if (!participant)
