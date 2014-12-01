@@ -10,7 +10,13 @@
 
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 
-const char * opensplice_cpp_identifier = "opensplice_static";
+static const char * opensplice_cpp_identifier = "opensplice_static";
+
+const char *
+rmw_get_implementation_identifier()
+{
+  return opensplice_cpp_identifier;
+}
 
 rmw_ret_t
 rmw_init()
