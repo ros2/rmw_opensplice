@@ -22,7 +22,6 @@ ament_export_include_directories(include/${PROJECT_NAME}/impl ${OpenSplice_INCLU
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(ros_middleware_opensplice_cpp SHARED src/functions.cpp)
-set_target_properties(ros_middleware_opensplice_cpp PROPERTIES COMPILE_FLAGS "-std=c++11")
 ament_target_dependencies(ros_middleware_opensplice_cpp
   "ros_middleware_interface"
   "rosidl_generator_cpp"
