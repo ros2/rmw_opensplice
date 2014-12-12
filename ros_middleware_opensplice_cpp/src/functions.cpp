@@ -7,6 +7,9 @@
 #include "ros_middleware_interface/handles.h"
 #include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
 
+#include "rosidl_generator_cpp/ServiceTypeSupport.h"
+#include "rosidl_typesupport_connext_cpp/ServiceTypeSupport.h"
+
 namespace ros_middleware_interface
 {
 
@@ -299,7 +302,7 @@ void trigger_guard_condition(const ros_middleware_interface::GuardConditionHandl
   guard_condition->set_trigger_value(true);
 }
 
-void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles, bool non_blocking)
+void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles, ServiceHandles& service_handles, bool non_blocking)
 {
   DDS::WaitSet waitset;
 
@@ -376,6 +379,46 @@ void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_m
       guard_condition->set_trigger_value(false);
     }
   }
+}
+
+ros_middleware_interface::ClientHandle create_client(
+  const ros_middleware_interface::NodeHandle& node_handle,
+  const rosidl_generator_cpp::ServiceTypeSupportHandle & type_support_handle,
+  const char * service_name)
+{
+}
+
+void send_request(
+  const ros_middleware_interface::ClientHandle& client_handle,
+  const void * ros_client)
+{
+}
+
+bool receive_response(
+  const ClientHandle& client_handle, void * ros_response)
+{
+  return false;
+}
+
+bool take_request(
+  const ros_middleware_interface::ServiceHandle& service_handle, void * ros_request)
+{
+  return false;
+}
+
+ros_middleware_interface::ServiceHandle create_service(
+  const ros_middleware_interface::NodeHandle& node_handle,
+  const rosidl_generator_cpp::ServiceTypeSupportHandle & type_support_handle,
+  const char * service_name)
+{
+  ros_middleware_interface::ServiceHandle service_handle;
+  return service_handle;
+}
+
+void send_response(
+  const ros_middleware_interface::ServiceHandle& service_handle, void * ros_request,
+  void * ros_response)
+{
 }
 
 }

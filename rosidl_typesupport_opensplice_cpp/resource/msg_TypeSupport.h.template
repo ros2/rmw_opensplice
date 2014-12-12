@@ -1,0 +1,39 @@
+@###############################################
+@#
+@# ROS message type support code generation for C++
+@#
+@# EmPy template for generating <msg>_TypeSupport.cpp files
+@#
+@###############################################
+@# Start of Template
+@#
+@# Context:
+@#  - spec (rosidl_parser.MessageSpecification)
+@#    Parsed specification of the .msg file
+@###############################################
+
+#ifndef __@(spec.base_type.pkg_name)__dds_opensplice__@(spec.base_type.type)_TypeSupport__h__
+#define __@(spec.base_type.pkg_name)__dds_opensplice__@(spec.base_type.type)_TypeSupport__h__
+
+#include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
+#include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
+#include "rosidl_generator_cpp/MessageTypeSupport.h"
+#include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
+
+namespace @(spec.base_type.pkg_name)
+{
+
+namespace type_support
+{
+
+void register_type__@(spec.base_type.type)(DDS::DomainParticipant * participant, const char * type_name);
+
+void convert_ros_message_to_dds(const @(spec.base_type.pkg_name)::@(spec.base_type.type)& ros_message, @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_& dds_message);
+
+void publish__@(spec.base_type.type)(DDS::DataWriter * topic_writer, const void * untyped_ros_message);
+
+void convert_dds_message_to_ros(const @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_& dds_message, @(spec.base_type.pkg_name)::@(spec.base_type.type)& ros_message);
+
+bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped_ros_message);
+
+#endif  // __@(spec.base_type.pkg_name)__dds_opensplice__@(spec.base_type.type)_TypeSupport__h__

@@ -2,7 +2,7 @@ import em
 import os
 import subprocess
 
-from rosidl_parser import parse_message_file
+from rosidl_parser import parse_message_file, parse_service_file
 
 
 def generate_dds_opensplice_cpp(
@@ -44,10 +44,19 @@ def generate_dds_opensplice_cpp(
 
 
 def generate_typesupport_opensplice_cpp(pkg_name, ros_interface_files, deps, output_dir, template_dir):
-    mapping = {
+    mapping_msgs = {
+        os.path.join(template_dir, 'msg_TypeSupport.h.template'): '%s_TypeSupport.h',
         os.path.join(template_dir, 'msg_TypeSupport.cpp.template'): '%s_TypeSupport.cpp',
     }
-    for template_file in mapping.keys():
+
+    mapping_srvs = {
+        os.path.join(template_dir, 'srv_ServiceTypeSupport.cpp.template'): '%s_ServiceTypeSupport.cpp',
+    }
+
+    for template_file in mapping_msgs.keys():
+        assert(os.path.exists(template_file))
+
+    for template_file in mapping_srvs.keys():
         assert(os.path.exists(template_file))
 
     try:
@@ -57,27 +66,53 @@ def generate_typesupport_opensplice_cpp(pkg_name, ros_interface_files, deps, out
 
     for idl_file in ros_interface_files:
         print(pkg_name, idl_file)
-        spec = parse_message_file(pkg_name, idl_file)
-        for template_file, generated_filename in mapping.items():
-            generated_file = os.path.join(output_dir, generated_filename % spec.base_type.type)
-            print('Generating: %s' % generated_file)
+        filename, extension = os.path.splitext(idl_file)
+        if extension == '.msg':
+            spec = parse_message_file(pkg_name, idl_file)
+            for template_file, generated_filename in mapping_msgs.items():
+                generated_file = os.path.join(output_dir, generated_filename % spec.base_type.type)
+                print('Generating MESSAGE: %s' % generated_file)
 
-            try:
-                # TODO only touch generated file if its content actually changes
-                ofile = open(generated_file, 'w')
-                # TODO reuse interpreter
-                interpreter = em.Interpreter(
-                    output=ofile,
-                    options={
-                        em.RAW_OPT: True,
-                        em.BUFFERED_OPT: True,
-                    },
-                    globals={'spec': spec},
-                )
-                interpreter.file(open(template_file))
-                interpreter.shutdown()
-            except Exception:
-                os.remove(generated_file)
-                raise
+                try:
+                    # TODO only touch generated file if its content actually changes
+                    ofile = open(generated_file, 'w')
+                    # TODO reuse interpreter
+                    interpreter = em.Interpreter(
+                        output=ofile,
+                        options={
+                            em.RAW_OPT: True,
+                            em.BUFFERED_OPT: True,
+                        },
+                        globals={'spec': spec},
+                    )
+                    interpreter.file(open(template_file))
+                    interpreter.shutdown()
+                except Exception:
+                    os.remove(generated_file)
+                    raise
+        elif extension == '.srv':
+            spec = parse_service_file(pkg_name, idl_file)
+            for template_file, generated_filename in mapping_srvs.items():
+                generated_file = os.path.join(output_dir, generated_filename % spec.srv_name)
+                print('Generating SERVICE: %s' % generated_file)
+
+                try:
+                    # TODO only touch generated file if its content actually changes
+                    ofile = open(generated_file, 'w')
+                    # TODO reuse interpreter
+                    interpreter = em.Interpreter(
+                        output=ofile,
+                        options={
+                            em.RAW_OPT: True,
+                            em.BUFFERED_OPT: True,
+                        },
+                        globals={'spec': spec},
+                    )
+                    interpreter.file(open(template_file))
+                    interpreter.shutdown()
+                except Exception:
+                    os.remove(generated_file)
+                    raise
+
 
     return 0
