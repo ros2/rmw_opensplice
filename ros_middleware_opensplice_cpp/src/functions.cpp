@@ -5,6 +5,7 @@
 
 #include "rosidl_generator_cpp/MessageTypeSupport.h"
 #include "ros_middleware_interface/handles.h"
+#include "ros_middleware_interface/functions.h"
 #include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
 
 #include "rosidl_generator_cpp/ServiceTypeSupport.h"
@@ -394,10 +395,10 @@ void send_request(
 {
 }
 
-bool receive_response(
+ros_middleware_interface::ROS2_RETCODE_t receive_response(
   const ClientHandle& client_handle, void * ros_response)
 {
-  return false;
+  return ROS2_RETCODE_ERROR;
 }
 
 bool take_request(
