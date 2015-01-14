@@ -303,7 +303,7 @@ void trigger_guard_condition(const ros_middleware_interface::GuardConditionHandl
   guard_condition->set_trigger_value(true);
 }
 
-void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles, ServiceHandles& service_handles, bool non_blocking)
+void wait(ros_middleware_interface::SubscriberHandles& subscriber_handles, ros_middleware_interface::GuardConditionHandles& guard_condition_handles, ServiceHandles& service_handles, ClientHandles& client_handles, bool non_blocking)
 {
   DDS::WaitSet waitset;
 
@@ -389,10 +389,11 @@ ros_middleware_interface::ClientHandle create_client(
 {
 }
 
-void send_request(
+int64_t send_request(
   const ros_middleware_interface::ClientHandle& client_handle,
   const void * ros_client)
 {
+  return -1;
 }
 
 ros_middleware_interface::ROS2_RETCODE_t receive_response(
@@ -403,6 +404,13 @@ ros_middleware_interface::ROS2_RETCODE_t receive_response(
 
 bool take_request(
   const ros_middleware_interface::ServiceHandle& service_handle, void * ros_request,
+  void * ros_request_header)
+{
+  return false;
+}
+
+bool take_response(
+  const ros_middleware_interface::ClientHandle& client_handle, void * ros_response,
   void * ros_request_header)
 {
   return false;
