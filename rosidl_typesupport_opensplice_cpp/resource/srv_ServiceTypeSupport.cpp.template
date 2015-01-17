@@ -1,0 +1,57 @@
+@###############################################
+@#
+@# ROS message type support code generation for C++
+@#
+@# EmPy template for generating <msg>_ServiceTypeSupport.cpp files
+@#
+@###############################################
+@# Start of Template
+@#
+@# Context:
+@#  - spec (rosidl_parser.ServiceSpecification)
+@#    Parsed specification of the .srv file
+@###############################################
+
+#include <iostream>
+
+#include "@(spec.pkg_name)/@(spec.srv_name)_Service.h"
+#include "rosidl_generator_cpp/ServiceTypeSupport.h"
+#include "rosidl_typesupport_opensplice_cpp/ServiceTypeSupport.h"
+
+namespace @(spec.pkg_name)
+{
+
+namespace service_type_support
+{
+
+void * create_client__@(spec.srv_name)(DDS::DomainParticipant * participant, const char * service_name)
+{
+  return NULL;
+}
+
+static ros_middleware_opensplice_cpp::ServiceTypeSupportCallbacks callbacks = {
+    "@(spec.pkg_name)",
+    "@(spec.srv_name)",
+    &create_client__@(spec.srv_name),
+};
+
+static rosidl_generator_cpp::ServiceTypeSupportHandle handle = {
+    "opensplice_static",
+    &callbacks
+};
+
+}  // namespace service_type_support
+
+}  // namespace @(spec.pkg_name)
+
+
+namespace ros_middleware_opensplice_cpp
+{
+
+template<>
+const rosidl_generator_cpp::ServiceTypeSupportHandle& get_service_type_support_handle<@(spec.pkg_name)::@(spec.srv_name)>()
+{
+    return @(spec.pkg_name)::service_type_support::handle;
+}
+
+}  // namespace ros_middleware_opensplice_cpp
