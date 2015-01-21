@@ -9,7 +9,7 @@
 #include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
 
 #include "rosidl_generator_cpp/ServiceTypeSupport.h"
-#include "rosidl_typesupport_connext_cpp/ServiceTypeSupport.h"
+#include "rosidl_typesupport_opensplice_cpp/ServiceTypeSupport.h"
 
 namespace ros_middleware_interface
 {
