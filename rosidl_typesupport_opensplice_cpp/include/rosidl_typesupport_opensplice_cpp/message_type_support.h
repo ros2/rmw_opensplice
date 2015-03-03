@@ -3,8 +3,6 @@
 
 #include "rosidl_generator_c/message_type_support.h"
 
-extern const char * opensplice_cpp_identifier;
-
 typedef struct message_type_support_callbacks_t
 {
   const char * package_name;
