@@ -3,9 +3,9 @@
 
 #include <ccpp_dds_dcps.h>
 
-#include <ros_middleware_interface/allocators.h>
-#include <ros_middleware_interface/error_handling.h>
-#include <ros_middleware_interface/rmw.h>
+#include <rmw/allocators.h>
+#include <rmw/error_handling.h>
+#include <rmw/rmw.h>
 #include <rosidl_generator_c/message_type_support.h>
 
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
