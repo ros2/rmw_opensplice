@@ -405,6 +405,7 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
          rmw_client_t * clients,
          bool non_blocking)
 {
+  // TODO(wjwwood): Handle services and service clients.
   DDS::WaitSet waitset;
 
   // add a condition for each subscriber
@@ -490,51 +491,57 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   return RMW_RET_OK;
 }
 
-ros_middleware_interface::ClientHandle create_client(
-  const ros_middleware_interface::NodeHandle& node_handle,
-  const rosidl_generator_cpp::ServiceTypeSupportHandle & type_support_handle,
-  const char * service_name)
+// TODO(wjwwood): implement all of the service and service client functions.
+rmw_client_t *
+rmw_create_client(const rmw_node_t * node,
+                  const rosidl_message_type_support_t * type_support,
+                  const char * service_name)
 {
+  return NULL;
 }
 
-int64_t send_request(
-  const ros_middleware_interface::ClientHandle& client_handle,
-  const void * ros_client)
+rmw_ret_t
+rmw_destroy_client(rmw_client_t * client)
+{
+  return RMW_RET_OK;
+}
+
+int64_t
+rmw_send_request(const rmw_client_t * client, const void * ros_request)
 {
   return -1;
 }
 
-ros_middleware_interface::ROS2_RETCODE_t receive_response(
-  const ClientHandle& client_handle, void * ros_response)
+rmw_ret_t
+rmw_receive_response(const rmw_client_t * client, void * ros_response)
 {
-  return ROS2_RETCODE_ERROR;
+  return RMW_RET_ERROR;
 }
 
-bool take_request(
-  const ros_middleware_interface::ServiceHandle& service_handle, void * ros_request,
-  void * ros_request_header)
+rmw_ret_t
+rmw_take_response(const rmw_client_t * client,
+                  void * ros_response, void * ros_request_header)
 {
-  return false;
+  return RMW_RET_ERROR;
 }
 
-bool take_response(
-  const ros_middleware_interface::ClientHandle& client_handle, void * ros_response,
-  void * ros_request_header)
+rmw_service_t *
+rmw_create_service(const rmw_node_t * node,
+                   const rosidl_message_type_support_t * type_support,
+                   const char * service_name)
 {
-  return false;
+  return NULL;
 }
 
-ros_middleware_interface::ServiceHandle create_service(
-  const ros_middleware_interface::NodeHandle& node_handle,
-  const rosidl_generator_cpp::ServiceTypeSupportHandle & type_support_handle,
-  const char * service_name)
+rmw_ret_t
+rmw_destroy_service(rmw_service_t * service)
 {
-  ros_middleware_interface::ServiceHandle service_handle;
-  return service_handle;
+  return RMW_RET_OK;
 }
 
-void send_response(
-  const ros_middleware_interface::ServiceHandle& service_handle, void * ros_request,
-  void * ros_response)
+rmw_ret_t
+rmw_take_request(const rmw_service_t * service,
+                 void * ros_request, void * ros_request_header)
 {
+  return RMW_RET_ERROR;
 }
