@@ -36,10 +36,6 @@ register_ros_middleware_implementation()
 ament_package()
 
 install(
-  DIRECTORY include/
-  DESTINATION include
-)
-install(
   TARGETS ros_middleware_opensplice_cpp
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

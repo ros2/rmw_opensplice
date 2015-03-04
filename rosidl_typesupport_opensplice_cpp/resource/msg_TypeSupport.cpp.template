@@ -18,6 +18,7 @@
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_generator_cpp/MessageTypeSupport.h"
 #include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
+#include "ros_middleware_interface/get_type_support_handle.h"
 
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@
@@ -205,7 +206,7 @@ static ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks callbacks = {
     &take__@(spec.base_type.type)
 };
 
-static rosidl_generator_cpp::MessageTypeSupportHandle handle = {
+static rosidl_message_type_support_t handle = {
     "opensplice_static",
     &callbacks
 };
@@ -214,14 +215,26 @@ static rosidl_generator_cpp::MessageTypeSupportHandle handle = {
 
 }  // namespace @(spec.base_type.pkg_name)
 
-
 namespace ros_middleware_opensplice_cpp
 {
 
 template<>
-const rosidl_generator_cpp::MessageTypeSupportHandle& get_type_support_handle<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
+const rosidl_message_type_support_t * get_type_support_handle<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
 {
-    return @(spec.base_type.pkg_name)::type_support::handle;
+    return &@(spec.base_type.pkg_name)::type_support::handle;
 }
 
 }  // namespace ros_middleware_opensplice_cpp
+
+namespace rosidl_generator_cpp
+{
+
+template<>
+const rosidl_message_type_support_t *
+get_type_support_handle<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
+{
+    return ros_middleware_opensplice_cpp::get_type_support_handle<
+        @(spec.base_type.pkg_name)::@(spec.base_type.type)>();
+}
+
+}  // namespace rosidl_generator_cpp

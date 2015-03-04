@@ -1,4 +1,3 @@
-
 #ifndef __ros_middleware_opensplice_cpp__MessageTypeSupport__h__
 #define __ros_middleware_opensplice_cpp__MessageTypeSupport__h__
 
@@ -29,7 +28,7 @@ typedef struct MessageTypeSupportCallbacks {
 } MessageTypeSupportCallbacks;
 
 template<typename T>
-const rosidl_generator_cpp::MessageTypeSupportHandle& get_type_support_handle();
+const rosidl_message_type_support_t * get_type_support_handle();
 
 }  // namespace ros_middleware_opensplice_cpp
 
