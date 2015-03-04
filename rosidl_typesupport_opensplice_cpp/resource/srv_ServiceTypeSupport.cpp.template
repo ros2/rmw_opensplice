@@ -29,7 +29,7 @@ void * create_client__@(spec.srv_name)(DDS::DomainParticipant * participant, con
   return NULL;
 }
 
-static ros_middleware_opensplice_cpp::ServiceTypeSupportCallbacks callbacks = {
+static rmw_opensplice_cpp::ServiceTypeSupportCallbacks callbacks = {
     "@(spec.pkg_name)",
     "@(spec.srv_name)",
     &create_client__@(spec.srv_name),
@@ -45,7 +45,7 @@ static rosidl_generator_cpp::ServiceTypeSupportHandle handle = {
 }  // namespace @(spec.pkg_name)
 
 
-namespace ros_middleware_opensplice_cpp
+namespace rmw_opensplice_cpp
 {
 
 template<>
@@ -54,4 +54,4 @@ const rosidl_generator_cpp::ServiceTypeSupportHandle& get_service_type_support_h
     return @(spec.pkg_name)::service_type_support::handle;
 }
 
-}  // namespace ros_middleware_opensplice_cpp
+}  // namespace rmw_opensplice_cpp

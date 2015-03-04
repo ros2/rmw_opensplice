@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ros_middleware_opensplice_cpp</name>
+  <name>rmw_opensplice_cpp</name>
   <version>0.0.0</version>
   <description>Implement the ROS middleware interface using PrismTech OpenSplice static code generation in C++.</description>
   <maintainer email="dthomas@osrfoundation.org">Dirk Thomas</maintainer>
@@ -14,7 +14,7 @@
   <buildtool_export_depend>rosidl_cmake</buildtool_export_depend>
 
   <build_depend>libopensplice63</build_depend>
-  <build_depend>ros_middleware_interface</build_depend>
+  <build_depend>rmw</build_depend>
   <build_depend>rosidl_generator_cpp</build_depend>
   <build_depend>rosidl_typesupport_opensplice_cpp</build_depend>
   <build_depend>rosidl_generator_dds_idl</build_depend>

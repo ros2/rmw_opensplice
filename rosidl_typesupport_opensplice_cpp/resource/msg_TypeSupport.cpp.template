@@ -18,7 +18,7 @@
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_generator_cpp/MessageTypeSupport.h"
 #include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
-#include "ros_middleware_interface/get_type_support_handle.h"
+#include "rmw/get_type_support_handle.h"
 
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@
@@ -198,7 +198,7 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped
     return true;
 }
 
-static ros_middleware_opensplice_cpp::MessageTypeSupportCallbacks callbacks = {
+static rmw_opensplice_cpp::MessageTypeSupportCallbacks callbacks = {
     "@(spec.base_type.pkg_name)",
     "@(spec.base_type.type)",
     &register_type__@(spec.base_type.type),
@@ -215,7 +215,7 @@ static rosidl_message_type_support_t handle = {
 
 }  // namespace @(spec.base_type.pkg_name)
 
-namespace ros_middleware_opensplice_cpp
+namespace rmw_opensplice_cpp
 {
 
 template<>
@@ -224,7 +224,7 @@ const rosidl_message_type_support_t * get_type_support_handle<@(spec.base_type.p
     return &@(spec.base_type.pkg_name)::type_support::handle;
 }
 
-}  // namespace ros_middleware_opensplice_cpp
+}  // namespace rmw_opensplice_cpp
 
 namespace rosidl_generator_cpp
 {
@@ -233,7 +233,7 @@ template<>
 const rosidl_message_type_support_t *
 get_type_support_handle<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
 {
-    return ros_middleware_opensplice_cpp::get_type_support_handle<
+    return rmw_opensplice_cpp::get_type_support_handle<
         @(spec.base_type.pkg_name)::@(spec.base_type.type)>();
 }
 

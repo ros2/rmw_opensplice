@@ -1,5 +1,5 @@
-#ifndef __ros_middleware_opensplice_cpp__MessageTypeSupport__h__
-#define __ros_middleware_opensplice_cpp__MessageTypeSupport__h__
+#ifndef __rmw_opensplice_cpp__MessageTypeSupport__h__
+#define __rmw_opensplice_cpp__MessageTypeSupport__h__
 
 #include "rosidl_generator_cpp/MessageTypeSupport.h"
 
@@ -9,14 +9,14 @@ class DataReader;
 class DataWriter;
 }
 
-namespace ros_middleware_interface
+namespace rmw
 {
 
 extern const char * _prismtech_opensplice_identifier;
 
-}  // namespace ros_middleware_interface
+}  // namespace rmw
 
-namespace ros_middleware_opensplice_cpp
+namespace rmw_opensplice_cpp
 {
 
 typedef struct MessageTypeSupportCallbacks {
@@ -30,6 +30,6 @@ typedef struct MessageTypeSupportCallbacks {
 template<typename T>
 const rosidl_message_type_support_t * get_type_support_handle();
 
-}  // namespace ros_middleware_opensplice_cpp
+}  // namespace rmw_opensplice_cpp
 
-#endif  // __ros_middleware_opensplice_cpp__MessageTypeSupport__h__
+#endif  // __rmw_opensplice_cpp__MessageTypeSupport__h__
