@@ -26,7 +26,7 @@ typedef struct ServiceTypeSupportCallbacks {
 } ServiceTypeSupportCallbacks;
 
 template<typename T>
-const rosidl_generator_cpp::ServiceTypeSupportHandle& get_service_type_support_handle();
+const rosidl_service_type_support_t * get_service_type_support_handle();
 
 }  // namespace rmw_opensplice_cpp
 

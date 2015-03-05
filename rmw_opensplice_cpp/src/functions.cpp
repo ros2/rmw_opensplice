@@ -7,8 +7,11 @@
 #include <rmw/error_handling.h>
 #include <rmw/rmw.h>
 #include <rosidl_generator_c/message_type_support.h>
-
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+
+// The extern "C" here enforces that overloading is not used.
+extern "C"
+{
 
 static const char * opensplice_cpp_identifier = "opensplice_static";
 
@@ -401,8 +404,8 @@ rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition)
 rmw_ret_t
 rmw_wait(rmw_subscriptions_t * subscriptions,
          rmw_guard_conditions_t * guard_conditions,
-         rmw_service_t * services,
-         rmw_client_t * clients,
+         rmw_services_t * services,
+         rmw_clients_t * clients,
          bool non_blocking)
 {
   // TODO(wjwwood): Handle services and service clients.
@@ -494,7 +497,7 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
 // TODO(wjwwood): implement all of the service and service client functions.
 rmw_client_t *
 rmw_create_client(const rmw_node_t * node,
-                  const rosidl_message_type_support_t * type_support,
+                  const rosidl_service_type_support_t * type_support,
                   const char * service_name)
 {
   return NULL;
@@ -506,10 +509,12 @@ rmw_destroy_client(rmw_client_t * client)
   return RMW_RET_OK;
 }
 
-int64_t
-rmw_send_request(const rmw_client_t * client, const void * ros_request)
+rmw_ret_t
+rmw_send_request(const rmw_client_t * client, const void * ros_request,
+                 int64_t * sequence_id)
 {
-  return -1;
+  *sequence_id = -1;
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -527,7 +532,7 @@ rmw_take_response(const rmw_client_t * client,
 
 rmw_service_t *
 rmw_create_service(const rmw_node_t * node,
-                   const rosidl_message_type_support_t * type_support,
+                   const rosidl_service_type_support_t * type_support,
                    const char * service_name)
 {
   return NULL;
@@ -545,3 +550,14 @@ rmw_take_request(const rmw_service_t * service,
 {
   return RMW_RET_ERROR;
 }
+
+rmw_ret_t
+rmw_send_response(const rmw_service_t * service,
+                  void * ros_request, void * ros_response)
+{
+  ros_request = nullptr;
+  ros_response = nullptr;
+  return RMW_RET_ERROR;
+}
+
+}  // extern "C"
