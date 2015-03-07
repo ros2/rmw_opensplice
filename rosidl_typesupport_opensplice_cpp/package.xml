@@ -16,4 +16,7 @@
   <buildtool_export_depend>opensplice_cmake_module</buildtool_export_depend>
   <buildtool_export_depend>rosidl_cmake</buildtool_export_depend>
   <buildtool_export_depend>rosidl_generator_dds_idl</buildtool_export_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 </package>

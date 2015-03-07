@@ -11,6 +11,11 @@ if(OpenSplice_HOME)
   ament_environment_hooks(env_hook/opensplice.sh.in)
 endif()
 
+if(AMENT_ENABLE_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package(
   CONFIG_EXTRAS "opensplice_cmake_module-extras.cmake"
 )
