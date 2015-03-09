@@ -520,12 +520,6 @@ rmw_send_request(const rmw_client_t * client, const void * ros_request,
 }
 
 rmw_ret_t
-rmw_receive_response(const rmw_client_t * client, void * ros_response)
-{
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
 rmw_take_response(const rmw_client_t * client,
                   void * ros_response, void * ros_request_header, bool * taken)
 {
