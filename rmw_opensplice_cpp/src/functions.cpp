@@ -340,6 +340,11 @@ rmw_destroy_subscription(rmw_subscription_t * subscription)
 rmw_ret_t
 rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * taken)
 {
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
   if (subscription->implementation_identifier != opensplice_cpp_identifier)
   {
     rmw_set_error_string("subscription does not share this implementation");
@@ -351,11 +356,6 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
   DDS::DataReader * topic_reader = subscriber_info->topic_reader;
   const message_type_support_callbacks_t * callbacks = \
     subscriber_info->callbacks;
-
-  if (taken == NULL) {
-    rmw_set_error_string("taken argument can't be null");
-    return RMW_RET_ERROR;
-  }
 
   *taken = callbacks->take(topic_reader, ros_message);
 
