@@ -16,8 +16,8 @@
 
 #include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
-#include "rosidl_generator_cpp/MessageTypeSupport.h"
-#include "rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h"
+#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+#include <rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h>
 #include "rmw/get_type_support_handle.h"
 
 @[for field in spec.fields]@
@@ -45,8 +45,9 @@ namespace @(spec.base_type.pkg_name)
 namespace type_support
 {
 
-void register_type__@(spec.base_type.type)(DDS::DomainParticipant * participant, const char * type_name)
+void register_type__@(spec.base_type.type)(void * untyped_participant, const char * type_name)
 {
+    DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(untyped_participant);
     std::cout << "  @(spec.base_type.pkg_name)::type_support::register_type__@(spec.base_type.type)()" << std::endl;
     @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_TypeSupport * ros_message_ts = new @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_TypeSupport();
     DDS::ReturnCode_t status = ros_message_ts->register_type(participant, type_name);
@@ -100,8 +101,9 @@ void convert_ros_message_to_dds(const @(spec.base_type.pkg_name)::@(spec.base_ty
 @[end for]@
 }
 
-void publish__@(spec.base_type.type)(DDS::DataWriter * topic_writer, const void * untyped_ros_message)
+void publish__@(spec.base_type.type)(void * untyped_topic_writer, const void * untyped_ros_message)
 {
+    DDS::DataWriter * topic_writer = static_cast<DDS::DataWriter *>(untyped_topic_writer);
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)()" << std::endl;
 
     const @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message = *(const @(spec.base_type.pkg_name)::@(spec.base_type.type) *)untyped_ros_message;
@@ -160,8 +162,9 @@ void convert_dds_message_to_ros(const @(spec.base_type.pkg_name)::dds_::@(spec.b
 @[end for]@
 }
 
-bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped_ros_message)
+bool take__@(spec.base_type.type)(void * untyped_topic_reader, void * untyped_ros_message)
 {
+    DDS::DataReader * topic_reader = static_cast<DDS::DataReader *>(untyped_topic_reader);
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)()" << std::endl;
 
     @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader * data_reader = @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
@@ -198,7 +201,7 @@ bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped
     return true;
 }
 
-static rmw_opensplice_cpp::MessageTypeSupportCallbacks callbacks = {
+static message_type_support_callbacks_t callbacks = {
     "@(spec.base_type.pkg_name)",
     "@(spec.base_type.type)",
     &register_type__@(spec.base_type.type),

@@ -19,14 +19,6 @@ extern const char * _prismtech_opensplice_identifier;
 namespace rmw_opensplice_cpp
 {
 
-typedef struct MessageTypeSupportCallbacks {
-  const char * _package_name;
-  const char * _message_name;
-  void (*_register_type)(DDS::DomainParticipant * participant, const char * type_name);
-  void (*_publish)(DDS::DataWriter * topic_writer, const void * ros_message);
-  bool (*_take)(DDS::DataReader * topic_reader, void * ros_message);
-} MessageTypeSupportCallbacks;
-
 template<typename T>
 const rosidl_message_type_support_t * get_type_support_handle();
 
