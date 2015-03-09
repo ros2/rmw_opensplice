@@ -338,8 +338,13 @@ rmw_destroy_subscription(rmw_subscription_t * subscription)
 }
 
 rmw_ret_t
-rmw_take(const rmw_subscription_t * subscription, void * ros_message)
+rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * taken)
 {
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
   if (subscription->implementation_identifier != opensplice_cpp_identifier)
   {
     rmw_set_error_string("subscription does not share this implementation");
@@ -352,7 +357,9 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message)
   const message_type_support_callbacks_t * callbacks = \
     subscriber_info->callbacks;
 
-  return callbacks->take(topic_reader, ros_message);
+  *taken = callbacks->take(topic_reader, ros_message);
+
+  return RMW_RET_OK;
 }
 
 rmw_guard_condition_t *
@@ -518,15 +525,15 @@ rmw_send_request(const rmw_client_t * client, const void * ros_request,
 }
 
 rmw_ret_t
-rmw_receive_response(const rmw_client_t * client, void * ros_response)
-{
-  return RMW_RET_ERROR;
-}
-
-rmw_ret_t
 rmw_take_response(const rmw_client_t * client,
-                  void * ros_response, void * ros_request_header)
+                  void * ros_response, void * ros_request_header, bool * taken)
 {
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
+  *taken = false;
   return RMW_RET_ERROR;
 }
 
@@ -546,8 +553,14 @@ rmw_destroy_service(rmw_service_t * service)
 
 rmw_ret_t
 rmw_take_request(const rmw_service_t * service,
-                 void * ros_request, void * ros_request_header)
+                 void * ros_request, void * ros_request_header, bool * taken)
 {
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
+  *taken = false;
   return RMW_RET_ERROR;
 }
 
