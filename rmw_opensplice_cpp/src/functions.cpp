@@ -352,6 +352,11 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
   const message_type_support_callbacks_t * callbacks = \
     subscriber_info->callbacks;
 
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
   *taken = callbacks->take(topic_reader, ros_message);
 
   return RMW_RET_OK;
@@ -523,6 +528,11 @@ rmw_ret_t
 rmw_take_response(const rmw_client_t * client,
                   void * ros_response, void * ros_request_header, bool * taken)
 {
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
   *taken = false;
   return RMW_RET_ERROR;
 }
@@ -545,6 +555,11 @@ rmw_ret_t
 rmw_take_request(const rmw_service_t * service,
                  void * ros_request, void * ros_request_header, bool * taken)
 {
+  if (taken == NULL) {
+    rmw_set_error_string("taken argument can't be null");
+    return RMW_RET_ERROR;
+  }
+
   *taken = false;
   return RMW_RET_ERROR;
 }
