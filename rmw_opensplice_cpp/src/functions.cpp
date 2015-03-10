@@ -22,15 +22,15 @@ rmw_get_implementation_identifier()
   return opensplice_cpp_identifier;
 }
 
-struct OpenSpliceStaticSubscriberInfo
-{
-  DDS::DataReader * topic_reader;
-  const message_type_support_callbacks_t * callbacks;
-};
-
 struct OpenSpliceStaticPublisherInfo
 {
   DDS::DataWriter * topic_writer;
+  const message_type_support_callbacks_t * callbacks;
+};
+
+struct OpenSpliceStaticSubscriberInfo
+{
+  DDS::DataReader * topic_reader;
   const message_type_support_callbacks_t * callbacks;
 };
 
