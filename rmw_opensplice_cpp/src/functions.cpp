@@ -8,6 +8,7 @@
 #include <rmw/rmw.h>
 #include <rosidl_generator_c/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+#include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
@@ -20,6 +21,18 @@ rmw_get_implementation_identifier()
 {
   return opensplice_cpp_identifier;
 }
+
+struct OpenSpliceStaticPublisherInfo
+{
+  DDS::DataWriter * topic_writer;
+  const message_type_support_callbacks_t * callbacks;
+};
+
+struct OpenSpliceStaticSubscriberInfo
+{
+  DDS::DataReader * topic_reader;
+  const message_type_support_callbacks_t * callbacks;
+};
 
 rmw_ret_t
 rmw_init()
@@ -81,12 +94,6 @@ rmw_destroy_node(rmw_node_t * node)
   rmw_node_free(node);
   return RMW_RET_OK;
 }
-
-struct OpenSpliceStaticPublisherInfo
-{
-  DDS::DataWriter * topic_writer;
-  const message_type_support_callbacks_t * callbacks;
-};
 
 rmw_publisher_t *
 rmw_create_publisher(const rmw_node_t * node,
@@ -224,12 +231,6 @@ rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
   callbacks->publish(topic_writer, ros_message);
   return RMW_RET_OK;
 }
-
-struct OpenSpliceStaticSubscriberInfo
-{
-  DDS::DataReader * topic_reader;
-  const message_type_support_callbacks_t * callbacks;
-};
 
 rmw_subscription_t *
 rmw_create_subscription(const rmw_node_t * node,

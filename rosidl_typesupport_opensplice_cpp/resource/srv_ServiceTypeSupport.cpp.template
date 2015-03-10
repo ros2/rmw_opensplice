@@ -18,6 +18,7 @@
 #include "@(spec.pkg_name)/@(spec.srv_name)_Service.h"
 #include "rosidl_generator_cpp/ServiceTypeSupport.h"
 #include "rosidl_typesupport_opensplice_cpp/ServiceTypeSupport.h"
+#include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
 namespace @(spec.pkg_name)
 {
@@ -25,15 +26,9 @@ namespace @(spec.pkg_name)
 namespace service_type_support
 {
 
-void * create_client__@(spec.srv_name)(DDS::DomainParticipant * participant, const char * service_name)
-{
-  return NULL;
-}
-
-static rmw_opensplice_cpp::ServiceTypeSupportCallbacks callbacks = {
+static service_type_support_callbacks_t callbacks = {
     "@(spec.pkg_name)",
     "@(spec.srv_name)",
-    &create_client__@(spec.srv_name),
 };
 
 static rosidl_service_type_support_t handle = {
