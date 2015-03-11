@@ -37,7 +37,6 @@ endif()
 if(NOT "${_ospl_home} " STREQUAL " " AND NOT EXISTS "${_ospl_home}/${_ospl_release_file}")
   set(_ospl_home "")
 endif()
-unset(_ospl_release_file)
 
 if(NOT "${_ospl_home} " STREQUAL " ")
   # look inside of OSPL_HOME if defined
