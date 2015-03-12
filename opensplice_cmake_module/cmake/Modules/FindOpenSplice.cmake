@@ -28,7 +28,7 @@
 set(OpenSplice_FOUND FALSE)
 
 # check if provided OSPL_HOME is from an "official" binary package
-set(_ospl_home "$ENV{OSPL_HOME}")
+file(TO_CMAKE_PATH "$ENV{OSPL_HOME}" _ospl_home)
 if(WIN32)
   set(_ospl_release_file release.bat)
 else()
@@ -40,11 +40,11 @@ endif()
 
 if(NOT "${_ospl_home} " STREQUAL " ")
   # look inside of OSPL_HOME if defined
-  message(STATUS "Found PrismTech OpenSplice: $ENV{OSPL_HOME}")
+  message(STATUS "Found PrismTech OpenSplice: ${_ospl_home}")
   set(OpenSplice_INCLUDE_DIRS
-    "$ENV{OSPL_HOME}/include"
-    "$ENV{OSPL_HOME}/include/sys"
-    "$ENV{OSPL_HOME}/include/dcps/C++/SACPP")
+    "${_ospl_home}/include"
+    "${_ospl_home}/include/sys"
+    "${_ospl_home}/include/dcps/C++/SACPP")
   set(OpenSplice_LIBRARIES
     "cmxml"
     "commonserv"
@@ -64,10 +64,12 @@ if(NOT "${_ospl_home} " STREQUAL " ")
     "spliced"
     "dcpsisocpp"
     "dcpssacpp")
-  list(APPEND OpenSplice_LIBRARIES "pthread" "dl")
-  set(OpenSplice_LIBRARY_DIRS "$ENV{OSPL_HOME}/lib")
+  if(NOT WIN32)
+    list(APPEND OpenSplice_LIBRARIES pthread dl)
+  endif()
+  set(OpenSplice_LIBRARY_DIRS "${_ospl_home}/lib")
   set(OpenSplice_DEFINITIONS "")
-  set(OpenSplice_IDLPP "$ENV{OSPL_HOME}/bin/idlpp")
+  set(OpenSplice_IDLPP "${_ospl_home}/bin/idlpp")
   set(OpenSplice_FOUND TRUE)
 else()
   # try to find_package() it
