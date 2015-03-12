@@ -41,6 +41,7 @@ endif()
 if(NOT "${_ospl_home} " STREQUAL " ")
   # look inside of OSPL_HOME if defined
   message(STATUS "Found PrismTech OpenSplice: ${_ospl_home}")
+  set(OpenSplice_HOME "${_ospl_home}")
   set(OpenSplice_INCLUDE_DIRS
     "${_ospl_home}/include"
     "${_ospl_home}/include/sys"
