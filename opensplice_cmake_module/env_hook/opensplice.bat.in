@@ -1,3 +1,3 @@
 set "OSPL_HOME=@OpenSplice_HOME@"
 
-call %OSPL_HOME%\release.bat
+call "%OSPL_HOME%\release.bat" 1> nul
