@@ -66,7 +66,7 @@ if(NOT "${_ospl_home} " STREQUAL " ")
     "dcpsisocpp"
     "dcpssacpp")
   if(NOT WIN32)
-    list(APPEND OpenSplice_LIBRARIES pthread dl)
+    list(APPEND OpenSplice_LIBRARIES "pthread" "dl")
   endif()
   set(OpenSplice_LIBRARY_DIRS "${_ospl_home}/lib")
   set(OpenSplice_DEFINITIONS "")
