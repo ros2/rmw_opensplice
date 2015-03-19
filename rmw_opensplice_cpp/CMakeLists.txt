@@ -41,6 +41,11 @@ endif()
 ament_package()
 
 install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
   TARGETS rmw_opensplice_cpp
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
