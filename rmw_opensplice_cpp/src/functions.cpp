@@ -14,13 +14,7 @@
 extern "C"
 {
 
-static const char * opensplice_cpp_identifier = "opensplice_static";
-
-const char *
-rmw_get_implementation_identifier()
-{
-  return opensplice_cpp_identifier;
-}
+RMW_PUBLIC const char * opensplice_cpp_identifier = "opensplice_static";
 
 struct OpenSpliceStaticPublisherInfo
 {
@@ -33,6 +27,12 @@ struct OpenSpliceStaticSubscriberInfo
   DDS::DataReader * topic_reader;
   const message_type_support_callbacks_t * callbacks;
 };
+
+const char *
+rmw_get_implementation_identifier()
+{
+  return opensplice_cpp_identifier;
+}
 
 rmw_ret_t
 rmw_init()

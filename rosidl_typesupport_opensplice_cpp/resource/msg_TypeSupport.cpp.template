@@ -18,7 +18,6 @@
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/MessageTypeSupport.h>
-#include "rmw/get_type_support_handle.h"
 
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@

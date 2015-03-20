@@ -10,13 +10,6 @@ class DataReader;
 class DataWriter;
 }
 
-namespace rmw
-{
-
-extern const char * _prismtech_opensplice_identifier;
-
-}  // namespace rmw
-
 namespace rmw_opensplice_cpp
 {
 
