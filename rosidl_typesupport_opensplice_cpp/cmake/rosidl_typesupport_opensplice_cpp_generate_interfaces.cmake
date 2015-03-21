@@ -137,7 +137,9 @@ install(
 )
 install(
   TARGETS ${rosidl_generate_interfaces_TARGET}${_target_suffix}
-  DESTINATION "lib"
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})

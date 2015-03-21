@@ -47,6 +47,7 @@ install(
 
 install(
   TARGETS rmw_opensplice_cpp
-  LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
