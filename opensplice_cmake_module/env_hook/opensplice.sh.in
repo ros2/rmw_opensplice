@@ -1,18 +1,22 @@
 export OSPL_HOME=@OpenSplice_HOME@
-export OSPL_TMPL_PATH=$OSPL_HOME/etc/opensplice/idlpp
-export OSPL_URI=file://$OSPL_HOME/etc/opensplice/config/ospl.xml
-
-# detect if running on Darwin platform
-_UNAME=`uname -s`
-_IS_DARWIN=0
-if [ "$_UNAME" = "Darwin" ]; then
-  _IS_DARWIN=1
-fi
-unset _UNAME
-
-if [ $_IS_DARWIN -eq 0 ]; then
-  ament_prepend_unique_value LD_LIBRARY_PATH "@OpenSplice_HOME@/lib"
+if [ -f "$OSPL_HOME/release.com" ]; then
+  source "$OSPL_HOME/release.com" > /dev/null
 else
-  ament_prepend_unique_value DYLD_LIBRARY_PATH "@OpenSplice_HOME@/lib"
+  export OSPL_TMPL_PATH=$OSPL_HOME/etc/opensplice/idlpp
+  export OSPL_URI=file://$OSPL_HOME/etc/opensplice/config/ospl.xml
+
+  # detect if running on Darwin platform
+  _UNAME=`uname -s`
+  _IS_DARWIN=0
+  if [ "$_UNAME" = "Darwin" ]; then
+    _IS_DARWIN=1
+  fi
+  unset _UNAME
+
+  if [ $_IS_DARWIN -eq 0 ]; then
+    ament_prepend_unique_value LD_LIBRARY_PATH "@OpenSplice_HOME@/lib"
+  else
+    ament_prepend_unique_value DYLD_LIBRARY_PATH "@OpenSplice_HOME@/lib"
+  fi
+  unset _IS_DARWIN
 fi
-unset _IS_DARWIN
