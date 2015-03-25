@@ -18,7 +18,7 @@ find_package(rosidl_typesupport_opensplice_cpp REQUIRED)
 
 ament_export_definitions(${OpenSplice_DEFINITIONS})
 ament_export_dependencies(rmw rosidl_generator_cpp rosidl_typesupport_opensplice_cpp)
-ament_export_include_directories(include/${PROJECT_NAME}/impl ${OpenSplice_INCLUDE_DIRS})
+ament_export_include_directories(${OpenSplice_INCLUDE_DIRS})
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(rmw_opensplice_cpp SHARED src/functions.cpp)
@@ -39,11 +39,6 @@ if(AMENT_ENABLE_TESTING)
 endif()
 
 ament_package()
-
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
 
 install(
   TARGETS rmw_opensplice_cpp
