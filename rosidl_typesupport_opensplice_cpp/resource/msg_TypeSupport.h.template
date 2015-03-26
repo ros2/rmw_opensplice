@@ -17,7 +17,6 @@
 
 #include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
-#include "rosidl_generator_cpp/MessageTypeSupport.h"
 
 namespace DDS
 {
