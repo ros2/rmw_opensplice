@@ -19,8 +19,6 @@
 #include "@(spec.pkg_name)/dds_opensplice/ccpp_@(spec.srv_name)Response_.h"
 #include "@(spec.pkg_name)/dds_opensplice/ccpp_Sample@(spec.srv_name)Request_.h"
 #include "@(spec.pkg_name)/dds_opensplice/ccpp_Sample@(spec.srv_name)Response_.h"
-#include "@(spec.pkg_name)/dds_opensplice/ccpp_WriteSample@(spec.srv_name)Request_.h"
-#include "@(spec.pkg_name)/dds_opensplice/ccpp_WriteSample@(spec.srv_name)Response_.h"
 #include "@(spec.pkg_name)/dds_opensplice/@(spec.srv_name)Request_TypeSupport.h"
 #include "@(spec.pkg_name)/dds_opensplice/@(spec.srv_name)Response_TypeSupport.h"
 #include <rmw/rmw.h>
