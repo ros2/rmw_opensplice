@@ -281,6 +281,18 @@ bool take_response__@(spec.srv_name)(void * untyped_requester, void * untyped_ro
   return false;
 }
 
+void destroy_requester__@(spec.srv_name)(void * untyped_requester)
+{
+  rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
+  delete requester;
+}
+
+void destroy_responder__@(spec.srv_name)(void * untyped_responder)
+{
+  rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
+  delete responder;
+}
+
 static service_type_support_callbacks_t callbacks = {
   "@(spec.pkg_name)",
   "@(spec.srv_name)",
@@ -290,6 +302,8 @@ static service_type_support_callbacks_t callbacks = {
   &take_request__@(spec.srv_name),
   &send_response__@(spec.srv_name),
   &take_response__@(spec.srv_name),
+  &destroy_requester__@(spec.srv_name),
+  &destroy_responder__@(spec.srv_name),
 };
 
 static rosidl_service_type_support_t handle = {

@@ -21,6 +21,10 @@ typedef struct service_type_support_callbacks_t
   void (*send_response)(void * responder, const void * ros_request_header, const void * ros_response);
   // Function to read a ROS response from the wire
   bool (*take_response)(void * requester, void * ros_request_header, void * ros_response);
+  // De-allocatea a requester
+  void (*destroy_requester)(void *untyped_requester);
+  // De-allocatea a responder
+  void (*destroy_responder)(void *untyped_requester);
 } service_type_support_callbacks_t;
 
 #endif  /* ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_SERVICE_TYPE_SUPPORT_H_ */

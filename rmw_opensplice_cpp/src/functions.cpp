@@ -624,8 +624,13 @@ rmw_ret_t
 rmw_destroy_client(rmw_client_t * client)
 {
   if (client) {
-    // TODO(esteve): de-allocate Requester and response DataReader
-    delete static_cast<OpenSpliceStaticClientInfo *>(client->data);
+    OpenSpliceStaticClientInfo* client_info = static_cast<OpenSpliceStaticClientInfo *>(client->data);
+
+    const service_type_support_callbacks_t * callbacks = \
+      static_cast<const service_type_support_callbacks_t *>(client_info->callbacks_);
+    callbacks->destroy_requester(client_info->requester_);
+
+    delete client_info;
     rmw_client_free(static_cast<rmw_client_t *>(client));
     return RMW_RET_OK;
   }
@@ -715,7 +720,13 @@ rmw_ret_t
 rmw_destroy_service(rmw_service_t * service)
 {
   if (service) {
-    delete static_cast<OpenSpliceStaticServiceInfo*>(service->data);
+    OpenSpliceStaticServiceInfo* service_info = static_cast<OpenSpliceStaticServiceInfo *>(service->data);
+
+    const service_type_support_callbacks_t * callbacks = \
+      static_cast<const service_type_support_callbacks_t *>(service_info->callbacks_);
+    callbacks->destroy_responder(service_info->responder_);
+
+    delete service_info;
     rmw_service_free(static_cast<rmw_service_t*>(service));
     return RMW_RET_OK;
   }
