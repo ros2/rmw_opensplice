@@ -1,5 +1,5 @@
-#ifndef __rosidl_typesupport_opensplice_cpp__Requester__h__
-#define __rosidl_typesupport_opensplice_cpp__Requester__h__
+#ifndef __rosidl_typesupport_opensplice_cpp__requester__h__
+#define __rosidl_typesupport_opensplice_cpp__requester__h__
 
 #include <atomic>
 #include <random>
@@ -123,4 +123,4 @@ class Requester
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 
-#endif  // __rosidl_typesupport_opensplice_cpp__Requester__h__
+#endif  // __rosidl_typesupport_opensplice_cpp__requester__h__

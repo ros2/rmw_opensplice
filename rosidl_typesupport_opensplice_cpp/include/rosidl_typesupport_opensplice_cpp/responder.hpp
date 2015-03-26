@@ -1,5 +1,5 @@
-#ifndef __rosidl_typesupport_opensplice_cpp__Responder__h__
-#define __rosidl_typesupport_opensplice_cpp__Responder__h__
+#ifndef __rosidl_typesupport_opensplice_cpp__responder__h__
+#define __rosidl_typesupport_opensplice_cpp__responder__h__
 
 #include <ccpp_dds_dcps.h>
 #include <u_entity.h>
@@ -103,4 +103,4 @@ class Responder
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 
-#endif  // __rosidl_typesupport_opensplice_cpp__Responder__h__
+#endif  // __rosidl_typesupport_opensplice_cpp__responder__h__

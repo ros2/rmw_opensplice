@@ -32,8 +32,8 @@
 
 #include "@(spec.pkg_name)/@(spec.srv_name)_Service.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
-#include "rosidl_typesupport_opensplice_cpp/Requester.hpp"
-#include "rosidl_typesupport_opensplice_cpp/Responder.hpp"
+#include "rosidl_typesupport_opensplice_cpp/requester.hpp"
+#include "rosidl_typesupport_opensplice_cpp/responder.hpp"
 
 namespace DDS
 {
