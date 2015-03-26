@@ -35,31 +35,33 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(_extension "${_idl_file}" EXT)
   if("${_extension}" STREQUAL ".msg")
     get_filename_component(name "${_idl_file}" NAME_WE)
-    list(APPEND _generated_files "${_output_path}/${name}_.h")
-    list(APPEND _generated_files "${_output_path}/${name}_.cpp")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps.h")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps.cpp")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps_impl.h")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps_impl.cpp")
-    list(APPEND _generated_files "${_output_path}/${name}_SplDcps.h")
-    list(APPEND _generated_files "${_output_path}/${name}_SplDcps.cpp")
-    list(APPEND _generated_files "${_output_path}/ccpp_${name}_.h")
-    list(APPEND _generated_files "${_output_path}/${name}_TypeSupport.h")
-    list(APPEND _generated_files "${_output_path}/${name}_TypeSupport.cpp")
+    list(APPEND _generated_files
+      "${_output_path}/${name}_.h"
+      "${_output_path}/${name}_.cpp"
+      "${_output_path}/${name}_Dcps.h"
+      "${_output_path}/${name}_Dcps.cpp"
+      "${_output_path}/${name}_Dcps_impl.h"
+      "${_output_path}/${name}_Dcps_impl.cpp"
+      "${_output_path}/${name}_SplDcps.h"
+      "${_output_path}/${name}_SplDcps.cpp"
+      "${_output_path}/ccpp_${name}_.h"
+      "${_output_path}/${name}_TypeSupport.h"
+      "${_output_path}/${name}_TypeSupport.cpp")
   elseif("${_extension}" STREQUAL ".srv")
     get_filename_component(name "${_idl_file}" NAME_WE)
     list(APPEND _generated_files "${_output_path}/${name}_ServiceTypeSupport.cpp")
 
     foreach(_suffix Request Response)
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_.h")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_.cpp")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_Dcps.h")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_Dcps.cpp")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_Dcps_impl.h")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_Dcps_impl.cpp")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_SplDcps.h")
-      list(APPEND _generated_files "${_output_path}/Sample${name}${_suffix}_SplDcps.cpp")
-      list(APPEND _generated_files "${_output_path}/ccpp_Sample${name}${_suffix}_.h")
+      list(APPEND _generated_files
+        "${_output_path}/Sample${name}${_suffix}_.h"
+        "${_output_path}/Sample${name}${_suffix}_.cpp"
+        "${_output_path}/Sample${name}${_suffix}_Dcps.h"
+        "${_output_path}/Sample${name}${_suffix}_Dcps.cpp"
+        "${_output_path}/Sample${name}${_suffix}_Dcps_impl.h"
+        "${_output_path}/Sample${name}${_suffix}_Dcps_impl.cpp"
+        "${_output_path}/Sample${name}${_suffix}_SplDcps.h"
+        "${_output_path}/Sample${name}${_suffix}_SplDcps.cpp"
+        "${_output_path}/ccpp_Sample${name}${_suffix}_.h")
     endforeach()
   endif()
 endforeach()
