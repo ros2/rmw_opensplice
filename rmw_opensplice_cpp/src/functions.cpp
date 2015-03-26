@@ -6,7 +6,6 @@
 #include <rmw/allocators.h>
 #include <rmw/error_handling.h>
 #include <rmw/rmw.h>
-#include <rosidl_generator_c/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
 
@@ -26,6 +25,18 @@ struct OpenSpliceStaticSubscriberInfo
 {
   DDS::DataReader * topic_reader;
   const message_type_support_callbacks_t * callbacks;
+};
+
+struct OpenSpliceStaticClientInfo {
+  void * requester_;
+  DDS::DataReader * response_datareader_;
+  const service_type_support_callbacks_t * callbacks_;
+};
+
+struct OpenSpliceStaticServiceInfo {
+  void * responder_;
+  DDS::DataReader * request_datareader_;
+  const service_type_support_callbacks_t * callbacks_;
 };
 
 const char *
@@ -440,6 +451,28 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
     waitset.attach_condition(guard_condition);
   }
 
+  // add a condition for each service
+  for (unsigned long i = 0; i < services->service_count; ++i)
+  {
+    OpenSpliceStaticServiceInfo * service_info = \
+      static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
+    DDS::DataReader* request_datareader = service_info->request_datareader_;
+    DDS::StatusCondition * condition = request_datareader->get_statuscondition();
+    condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
+    waitset.attach_condition(condition);
+  }
+
+  // add a condition for each client
+  for (unsigned long i = 0; i < clients->client_count; ++i)
+  {
+    OpenSpliceStaticClientInfo * client_info = \
+      static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
+    DDS::DataReader* response_datareader = client_info->response_datareader_;
+    DDS::StatusCondition * condition = response_datareader->get_statuscondition();
+    condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
+    waitset.attach_condition(condition);
+  }
+
   // invoke wait until one of the conditions triggers
   DDS::ConditionSeq active_conditions;
   DDS::Duration_t timeout;
@@ -499,6 +532,56 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
       guard_condition->set_trigger_value(false);
     }
   }
+
+  // set service handles to zero for all not triggered conditions
+  for (unsigned long i = 0; i < services->service_count; ++i)
+  {
+    OpenSpliceStaticServiceInfo * service_info = \
+      static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
+    DDS::DataReader* request_datareader = service_info->request_datareader_;
+    DDS::StatusCondition * condition = request_datareader->get_statuscondition();
+
+    // search for service condition in active set
+    unsigned long j = 0;
+    for (; j < active_conditions.length(); ++j)
+    {
+      if (active_conditions[j] == condition)
+      {
+        break;
+      }
+    }
+    // if service condition is not found in the active set
+    // reset the service handle
+    if (!(j < active_conditions.length()))
+    {
+      services->services[i] = 0;
+    }
+  }
+
+  // set client handles to zero for all not triggered conditions
+  for (unsigned long i = 0; i < clients->client_count; ++i)
+  {
+    OpenSpliceStaticClientInfo * client_info = \
+      static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
+    DDS::DataReader* response_datareader = client_info->response_datareader_;
+    DDS::StatusCondition * condition = response_datareader->get_statuscondition();
+
+    // search for service condition in active set
+    unsigned long j = 0;
+    for (; j < active_conditions.length(); ++j)
+    {
+      if (active_conditions[j] == condition)
+      {
+        break;
+      }
+    }
+    // if client condition is not found in the active set
+    // reset the client handle
+    if (!(j < active_conditions.length()))
+    {
+      clients->clients[i] = 0;
+    }
+  }
   return RMW_RET_OK;
 }
 
@@ -508,34 +591,89 @@ rmw_create_client(const rmw_node_t * node,
                   const rosidl_service_type_support_t * type_support,
                   const char * service_name)
 {
-  return NULL;
+  if (node->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("node handle not from this implementation");
+    // printf("but from: %s\n", node->implementation_identifier);
+    return NULL;
+  }
+
+  DDS::DomainParticipant* participant = \
+    static_cast<DDS::DomainParticipant*>(node->data);
+
+  const service_type_support_callbacks_t * callbacks = \
+    static_cast<const service_type_support_callbacks_t *>(type_support->data);
+
+  DDS::DataReader * response_datareader;
+
+  void * requester = callbacks->create_requester(
+    participant, service_name, reinterpret_cast<void **>(&response_datareader));
+
+  OpenSpliceStaticClientInfo* client_info = new OpenSpliceStaticClientInfo();
+  client_info->requester_ = requester;
+  client_info->callbacks_ = callbacks;
+  client_info->response_datareader_ = response_datareader;
+
+  rmw_client_t * client = rmw_client_allocate();
+  client->implementation_identifier = opensplice_cpp_identifier;
+  client->data = client_info;
+  return client;
 }
 
 rmw_ret_t
 rmw_destroy_client(rmw_client_t * client)
 {
-  return RMW_RET_OK;
+  if (client) {
+    // TODO(esteve): de-allocate Requester and response DataReader
+    delete static_cast<OpenSpliceStaticClientInfo *>(client->data);
+    rmw_client_free(static_cast<rmw_client_t *>(client));
+    return RMW_RET_OK;
+  }
+
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
 rmw_send_request(const rmw_client_t * client, const void * ros_request,
                  int64_t * sequence_id)
 {
-  *sequence_id = -1;
-  return RMW_RET_ERROR;
+  if (client->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("client handle not from this implementation");
+    // printf("but from: %s\n", client->implementation_identifier);
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticClientInfo * client_info = \
+    static_cast<OpenSpliceStaticClientInfo*>(client->data);
+  void * requester = client_info->requester_;
+  const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
+  *sequence_id = callbacks->send_request(requester, ros_request);
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
-rmw_take_response(const rmw_client_t * client,
-                  void * ros_response, void * ros_request_header, bool * taken)
+rmw_take_response(const rmw_client_t * client, void * ros_request_header,
+                  void * ros_response, bool * taken)
 {
   if (taken == NULL) {
     rmw_set_error_string("taken argument can't be null");
     return RMW_RET_ERROR;
   }
 
-  *taken = false;
-  return RMW_RET_ERROR;
+  if (client->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("client handle not from this implementation");
+    // printf("but from: %s\n", client->implementation_identifier);
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticClientInfo * client_info = \
+    static_cast<OpenSpliceStaticClientInfo*>(client->data);
+  void * requester = client_info->requester_;
+  const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
+  *taken = callbacks->take_response(requester, ros_request_header, ros_response);
+  return RMW_RET_OK;
 }
 
 rmw_service_t *
@@ -543,35 +681,89 @@ rmw_create_service(const rmw_node_t * node,
                    const rosidl_service_type_support_t * type_support,
                    const char * service_name)
 {
-  return NULL;
+  if (node->implementation_identifier != opensplice_cpp_identifier)
+  {
+      rmw_set_error_string("node handle not from this implementation");
+      // printf("but from: %s\n", node->implementation_identifier);
+      return NULL;
+  }
+
+  DDS::DomainParticipant* participant = static_cast<DDS::DomainParticipant*>(node->data);
+
+  const service_type_support_callbacks_t * callbacks = \
+    static_cast<const service_type_support_callbacks_t *>(type_support->data);
+
+  DDS::DataReader_ptr request_datareader = NULL;
+
+  void * responder = callbacks->create_responder(
+    participant, service_name, reinterpret_cast<void **>(&request_datareader));
+
+  assert(request_datareader != NULL);
+
+  OpenSpliceStaticServiceInfo* service_info = new OpenSpliceStaticServiceInfo();
+  service_info->responder_ = responder;
+  service_info->callbacks_ = callbacks;
+  service_info->request_datareader_ = request_datareader;
+
+  rmw_service_t * service = rmw_service_allocate();
+  service->implementation_identifier = opensplice_cpp_identifier;
+  service->data = service_info;
+  return service;
 }
 
 rmw_ret_t
 rmw_destroy_service(rmw_service_t * service)
 {
-  return RMW_RET_OK;
+  if (service) {
+    delete static_cast<OpenSpliceStaticServiceInfo*>(service->data);
+    rmw_service_free(static_cast<rmw_service_t*>(service));
+    return RMW_RET_OK;
+  }
+
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
 rmw_take_request(const rmw_service_t * service,
-                 void * ros_request, void * ros_request_header, bool * taken)
+                 void * ros_request_header, void * ros_request, bool * taken)
 {
   if (taken == NULL) {
     rmw_set_error_string("taken argument can't be null");
     return RMW_RET_ERROR;
   }
 
-  *taken = false;
-  return RMW_RET_ERROR;
+  if (service->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("service handle not from this implementation");
+    // printf("but from: %s\n", service->implementation_identifier);
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticServiceInfo * service_info = \
+    static_cast<OpenSpliceStaticServiceInfo*>(service->data);
+  void * responder = service_info->responder_;
+  const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
+  *taken = callbacks->take_request(responder, ros_request_header, ros_request);
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
 rmw_send_response(const rmw_service_t * service,
-                  void * ros_request, void * ros_response)
+                  void * ros_request_header, void * ros_response)
 {
-  ros_request = nullptr;
-  ros_response = nullptr;
-  return RMW_RET_ERROR;
+   if (service->implementation_identifier != opensplice_cpp_identifier)
+   {
+     rmw_set_error_string("service handle not from this implementation");
+     // printf("but from: %s\n", service->implementation_identifier);
+     return RMW_RET_ERROR;
+   }
+
+   OpenSpliceStaticServiceInfo * service_info = \
+     static_cast<OpenSpliceStaticServiceInfo*>(service->data);
+   void * responder = service_info->responder_;
+   const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
+   callbacks->send_response(responder, ros_request_header, ros_response);
+   return RMW_RET_OK;
 }
 
 }  // extern "C"

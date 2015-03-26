@@ -30,6 +30,15 @@
 namespace rosidl_typesupport_opensplice_cpp
 {
 
+template<typename T>
+class Sample;
+
+template<typename T>
+class TemplateDataReader;
+
+template<typename T>
+class TemplateDataWriter;
+
 // This is implemented in the shared library provided by this package.
 template<typename T>
 ROSIDL_PUBLIC
