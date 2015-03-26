@@ -110,9 +110,22 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
       endif()
     elseif("${_extension}" STREQUAL ".srv")
       get_filename_component(name "${_idl_file}" NAME_WE)
+
       set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/Sample${name}Request_.idl")
+      normalize_path(_abs_idl_file "${_abs_idl_file}")
+      list(APPEND _dependency_files "${_abs_idl_file}")
+      list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
+
       set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/Sample${name}Response_.idl")
+      normalize_path(_abs_idl_file "${_abs_idl_file}")
+      list(APPEND _dependency_files "${_abs_idl_file}")
+      list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
+
       set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/WriteSample${name}Request_.idl")
+      normalize_path(_abs_idl_file "${_abs_idl_file}")
+      list(APPEND _dependency_files "${_abs_idl_file}")
+      list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
+
       set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/WriteSample${name}Response_.idl")
       normalize_path(_abs_idl_file "${_abs_idl_file}")
       list(APPEND _dependency_files "${_abs_idl_file}")
