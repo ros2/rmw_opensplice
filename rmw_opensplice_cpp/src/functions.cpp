@@ -17,25 +17,25 @@ RMW_PUBLIC const char * opensplice_cpp_identifier = "opensplice_static";
 
 struct OpenSpliceStaticPublisherInfo
 {
-  DDS::DataWriter * topic_writer;
+  DDS::DataWriter_ptr topic_writer;
   const message_type_support_callbacks_t * callbacks;
 };
 
 struct OpenSpliceStaticSubscriberInfo
 {
-  DDS::DataReader * topic_reader;
+  DDS::DataReader_ptr topic_reader;
   const message_type_support_callbacks_t * callbacks;
 };
 
 struct OpenSpliceStaticClientInfo {
   void * requester_;
-  DDS::DataReader * response_datareader_;
+  DDS::DataReader_ptr response_datareader_;
   const service_type_support_callbacks_t * callbacks_;
 };
 
 struct OpenSpliceStaticServiceInfo {
   void * responder_;
-  DDS::DataReader * request_datareader_;
+  DDS::DataReader_ptr request_datareader_;
   const service_type_support_callbacks_t * callbacks_;
 };
 
@@ -72,7 +72,7 @@ rmw_create_node(const char * name)
   // TODO: take the domain id from configuration
   DDS::DomainId_t domain = 0;
 
-  DDS::DomainParticipant * participant = dp_factory->create_participant(
+  DDS::DomainParticipant_ptr participant = dp_factory->create_participant(
     domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE
   );
   if (!participant)
@@ -120,8 +120,8 @@ rmw_create_publisher(const rmw_node_t * node,
     return nullptr;
   }
 
-  DDS::DomainParticipant * participant = \
-    static_cast<DDS::DomainParticipant *>(node->data);
+  DDS::DomainParticipant_ptr participant = \
+    static_cast<DDS::DomainParticipant_ptr>(node->data);
 
   const message_type_support_callbacks_t * callbacks = \
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
@@ -183,7 +183,7 @@ rmw_create_publisher(const rmw_node_t * node,
     return nullptr;
   };
 
-  DDS::DataWriter * topic_writer = dds_publisher->create_datawriter(
+  DDS::DataWriter_ptr topic_writer = dds_publisher->create_datawriter(
     topic, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE
   );
   if (!topic_writer)
@@ -235,7 +235,7 @@ rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
 
   const OpenSpliceStaticPublisherInfo * publisher_info = \
     static_cast<const OpenSpliceStaticPublisherInfo *>(publisher->data);
-  DDS::DataWriter * topic_writer = publisher_info->topic_writer;
+  DDS::DataWriter_ptr topic_writer = publisher_info->topic_writer;
   const message_type_support_callbacks_t * callbacks = \
     publisher_info->callbacks;
 
@@ -255,8 +255,8 @@ rmw_create_subscription(const rmw_node_t * node,
     return nullptr;
   }
 
-  DDS::DomainParticipant * participant = \
-    static_cast<DDS::DomainParticipant *>(node->data);
+  DDS::DomainParticipant_ptr participant = \
+    static_cast<DDS::DomainParticipant_ptr>(node->data);
 
   const message_type_support_callbacks_t * callbacks = \
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
@@ -314,7 +314,7 @@ rmw_create_subscription(const rmw_node_t * node,
     return nullptr;
   }
 
-  DDS::DataReader * topic_reader = dds_subscriber->create_datareader(
+  DDS::DataReader_ptr topic_reader = dds_subscriber->create_datareader(
     topic, default_datareader_qos, NULL, DDS::STATUS_MASK_NONE
   );
 
@@ -365,7 +365,7 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
 
   OpenSpliceStaticSubscriberInfo * subscriber_info = \
     static_cast<OpenSpliceStaticSubscriberInfo *>(subscription->data);
-  DDS::DataReader * topic_reader = subscriber_info->topic_reader;
+  DDS::DataReader_ptr topic_reader = subscriber_info->topic_reader;
   const message_type_support_callbacks_t * callbacks = \
     subscriber_info->callbacks;
 
@@ -379,7 +379,7 @@ rmw_create_guard_condition()
 {
   rmw_guard_condition_t * guard_condition = rmw_guard_condition_allocate();
   guard_condition->implementation_identifier = opensplice_cpp_identifier;
-  guard_condition->data = static_cast<DDS::GuardCondition *>(
+  guard_condition->data = static_cast<DDS::GuardCondition_ptr>(
     rmw_allocate(sizeof(DDS::GuardCondition)));
   // Ensure constructor with "placement new"
   new (guard_condition->data) DDS::GuardCondition();
@@ -397,8 +397,8 @@ rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
   }
   // TODO: do DDS specific teardown
   // Explicitly call destructor since the "placement new" was used
-  DDS::GuardCondition * dds_guard_condition = \
-    static_cast<DDS::GuardCondition *>(guard_condition->data);
+  DDS::GuardCondition* dds_guard_condition = \
+    static_cast<DDS::GuardCondition*>(guard_condition->data);
   dds_guard_condition->~GuardCondition();
   rmw_free(guard_condition->data);
   rmw_guard_condition_free(guard_condition);
@@ -414,8 +414,8 @@ rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition)
     return RMW_RET_ERROR;
   }
 
-  DDS::GuardCondition * dds_guard_condition = \
-    static_cast<DDS::GuardCondition *>(guard_condition->data);
+  DDS::GuardCondition_ptr dds_guard_condition = \
+    static_cast<DDS::GuardCondition_ptr>(guard_condition->data);
   dds_guard_condition->set_trigger_value(true);
   return RMW_RET_OK;
 }
@@ -436,8 +436,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
     OpenSpliceStaticSubscriberInfo * subscriber_info = \
       static_cast<OpenSpliceStaticSubscriberInfo *>(
         subscriptions->subscribers[i]);
-    DDS::DataReader * topic_reader = subscriber_info->topic_reader;
-    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
+    DDS::DataReader_ptr topic_reader = subscriber_info->topic_reader;
+    DDS::StatusCondition_ptr condition = topic_reader->get_statuscondition();
     condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(condition);
   }
@@ -445,8 +445,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   // add a condition for each guard condition
   for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i)
   {
-    DDS::GuardCondition * guard_condition = \
-      static_cast<DDS::GuardCondition *>(
+    DDS::GuardCondition_ptr guard_condition = \
+      static_cast<DDS::GuardCondition_ptr>(
         guard_conditions->guard_conditions[i]);
     waitset.attach_condition(guard_condition);
   }
@@ -456,8 +456,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   {
     OpenSpliceStaticServiceInfo * service_info = \
       static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
-    DDS::DataReader* request_datareader = service_info->request_datareader_;
-    DDS::StatusCondition * condition = request_datareader->get_statuscondition();
+    DDS::DataReader_ptr request_datareader = service_info->request_datareader_;
+    DDS::StatusCondition_ptr condition = request_datareader->get_statuscondition();
     condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(condition);
   }
@@ -467,8 +467,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   {
     OpenSpliceStaticClientInfo * client_info = \
       static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
-    DDS::DataReader* response_datareader = client_info->response_datareader_;
-    DDS::StatusCondition * condition = response_datareader->get_statuscondition();
+    DDS::DataReader_ptr response_datareader = client_info->response_datareader_;
+    DDS::StatusCondition_ptr condition = response_datareader->get_statuscondition();
     condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(condition);
   }
@@ -504,8 +504,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
     OpenSpliceStaticSubscriberInfo * subscriber_info = \
       static_cast<OpenSpliceStaticSubscriberInfo *>(
         subscriptions->subscribers[i]);
-    DDS::DataReader* topic_reader = subscriber_info->topic_reader;
-    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
+    DDS::DataReader_ptr topic_reader = subscriber_info->topic_reader;
+    DDS::StatusCondition_ptr condition = topic_reader->get_statuscondition();
     if (!condition->get_trigger_value())
     {
       // if the status condition was not triggered
@@ -517,8 +517,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   // set guard condition handles to zero for all not triggered guard conditions
   for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i)
   {
-    DDS::GuardCondition * guard_condition = \
-      static_cast<DDS::GuardCondition *>(
+    DDS::GuardCondition_ptr guard_condition = \
+      static_cast<DDS::GuardCondition_ptr>(
         guard_conditions->guard_conditions[i]);
     if (!guard_condition->get_trigger_value())
     {
@@ -538,8 +538,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   {
     OpenSpliceStaticServiceInfo * service_info = \
       static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
-    DDS::DataReader* request_datareader = service_info->request_datareader_;
-    DDS::StatusCondition * condition = request_datareader->get_statuscondition();
+    DDS::DataReader_ptr request_datareader = service_info->request_datareader_;
+    DDS::StatusCondition_ptr condition = request_datareader->get_statuscondition();
 
     // search for service condition in active set
     unsigned long j = 0;
@@ -563,8 +563,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   {
     OpenSpliceStaticClientInfo * client_info = \
       static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
-    DDS::DataReader* response_datareader = client_info->response_datareader_;
-    DDS::StatusCondition * condition = response_datareader->get_statuscondition();
+    DDS::DataReader_ptr response_datareader = client_info->response_datareader_;
+    DDS::StatusCondition_ptr condition = response_datareader->get_statuscondition();
 
     // search for service condition in active set
     unsigned long j = 0;
@@ -598,13 +598,13 @@ rmw_create_client(const rmw_node_t * node,
     return NULL;
   }
 
-  DDS::DomainParticipant* participant = \
-    static_cast<DDS::DomainParticipant*>(node->data);
+  DDS::DomainParticipant_ptr participant = \
+    static_cast<DDS::DomainParticipant_ptr>(node->data);
 
   const service_type_support_callbacks_t * callbacks = \
     static_cast<const service_type_support_callbacks_t *>(type_support->data);
 
-  DDS::DataReader * response_datareader;
+  DDS::DataReader_ptr response_datareader;
 
   void * requester = callbacks->create_requester(
     participant, service_name, reinterpret_cast<void **>(&response_datareader));
@@ -688,7 +688,7 @@ rmw_create_service(const rmw_node_t * node,
       return NULL;
   }
 
-  DDS::DomainParticipant* participant = static_cast<DDS::DomainParticipant*>(node->data);
+  DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(node->data);
 
   const service_type_support_callbacks_t * callbacks = \
     static_cast<const service_type_support_callbacks_t *>(type_support->data);
