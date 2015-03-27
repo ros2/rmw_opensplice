@@ -32,7 +32,8 @@ class Responder
 
     Responder(DDS::DomainParticipant_ptr participant, const std::string& service_name,
       const std::string& service_type_name) : participant_(participant),
-      service_name_(service_name), service_type_name_(service_type_name) {
+      service_name_(service_name), service_type_name_(service_type_name)
+    {
       // Create request Publisher and DataWriter
       DDS::ReturnCode_t status;
       DDS::TopicQos default_topic_qos;
