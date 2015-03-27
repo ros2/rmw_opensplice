@@ -15,22 +15,21 @@
 //   rosidl_typesupport_opensplice_cpp/srv_ServiceTypeSupport.cpp.template
 #include <iostream>
 
-#include "@(spec.pkg_name)/dds_opensplice/ccpp_@(spec.srv_name)Request_.h"
-#include "@(spec.pkg_name)/dds_opensplice/ccpp_@(spec.srv_name)Response_.h"
-#include "@(spec.pkg_name)/dds_opensplice/ccpp_Sample@(spec.srv_name)Request_.h"
-#include "@(spec.pkg_name)/dds_opensplice/ccpp_Sample@(spec.srv_name)Response_.h"
-#include "@(spec.pkg_name)/dds_opensplice/@(spec.srv_name)Request_TypeSupport.h"
-#include "@(spec.pkg_name)/dds_opensplice/@(spec.srv_name)Response_TypeSupport.h"
-#include <rmw/rmw.h>
-#include "@(spec.pkg_name)/@(spec.srv_name)_Service.h"
 #include <rosidl_generator_c/service_type_support.h>
 #include <rosidl_generator_c/visibility_control.h>
 // This is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder.
 #include <rosidl_generator_cpp/message_type_support.hpp>
 #include <rosidl_generator_cpp/service_type_support.hpp>
+#include <rmw/rmw.h>
 
 #include "@(spec.pkg_name)/@(spec.srv_name)_Service.h"
+#include "@(spec.pkg_name)/dds_opensplice/@(spec.srv_name)Request_TypeSupport.h"
+#include "@(spec.pkg_name)/dds_opensplice/@(spec.srv_name)Response_TypeSupport.h"
+#include "@(spec.pkg_name)/dds_opensplice/ccpp_@(spec.srv_name)Request_.h"
+#include "@(spec.pkg_name)/dds_opensplice/ccpp_@(spec.srv_name)Response_.h"
+#include "@(spec.pkg_name)/dds_opensplice/ccpp_Sample@(spec.srv_name)Request_.h"
+#include "@(spec.pkg_name)/dds_opensplice/ccpp_Sample@(spec.srv_name)Response_.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/requester.hpp"
 #include "rosidl_typesupport_opensplice_cpp/responder.hpp"
@@ -174,12 +173,19 @@ void * create_requester__@(spec.srv_name)(void * untyped_participant, const char
   const std::string request_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_");
   const std::string response_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_");
 
-  DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(untyped_participant);
+  DDS::DomainParticipant_ptr participant = static_cast<
+    DDS::DomainParticipant_ptr>(untyped_participant);
 
   register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
 
-  rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester(new rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(participant, service_name, service_type_name));
+  rosidl_typesupport_opensplice_cpp::Requester<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester(
+      new rosidl_typesupport_opensplice_cpp::Requester<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(
+          participant, service_name, service_type_name));
 
   DDS::DataReader_ptr typed_reader = requester->get_response_datareader();
   *untyped_reader = requester->get_response_datareader();
@@ -194,12 +200,19 @@ void * create_responder__@(spec.srv_name)(void * untyped_participant, const char
   const std::string request_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_");
   const std::string response_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_");
 
-  DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(untyped_participant);
+  DDS::DomainParticipant_ptr participant = static_cast<
+    DDS::DomainParticipant_ptr>(untyped_participant);
 
   register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
 
-  rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder(new rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(participant, service_name, service_type_name));
+  rosidl_typesupport_opensplice_cpp::Responder<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder(
+      new rosidl_typesupport_opensplice_cpp::Responder<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(
+          participant, service_name, service_type_name));
 
   DDS::DataReader_ptr typed_reader = responder->get_request_datareader();
   *untyped_reader = responder->get_request_datareader();
@@ -212,8 +225,12 @@ int64_t send_request__@(spec.srv_name)(void * untyped_requester, const void * un
   const @(spec.pkg_name)::@(spec.srv_name)Request & ros_request = *(reinterpret_cast<const @(spec.pkg_name)::@(spec.srv_name)Request *>(untyped_ros_request));
   @(spec.pkg_name)::type_support::convert_ros_message_to_dds(ros_request, request.data());
 
-
-  rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
+  rosidl_typesupport_opensplice_cpp::Requester<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<
+      rosidl_typesupport_opensplice_cpp::Requester<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
 
   requester->send_request(request);
   return request.sequence_number_;
@@ -225,7 +242,12 @@ bool take_request__@(spec.srv_name)(void * untyped_responder, void * untyped_ros
   @(spec.pkg_name)::@(spec.srv_name)Request & ros_request = *(@(spec.pkg_name)::@(spec.srv_name)Request *)untyped_ros_request;
   rmw_request_id_t & request_header = *(static_cast<rmw_request_id_t *>(untyped_ros_request_header));
 
-  rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
+  rosidl_typesupport_opensplice_cpp::Responder<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<
+      rosidl_typesupport_opensplice_cpp::Responder<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
 
   rosidl_typesupport_opensplice_cpp::Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_> request;
   bool taken = responder->take_request(request);
@@ -248,22 +270,35 @@ void send_response__@(spec.srv_name)(
     void * untyped_responder, const void * untyped_ros_request_header,
     const void * untyped_ros_response)
 {
-    rosidl_typesupport_opensplice_cpp::Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)Response_> response;
-    const @(spec.pkg_name)::@(spec.srv_name)Response & ros_response = *(reinterpret_cast<const @(spec.pkg_name)::@(spec.srv_name)Response *>(untyped_ros_response));
-    @(spec.pkg_name)::type_support::convert_ros_message_to_dds(ros_response, response.data());
+  rosidl_typesupport_opensplice_cpp::Sample<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> response;
+  const @(spec.pkg_name)::@(spec.srv_name)Response & ros_response = *(reinterpret_cast<
+    const @(spec.pkg_name)::@(spec.srv_name)Response *>(untyped_ros_response));
+  @(spec.pkg_name)::type_support::convert_ros_message_to_dds(ros_response, response.data());
 
-    const rmw_request_id_t & request_header = *(reinterpret_cast<const rmw_request_id_t *>(untyped_ros_request_header));
+  const rmw_request_id_t & request_header = *(reinterpret_cast<const rmw_request_id_t *>(
+    untyped_ros_request_header));
 
-    rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
+  rosidl_typesupport_opensplice_cpp::Responder<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<
+      rosidl_typesupport_opensplice_cpp::Responder<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
 
-    responder->send_response(request_header, response);
+  responder->send_response(request_header, response);
 }
 
 bool take_response__@(spec.srv_name)(void * untyped_requester, void * untyped_ros_request_header,
                                      void * untyped_ros_response)
 {
   @(spec.pkg_name)::@(spec.srv_name)Response & ros_response = *(@(spec.pkg_name)::@(spec.srv_name)Response *)untyped_ros_response;
-  rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
+  rosidl_typesupport_opensplice_cpp::Requester<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<
+      rosidl_typesupport_opensplice_cpp::Requester<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
 
   rosidl_typesupport_opensplice_cpp::Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)Response_> response;
   bool received = requester->take_response(response);
@@ -281,13 +316,23 @@ bool take_response__@(spec.srv_name)(void * untyped_requester, void * untyped_ro
 
 void destroy_requester__@(spec.srv_name)(void * untyped_requester)
 {
-  rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
+  rosidl_typesupport_opensplice_cpp::Requester<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester = reinterpret_cast<
+      rosidl_typesupport_opensplice_cpp::Requester<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_requester);
   delete requester;
 }
 
 void destroy_responder__@(spec.srv_name)(void * untyped_responder)
 {
-  rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
+  rosidl_typesupport_opensplice_cpp::Responder<
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+    @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder = reinterpret_cast<
+      rosidl_typesupport_opensplice_cpp::Responder<
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Request_,
+        @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> *>(untyped_responder);
   delete responder;
 }
 
