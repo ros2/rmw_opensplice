@@ -48,25 +48,34 @@ class Requester
       // Create request Publisher and DataWriter
       DDS::PublisherQos publisher_qos;
       DDS::ReturnCode_t status;
+
+      // TODO(esteve): check status
       status = participant->get_default_publisher_qos(publisher_qos);
 
+      // TODO(esteve): check that request_publisher_ is valid
       request_publisher_ = participant->create_publisher(
         publisher_qos, NULL, DDS::STATUS_MASK_NONE);
 
       DDS::TopicQos default_topic_qos;
+
+      // TODO(esteve): check status
       status = participant->get_default_topic_qos(default_topic_qos);
 
       std::string request_type_name = service_type_name_ + "Request_";
       std::string request_topic_name = service_name_ + "_Request";
 
+      // TODO(esteve): check that request_topic_ is valid
       request_topic_ = participant->create_topic(
         request_topic_name.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
         DDS::STATUS_MASK_NONE
       );
 
       DDS::DataWriterQos default_datawriter_qos;
+
+      // TODO(esteve): check status
       status = request_publisher_->get_default_datawriter_qos(default_datawriter_qos);
 
+      // TODO(esteve): check that request_datawriter_ is valid
       request_datawriter_ = request_publisher_->create_datawriter(
         request_topic_, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE
       );
@@ -74,12 +83,15 @@ class Requester
       // Create response Subscriber and DataReader
       DDS::SubscriberQos subscriber_qos;
       participant->get_default_subscriber_qos(subscriber_qos);
+
+      // TODO(esteve): check that response_subscriber_ is valid
       response_subscriber_ = participant_->create_subscriber(
         subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
 
       std::string response_type_name = service_type_name_ + "Response_";
       std::string response_topic_name = service_name_ + "_Response";
 
+      // TODO(esteve): check that response_topic_ is valid
       response_topic_ = participant->create_topic(
         response_topic_name.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
         DDS::STATUS_MASK_NONE
@@ -89,7 +101,9 @@ class Requester
       args.length(2);
       args[0] = DDS::string_dup(std::to_string(writer_guid_.first).c_str());
       args[1] = DDS::string_dup(std::to_string(writer_guid_.second).c_str());
+
       // Let OpenSplice do any needed encoding
+      // TODO(esteve): check that content_filtered_response_topic_ is valid
       content_filtered_response_topic_ = participant->create_contentfilteredtopic(
         service_name_.c_str(), response_topic_,
         "client_guid_0_ = %0 AND client_guid_1_ = %1",
@@ -97,6 +111,8 @@ class Requester
 
       DDS::DataReaderQos default_datareader_qos;
       response_subscriber_->get_default_datareader_qos(default_datareader_qos);
+
+      // TODO(esteve): check that response_subscriber_ is valid
       response_datareader_ = response_subscriber_->create_datareader(
         content_filtered_response_topic_,
         default_datareader_qos, NULL, DDS::STATUS_MASK_NONE);
