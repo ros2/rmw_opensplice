@@ -169,15 +169,15 @@ void register_types__@(spec.srv_name)(
 void * create_requester__@(spec.srv_name)(void * untyped_participant, const char * service_name,
                                           void ** untyped_reader)
 {
-  const char * service_type_name = "@(spec.pkg_name)::dds_::Sample@(spec.srv_name)";
+  const std::string service_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)");
 
-  const char * request_type_name = "@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_";
-  const char * response_type_name = "@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_";
+  const std::string request_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_");
+  const std::string response_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_");
 
   DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(untyped_participant);
 
   register_types__@(spec.srv_name)(
-    participant, request_type_name, response_type_name);
+    participant, request_type_name.c_str(), response_type_name.c_str());
 
   rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * requester(new rosidl_typesupport_opensplice_cpp::Requester<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(participant, service_name, service_type_name));
 
@@ -189,15 +189,15 @@ void * create_requester__@(spec.srv_name)(void * untyped_participant, const char
 void * create_responder__@(spec.srv_name)(void * untyped_participant, const char * service_name,
                                         void **untyped_reader)
 {
-  const char * service_type_name = "@(spec.pkg_name)::dds_::Sample@(spec.srv_name)";
+  const std::string service_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)");
 
-  const char * request_type_name = "@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_";
-  const char * response_type_name = "@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_";
+  const std::string request_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_");
+  const std::string response_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_");
 
   DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(untyped_participant);
 
   register_types__@(spec.srv_name)(
-    participant, request_type_name, response_type_name);
+    participant, request_type_name.c_str(), response_type_name.c_str());
 
   rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> * responder(new rosidl_typesupport_opensplice_cpp::Responder<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(participant, service_name, service_type_name));
 

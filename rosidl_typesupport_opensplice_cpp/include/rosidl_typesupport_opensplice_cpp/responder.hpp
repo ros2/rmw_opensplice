@@ -30,8 +30,8 @@ class Responder
 {
   public:
 
-    Responder(DDS::DomainParticipant_ptr participant, const char * service_name,
-      const char * service_type_name) : participant_(participant),
+    Responder(DDS::DomainParticipant_ptr participant, const std::string& service_name,
+      const std::string& service_type_name) : participant_(participant),
       service_name_(service_name), service_type_name_(service_type_name) {
       // Create request Publisher and DataWriter
       DDS::ReturnCode_t status;

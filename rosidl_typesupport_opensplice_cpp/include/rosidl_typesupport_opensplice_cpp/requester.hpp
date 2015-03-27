@@ -32,8 +32,8 @@ template<typename RequestT, typename ResponseT>
 class Requester
 {
   public:
-    Requester(DDS::DomainParticipant_ptr participant, const char * service_name,
-              const char * service_type_name) :
+    Requester(DDS::DomainParticipant_ptr participant, const std::string& service_name,
+              const std::string& service_type_name) :
       participant_(participant), service_name_(service_name),
       service_type_name_(service_type_name), sequence_number_(0)
     {
