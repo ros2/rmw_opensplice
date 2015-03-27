@@ -17,8 +17,9 @@
 #define __rosidl_typesupport_opensplice_cpp__requester__h__
 
 #include <atomic>
-#include <random>
 #include <limits>
+#include <random>
+
 #include <ccpp_dds_dcps.h>
 
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
