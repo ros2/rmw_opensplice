@@ -6,18 +6,9 @@ message("   - dependency package names: ${rosidl_generate_interfaces_DEPENDENCY_
 # avoid generating any opensplice specific stuff for builtin_msgs
 if(NOT "${PROJECT_NAME} " STREQUAL "builtin_msgs ")
 
-set(_ros_idl_files "")
-foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
-  get_filename_component(_extension "${_idl_file}" EXT)
-  # Skip .srv files
-  if("${_extension}" STREQUAL ".msg")
-    list(APPEND _ros_idl_files "${_idl_file}")
-  endif()
-endforeach()
-
 rosidl_generate_dds_interfaces(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
-  IDL_FILES ${_ros_idl_files}
+  IDL_FILES ${rosidl_generate_interfaces_IDL_FILES}
   DEPENDENCY_PACKAGE_NAMES ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}
   OUTPUT_SUBFOLDERS "dds_opensplice"
   EXTENSION "rosidl_typesupport_opensplice_cpp.rosidl_generator_dds_idl_extension"
@@ -31,6 +22,10 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   if("${_extension}" STREQUAL ".msg")
     get_filename_component(name "${_idl_file}" NAME_WE)
     list(APPEND _dds_idl_files "${_dds_idl_path}/${name}_.idl")
+  elseif("${_extension}" STREQUAL ".srv")
+    get_filename_component(name "${_idl_file}" NAME_WE)
+    list(APPEND _dds_idl_files "${_dds_idl_path}/Sample${name}Request_.idl")
+    list(APPEND _dds_idl_files "${_dds_idl_path}/Sample${name}Response_.idl")
   endif()
 endforeach()
 
@@ -40,20 +35,34 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(_extension "${_idl_file}" EXT)
   if("${_extension}" STREQUAL ".msg")
     get_filename_component(name "${_idl_file}" NAME_WE)
-    list(APPEND _generated_files "${_output_path}/${name}_.h")
-    list(APPEND _generated_files "${_output_path}/${name}_.cpp")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps.h")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps.cpp")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps_impl.h")
-    list(APPEND _generated_files "${_output_path}/${name}_Dcps_impl.cpp")
-    list(APPEND _generated_files "${_output_path}/${name}_SplDcps.h")
-    list(APPEND _generated_files "${_output_path}/${name}_SplDcps.cpp")
-    list(APPEND _generated_files "${_output_path}/ccpp_${name}_.h")
-    list(APPEND _generated_files "${_output_path}/${name}_TypeSupport.h")
-    list(APPEND _generated_files "${_output_path}/${name}_TypeSupport.cpp")
+    list(APPEND _generated_files
+      "${_output_path}/${name}_.h"
+      "${_output_path}/${name}_.cpp"
+      "${_output_path}/${name}_Dcps.h"
+      "${_output_path}/${name}_Dcps.cpp"
+      "${_output_path}/${name}_Dcps_impl.h"
+      "${_output_path}/${name}_Dcps_impl.cpp"
+      "${_output_path}/${name}_SplDcps.h"
+      "${_output_path}/${name}_SplDcps.cpp"
+      "${_output_path}/ccpp_${name}_.h"
+      "${_output_path}/${name}_TypeSupport.h"
+      "${_output_path}/${name}_TypeSupport.cpp")
   elseif("${_extension}" STREQUAL ".srv")
     get_filename_component(name "${_idl_file}" NAME_WE)
     list(APPEND _generated_files "${_output_path}/${name}_ServiceTypeSupport.cpp")
+
+    foreach(_suffix Request Response)
+      list(APPEND _generated_files
+        "${_output_path}/Sample${name}${_suffix}_.h"
+        "${_output_path}/Sample${name}${_suffix}_.cpp"
+        "${_output_path}/Sample${name}${_suffix}_Dcps.h"
+        "${_output_path}/Sample${name}${_suffix}_Dcps.cpp"
+        "${_output_path}/Sample${name}${_suffix}_Dcps_impl.h"
+        "${_output_path}/Sample${name}${_suffix}_Dcps_impl.cpp"
+        "${_output_path}/Sample${name}${_suffix}_SplDcps.h"
+        "${_output_path}/Sample${name}${_suffix}_SplDcps.cpp"
+        "${_output_path}/ccpp_Sample${name}${_suffix}_.h")
+    endforeach()
   endif()
 endforeach()
 
@@ -71,6 +80,18 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
         list(APPEND _dependency_files "${_abs_idl_file}")
         list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
       endif()
+    elseif("${_extension}" STREQUAL ".srv")
+      get_filename_component(name "${_idl_file}" NAME_WE)
+
+      set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/Sample${name}Request_.idl")
+      normalize_path(_abs_idl_file "${_abs_idl_file}")
+      list(APPEND _dependency_files "${_abs_idl_file}")
+      list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
+
+      set(_abs_idl_file "${${_pkg_name}_DIR}/../dds_opensplice/Sample${name}Response_.idl")
+      normalize_path(_abs_idl_file "${_abs_idl_file}")
+      list(APPEND _dependency_files "${_abs_idl_file}")
+      list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
     endif()
   endforeach()
 endforeach()

@@ -41,4 +41,8 @@ void convert_dds_message_to_ros(const @(spec.base_type.pkg_name)::dds_::@(spec.b
 
 bool take__@(spec.base_type.type)(DDS::DataReader * topic_reader, void * untyped_ros_message);
 
+} // namespace type_support
+
+} // namespace @(spec.base_type.pkg_name)
+
 #endif  // __@(spec.base_type.pkg_name)__dds_opensplice__@(spec.base_type.type)_TypeSupport__h__

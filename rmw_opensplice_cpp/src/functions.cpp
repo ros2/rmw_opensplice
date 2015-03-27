@@ -7,6 +7,7 @@
 #include <rmw/error_handling.h>
 #include <rmw/rmw.h>
 #include <rosidl_generator_c/message_type_support.h>
+#include <rosidl_generator_c/service_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
 
@@ -18,14 +19,26 @@ RMW_PUBLIC const char * opensplice_cpp_identifier = "opensplice_static";
 
 struct OpenSpliceStaticPublisherInfo
 {
-  DDS::DataWriter * topic_writer;
+  DDS::DataWriter_ptr topic_writer;
   const message_type_support_callbacks_t * callbacks;
 };
 
 struct OpenSpliceStaticSubscriberInfo
 {
-  DDS::DataReader * topic_reader;
+  DDS::DataReader_ptr topic_reader;
   const message_type_support_callbacks_t * callbacks;
+};
+
+struct OpenSpliceStaticClientInfo {
+  void * requester_;
+  DDS::DataReader_ptr response_datareader_;
+  const service_type_support_callbacks_t * callbacks_;
+};
+
+struct OpenSpliceStaticServiceInfo {
+  void * responder_;
+  DDS::DataReader_ptr request_datareader_;
+  const service_type_support_callbacks_t * callbacks_;
 };
 
 const char *
@@ -61,7 +74,7 @@ rmw_create_node(const char * name)
   // TODO: take the domain id from configuration
   DDS::DomainId_t domain = 0;
 
-  DDS::DomainParticipant * participant = dp_factory->create_participant(
+  DDS::DomainParticipant_ptr participant = dp_factory->create_participant(
     domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE
   );
   if (!participant)
@@ -109,8 +122,8 @@ rmw_create_publisher(const rmw_node_t * node,
     return nullptr;
   }
 
-  DDS::DomainParticipant * participant = \
-    static_cast<DDS::DomainParticipant *>(node->data);
+  DDS::DomainParticipant_ptr participant = \
+    static_cast<DDS::DomainParticipant_ptr>(node->data);
 
   const message_type_support_callbacks_t * callbacks = \
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
@@ -172,7 +185,7 @@ rmw_create_publisher(const rmw_node_t * node,
     return nullptr;
   };
 
-  DDS::DataWriter * topic_writer = dds_publisher->create_datawriter(
+  DDS::DataWriter_ptr topic_writer = dds_publisher->create_datawriter(
     topic, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE
   );
   if (!topic_writer)
@@ -224,7 +237,7 @@ rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
 
   const OpenSpliceStaticPublisherInfo * publisher_info = \
     static_cast<const OpenSpliceStaticPublisherInfo *>(publisher->data);
-  DDS::DataWriter * topic_writer = publisher_info->topic_writer;
+  DDS::DataWriter_ptr topic_writer = publisher_info->topic_writer;
   const message_type_support_callbacks_t * callbacks = \
     publisher_info->callbacks;
 
@@ -244,8 +257,8 @@ rmw_create_subscription(const rmw_node_t * node,
     return nullptr;
   }
 
-  DDS::DomainParticipant * participant = \
-    static_cast<DDS::DomainParticipant *>(node->data);
+  DDS::DomainParticipant_ptr participant = \
+    static_cast<DDS::DomainParticipant_ptr>(node->data);
 
   const message_type_support_callbacks_t * callbacks = \
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
@@ -303,7 +316,7 @@ rmw_create_subscription(const rmw_node_t * node,
     return nullptr;
   }
 
-  DDS::DataReader * topic_reader = dds_subscriber->create_datareader(
+  DDS::DataReader_ptr topic_reader = dds_subscriber->create_datareader(
     topic, default_datareader_qos, NULL, DDS::STATUS_MASK_NONE
   );
 
@@ -354,7 +367,7 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
 
   OpenSpliceStaticSubscriberInfo * subscriber_info = \
     static_cast<OpenSpliceStaticSubscriberInfo *>(subscription->data);
-  DDS::DataReader * topic_reader = subscriber_info->topic_reader;
+  DDS::DataReader_ptr topic_reader = subscriber_info->topic_reader;
   const message_type_support_callbacks_t * callbacks = \
     subscriber_info->callbacks;
 
@@ -368,7 +381,7 @@ rmw_create_guard_condition()
 {
   rmw_guard_condition_t * guard_condition = rmw_guard_condition_allocate();
   guard_condition->implementation_identifier = opensplice_cpp_identifier;
-  guard_condition->data = static_cast<DDS::GuardCondition *>(
+  guard_condition->data = static_cast<DDS::GuardCondition_ptr>(
     rmw_allocate(sizeof(DDS::GuardCondition)));
   // Ensure constructor with "placement new"
   new (guard_condition->data) DDS::GuardCondition();
@@ -386,8 +399,8 @@ rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
   }
   // TODO: do DDS specific teardown
   // Explicitly call destructor since the "placement new" was used
-  DDS::GuardCondition * dds_guard_condition = \
-    static_cast<DDS::GuardCondition *>(guard_condition->data);
+  DDS::GuardCondition* dds_guard_condition = \
+    static_cast<DDS::GuardCondition*>(guard_condition->data);
   dds_guard_condition->~GuardCondition();
   rmw_free(guard_condition->data);
   rmw_guard_condition_free(guard_condition);
@@ -403,8 +416,8 @@ rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition)
     return RMW_RET_ERROR;
   }
 
-  DDS::GuardCondition * dds_guard_condition = \
-    static_cast<DDS::GuardCondition *>(guard_condition->data);
+  DDS::GuardCondition_ptr dds_guard_condition = \
+    static_cast<DDS::GuardCondition_ptr>(guard_condition->data);
   dds_guard_condition->set_trigger_value(true);
   return RMW_RET_OK;
 }
@@ -425,8 +438,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
     OpenSpliceStaticSubscriberInfo * subscriber_info = \
       static_cast<OpenSpliceStaticSubscriberInfo *>(
         subscriptions->subscribers[i]);
-    DDS::DataReader * topic_reader = subscriber_info->topic_reader;
-    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
+    DDS::DataReader_ptr topic_reader = subscriber_info->topic_reader;
+    DDS::StatusCondition_ptr condition = topic_reader->get_statuscondition();
     condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
     waitset.attach_condition(condition);
   }
@@ -434,10 +447,32 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   // add a condition for each guard condition
   for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i)
   {
-    DDS::GuardCondition * guard_condition = \
-      static_cast<DDS::GuardCondition *>(
+    DDS::GuardCondition_ptr guard_condition = \
+      static_cast<DDS::GuardCondition_ptr>(
         guard_conditions->guard_conditions[i]);
     waitset.attach_condition(guard_condition);
+  }
+
+  // add a condition for each service
+  for (unsigned long i = 0; i < services->service_count; ++i)
+  {
+    OpenSpliceStaticServiceInfo * service_info = \
+      static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
+    DDS::DataReader_ptr request_datareader = service_info->request_datareader_;
+    DDS::StatusCondition_ptr condition = request_datareader->get_statuscondition();
+    condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
+    waitset.attach_condition(condition);
+  }
+
+  // add a condition for each client
+  for (unsigned long i = 0; i < clients->client_count; ++i)
+  {
+    OpenSpliceStaticClientInfo * client_info = \
+      static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
+    DDS::DataReader_ptr response_datareader = client_info->response_datareader_;
+    DDS::StatusCondition_ptr condition = response_datareader->get_statuscondition();
+    condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS);
+    waitset.attach_condition(condition);
   }
 
   // invoke wait until one of the conditions triggers
@@ -471,8 +506,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
     OpenSpliceStaticSubscriberInfo * subscriber_info = \
       static_cast<OpenSpliceStaticSubscriberInfo *>(
         subscriptions->subscribers[i]);
-    DDS::DataReader* topic_reader = subscriber_info->topic_reader;
-    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
+    DDS::DataReader_ptr topic_reader = subscriber_info->topic_reader;
+    DDS::StatusCondition_ptr condition = topic_reader->get_statuscondition();
     if (!condition->get_trigger_value())
     {
       // if the status condition was not triggered
@@ -484,8 +519,8 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
   // set guard condition handles to zero for all not triggered guard conditions
   for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i)
   {
-    DDS::GuardCondition * guard_condition = \
-      static_cast<DDS::GuardCondition *>(
+    DDS::GuardCondition_ptr guard_condition = \
+      static_cast<DDS::GuardCondition_ptr>(
         guard_conditions->guard_conditions[i]);
     if (!guard_condition->get_trigger_value())
     {
@@ -499,6 +534,56 @@ rmw_wait(rmw_subscriptions_t * subscriptions,
       guard_condition->set_trigger_value(false);
     }
   }
+
+  // set service handles to zero for all not triggered conditions
+  for (unsigned long i = 0; i < services->service_count; ++i)
+  {
+    OpenSpliceStaticServiceInfo * service_info = \
+      static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
+    DDS::DataReader_ptr request_datareader = service_info->request_datareader_;
+    DDS::StatusCondition_ptr condition = request_datareader->get_statuscondition();
+
+    // search for service condition in active set
+    unsigned long j = 0;
+    for (; j < active_conditions.length(); ++j)
+    {
+      if (active_conditions[j] == condition)
+      {
+        break;
+      }
+    }
+    // if service condition is not found in the active set
+    // reset the service handle
+    if (!(j < active_conditions.length()))
+    {
+      services->services[i] = 0;
+    }
+  }
+
+  // set client handles to zero for all not triggered conditions
+  for (unsigned long i = 0; i < clients->client_count; ++i)
+  {
+    OpenSpliceStaticClientInfo * client_info = \
+      static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
+    DDS::DataReader_ptr response_datareader = client_info->response_datareader_;
+    DDS::StatusCondition_ptr condition = response_datareader->get_statuscondition();
+
+    // search for service condition in active set
+    unsigned long j = 0;
+    for (; j < active_conditions.length(); ++j)
+    {
+      if (active_conditions[j] == condition)
+      {
+        break;
+      }
+    }
+    // if client condition is not found in the active set
+    // reset the client handle
+    if (!(j < active_conditions.length()))
+    {
+      clients->clients[i] = 0;
+    }
+  }
   return RMW_RET_OK;
 }
 
@@ -508,34 +593,97 @@ rmw_create_client(const rmw_node_t * node,
                   const rosidl_service_type_support_t * type_support,
                   const char * service_name)
 {
-  return NULL;
+  if (node->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("node handle not from this implementation");
+    // printf("but from: %s\n", node->implementation_identifier);
+    return NULL;
+  }
+
+  DDS::DomainParticipant_ptr participant = \
+    static_cast<DDS::DomainParticipant_ptr>(node->data);
+
+  const service_type_support_callbacks_t * callbacks = \
+    static_cast<const service_type_support_callbacks_t *>(type_support->data);
+
+  DDS::DataReader_ptr response_datareader = NULL;
+  void * requester = NULL;
+
+  callbacks->create_requester(
+    participant, service_name,
+    reinterpret_cast<void **>(&requester),
+    reinterpret_cast<void **>(&response_datareader));
+
+  OpenSpliceStaticClientInfo* client_info = new OpenSpliceStaticClientInfo();
+  client_info->requester_ = requester;
+  client_info->callbacks_ = callbacks;
+  client_info->response_datareader_ = response_datareader;
+
+  rmw_client_t * client = rmw_client_allocate();
+  client->implementation_identifier = opensplice_cpp_identifier;
+  client->data = client_info;
+  return client;
 }
 
 rmw_ret_t
 rmw_destroy_client(rmw_client_t * client)
 {
-  return RMW_RET_OK;
+  if (client) {
+    OpenSpliceStaticClientInfo* client_info = static_cast<OpenSpliceStaticClientInfo *>(client->data);
+
+    const service_type_support_callbacks_t * callbacks = \
+      static_cast<const service_type_support_callbacks_t *>(client_info->callbacks_);
+    callbacks->destroy_requester(client_info->requester_);
+
+    delete client_info;
+    rmw_client_free(static_cast<rmw_client_t *>(client));
+    return RMW_RET_OK;
+  }
+
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
 rmw_send_request(const rmw_client_t * client, const void * ros_request,
                  int64_t * sequence_id)
 {
-  *sequence_id = -1;
-  return RMW_RET_ERROR;
+  if (client->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("client handle not from this implementation");
+    // printf("but from: %s\n", client->implementation_identifier);
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticClientInfo * client_info = \
+    static_cast<OpenSpliceStaticClientInfo*>(client->data);
+  void * requester = client_info->requester_;
+  const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
+  *sequence_id = callbacks->send_request(requester, ros_request);
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
-rmw_take_response(const rmw_client_t * client,
-                  void * ros_response, void * ros_request_header, bool * taken)
+rmw_take_response(const rmw_client_t * client, void * ros_request_header,
+                  void * ros_response, bool * taken)
 {
   if (taken == NULL) {
     rmw_set_error_string("taken argument can't be null");
     return RMW_RET_ERROR;
   }
 
-  *taken = false;
-  return RMW_RET_ERROR;
+  if (client->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("client handle not from this implementation");
+    // printf("but from: %s\n", client->implementation_identifier);
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticClientInfo * client_info = \
+    static_cast<OpenSpliceStaticClientInfo*>(client->data);
+  void * requester = client_info->requester_;
+  const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
+  *taken = callbacks->take_response(requester, ros_request_header, ros_response);
+  return RMW_RET_OK;
 }
 
 rmw_service_t *
@@ -543,35 +691,98 @@ rmw_create_service(const rmw_node_t * node,
                    const rosidl_service_type_support_t * type_support,
                    const char * service_name)
 {
-  return NULL;
+  if (node->implementation_identifier != opensplice_cpp_identifier)
+  {
+      rmw_set_error_string("node handle not from this implementation");
+      // printf("but from: %s\n", node->implementation_identifier);
+      return NULL;
+  }
+
+  DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(node->data);
+
+  const service_type_support_callbacks_t * callbacks = \
+    static_cast<const service_type_support_callbacks_t *>(type_support->data);
+
+  DDS::DataReader_ptr request_datareader = NULL;
+  void * responder = NULL;
+
+  callbacks->create_responder(
+    participant, service_name,
+    reinterpret_cast<void **>(&responder),
+    reinterpret_cast<void **>(&request_datareader));
+
+  assert(request_datareader != NULL);
+
+  OpenSpliceStaticServiceInfo* service_info = new OpenSpliceStaticServiceInfo();
+  service_info->responder_ = responder;
+  service_info->callbacks_ = callbacks;
+  service_info->request_datareader_ = request_datareader;
+
+  rmw_service_t * service = rmw_service_allocate();
+  service->implementation_identifier = opensplice_cpp_identifier;
+  service->data = service_info;
+  return service;
 }
 
 rmw_ret_t
 rmw_destroy_service(rmw_service_t * service)
 {
-  return RMW_RET_OK;
+  if (service) {
+    OpenSpliceStaticServiceInfo* service_info = static_cast<OpenSpliceStaticServiceInfo *>(service->data);
+
+    const service_type_support_callbacks_t * callbacks = \
+      static_cast<const service_type_support_callbacks_t *>(service_info->callbacks_);
+    callbacks->destroy_responder(service_info->responder_);
+
+    delete service_info;
+    rmw_service_free(static_cast<rmw_service_t*>(service));
+    return RMW_RET_OK;
+  }
+
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
 rmw_take_request(const rmw_service_t * service,
-                 void * ros_request, void * ros_request_header, bool * taken)
+                 void * ros_request_header, void * ros_request, bool * taken)
 {
   if (taken == NULL) {
     rmw_set_error_string("taken argument can't be null");
     return RMW_RET_ERROR;
   }
 
-  *taken = false;
-  return RMW_RET_ERROR;
+  if (service->implementation_identifier != opensplice_cpp_identifier)
+  {
+    rmw_set_error_string("service handle not from this implementation");
+    // printf("but from: %s\n", service->implementation_identifier);
+    return RMW_RET_ERROR;
+  }
+
+  OpenSpliceStaticServiceInfo * service_info = \
+    static_cast<OpenSpliceStaticServiceInfo*>(service->data);
+  void * responder = service_info->responder_;
+  const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
+  *taken = callbacks->take_request(responder, ros_request_header, ros_request);
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
 rmw_send_response(const rmw_service_t * service,
-                  void * ros_request, void * ros_response)
+                  void * ros_request_header, void * ros_response)
 {
-  ros_request = nullptr;
-  ros_response = nullptr;
-  return RMW_RET_ERROR;
+   if (service->implementation_identifier != opensplice_cpp_identifier)
+   {
+     rmw_set_error_string("service handle not from this implementation");
+     // printf("but from: %s\n", service->implementation_identifier);
+     return RMW_RET_ERROR;
+   }
+
+   OpenSpliceStaticServiceInfo * service_info = \
+     static_cast<OpenSpliceStaticServiceInfo*>(service->data);
+   void * responder = service_info->responder_;
+   const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
+   callbacks->send_response(responder, ros_request_header, ros_response);
+   return RMW_RET_OK;
 }
 
 }  // extern "C"
