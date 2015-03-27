@@ -22,8 +22,8 @@
 
 #include <ccpp_dds_dcps.h>
 
-#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
-#include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
+#include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
 namespace rosidl_typesupport_opensplice_cpp
 {
