@@ -20,7 +20,6 @@
 #include <random>
 #include <limits>
 #include <ccpp_dds_dcps.h>
-#include <u_entity.h>
 
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
