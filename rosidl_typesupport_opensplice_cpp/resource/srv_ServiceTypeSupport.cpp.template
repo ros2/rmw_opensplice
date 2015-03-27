@@ -165,8 +165,8 @@ void register_types__@(spec.srv_name)(
   //delete ros_response_ts;
 }
 
-void * create_requester__@(spec.srv_name)(void * untyped_participant, const char * service_name,
-                                          void ** untyped_reader)
+void create_requester__@(spec.srv_name)(void * untyped_participant, const char * service_name,
+                                        void **untyped_requester, void ** untyped_reader)
 {
   const std::string service_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)");
 
@@ -188,12 +188,12 @@ void * create_requester__@(spec.srv_name)(void * untyped_participant, const char
           participant, service_name, service_type_name));
 
   DDS::DataReader_ptr typed_reader = requester->get_response_datareader();
+  *untyped_requester = requester;
   *untyped_reader = requester->get_response_datareader();
-  return requester;
 }
 
-void * create_responder__@(spec.srv_name)(void * untyped_participant, const char * service_name,
-                                        void **untyped_reader)
+void create_responder__@(spec.srv_name)(void * untyped_participant, const char * service_name,
+                                        void **untyped_responder, void **untyped_reader)
 {
   const std::string service_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)");
 
@@ -215,8 +215,8 @@ void * create_responder__@(spec.srv_name)(void * untyped_participant, const char
           participant, service_name, service_type_name));
 
   DDS::DataReader_ptr typed_reader = responder->get_request_datareader();
+  *untyped_responder = responder;
   *untyped_reader = responder->get_request_datareader();
-  return responder;
 }
 
 int64_t send_request__@(spec.srv_name)(void * untyped_requester, const void * untyped_ros_request)

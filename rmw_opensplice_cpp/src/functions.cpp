@@ -606,10 +606,13 @@ rmw_create_client(const rmw_node_t * node,
   const service_type_support_callbacks_t * callbacks = \
     static_cast<const service_type_support_callbacks_t *>(type_support->data);
 
-  DDS::DataReader_ptr response_datareader;
+  DDS::DataReader_ptr response_datareader = NULL;
+  void * requester = NULL;
 
-  void * requester = callbacks->create_requester(
-    participant, service_name, reinterpret_cast<void **>(&response_datareader));
+  callbacks->create_requester(
+    participant, service_name,
+    reinterpret_cast<void **>(&requester),
+    reinterpret_cast<void **>(&response_datareader));
 
   OpenSpliceStaticClientInfo* client_info = new OpenSpliceStaticClientInfo();
   client_info->requester_ = requester;
@@ -701,9 +704,12 @@ rmw_create_service(const rmw_node_t * node,
     static_cast<const service_type_support_callbacks_t *>(type_support->data);
 
   DDS::DataReader_ptr request_datareader = NULL;
+  void * responder = NULL;
 
-  void * responder = callbacks->create_responder(
-    participant, service_name, reinterpret_cast<void **>(&request_datareader));
+  callbacks->create_responder(
+    participant, service_name,
+    reinterpret_cast<void **>(&responder),
+    reinterpret_cast<void **>(&request_datareader));
 
   assert(request_datareader != NULL);
 

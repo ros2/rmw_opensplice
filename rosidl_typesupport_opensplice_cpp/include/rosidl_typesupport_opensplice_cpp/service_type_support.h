@@ -8,11 +8,11 @@ typedef struct service_type_support_callbacks_t
   const char * package_name;
   const char * service_name;
   // Function to create a requester
-  void* (*create_requester)(void * participant, const char * service_name,
-                            void **reader);
+  void (*create_requester)(void * participant, const char * service_name,
+                           void **requester, void **reader);
   // Function to create a responder
-  void* (*create_responder)(void * participant, const char * service_name,
-                            void **reader);
+  void (*create_responder)(void * participant, const char * service_name,
+                           void **responder, void **reader);
   // Function to send ROS requests
   int64_t (*send_request)(void * requester, const void * ros_request);
   // Function to read a ROS request from the wire
