@@ -39,9 +39,12 @@ class Requester
     {
       std::random_device rd;
       std::default_random_engine e1(rd());
+      // NOTE: use extra parentheses to avoid macro expansion. On Windows,
+      // max and min are defined as macros in <windows.h>
+      // See http://stackoverflow.com/a/2561377/470581
       std::uniform_int_distribution<uint64_t> uniform_dist(
-        std::numeric_limits<uint64_t>::min(),
-        std::numeric_limits<uint64_t>::max());
+        (std::numeric_limits<uint64_t>::min)(),
+        (std::numeric_limits<uint64_t>::max)());
       writer_guid_.first = uniform_dist(e1);
       writer_guid_.second = uniform_dist(e1);
 
