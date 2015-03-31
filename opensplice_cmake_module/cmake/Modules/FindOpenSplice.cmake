@@ -63,7 +63,8 @@ if(NOT "${_ospl_home} " STREQUAL " ")
     "ddsutil"
     "durability"
     "spliced"
-    "dcpsisocpp"
+    # we can't link against both sacpp and isocpp at the same time
+    #"dcpsisocpp"
     "dcpssacpp")
   if(NOT WIN32)
     list(APPEND OpenSplice_LIBRARIES "pthread" "dl")
@@ -79,7 +80,14 @@ else()
     message(STATUS "Found PrismTech OpenSplice: ${opensplice_DIR}")
     set(OpenSplice_HOME "${OPENSPLICE_PREFIX}")
     set(OpenSplice_INCLUDE_DIRS ${OPENSPLICE_INCLUDE_DIRS})
-    set(OpenSplice_LIBRARIES ${OPENSPLICE_LIBRARIES})
+    set(OpenSplice_LIBRARIES "")
+    foreach(_lib ${OPENSPLICE_LIBRARIES})
+      get_filename_component(_name "${_lib}" NAME_WE)
+      # we can't link against both sacpp and isocpp at the same time
+      if(NOT "${_name}" STREQUAL "libdcpsisocpp" AND NOT "${_name}" STREQUAL "dcpsisocpp")
+        list(APPEND OpenSplice_LIBRARIES "${_lib}")
+      endif()
+    endforeach()
     set(OpenSplice_LIBRARY_DIRS "")
     set(OpenSplice_DEFINITIONS ${OPENSPLICE_DEFINITIONS})
     set(OpenSplice_IDLPP "${OPENSPLICE_IDLPP}")
