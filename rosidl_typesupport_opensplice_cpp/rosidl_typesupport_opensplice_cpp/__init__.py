@@ -30,14 +30,15 @@ def generate_dds_opensplice_cpp(
 
         cmd = [idl_pp]
         for include_dir in include_dirs:
-            cmd += ['-I', include_dir]
+            cmd += ['-I', '"%s"' % include_dir]
         cmd += [
             '-S',
             '-l', 'cpp',
             '-o', 'dds-types',
-            '-d', output_dir,
-            idl_file
+            '-d', '"%s"' % output_dir,
+            '"%s"' % idl_file
         ]
+        print("CMD IS %s" % cmd)
         subprocess.check_call(cmd)
 
     return 0
