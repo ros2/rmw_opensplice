@@ -172,10 +172,10 @@ void convert_dds_message_to_ros(const @(spec.base_type.pkg_name)::dds_::@(spec.b
 
 bool take__@(spec.base_type.type)(void * untyped_topic_reader, void * untyped_ros_message)
 {
-    DDS::DataReader_ptr topic_reader = static_cast<DDS::DataReader_ptr>(untyped_topic_reader);
+    DDS::DataReader* topic_reader = static_cast<DDS::DataReader*>(untyped_topic_reader);
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)()" << std::endl;
 
-    @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader_ptr data_reader = @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
+    @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader* data_reader = @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
     //std::cout << "  @(spec.base_type.pkg_name)::type_support::publish__@(spec.base_type.type)() write dds message" << std::endl;
 
     @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_Seq dds_messages;

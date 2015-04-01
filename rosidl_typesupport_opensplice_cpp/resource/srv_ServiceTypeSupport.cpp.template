@@ -77,9 +77,9 @@ template <>
 class TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader
 {
   public:
-    static bool take_sample(DDS::DataReader_ptr datareader,
+    static bool take_sample(DDS::DataReader* datareader,
                             Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& sample) {
-      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader_ptr typed_datareader = _narrow(datareader);
+      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader* typed_datareader = _narrow(datareader);
 
       @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_Seq dds_messages;
       DDS::SampleInfoSeq sample_infos;
@@ -115,9 +115,9 @@ class TemplateDataReader<Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix
 template <>
 class TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter {
   public:
-    static void write_sample(DDS::DataWriter_ptr datawriter,
+    static void write_sample(DDS::DataWriter* datawriter,
                              Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& sample) {
-      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter_ptr typed_datawriter = _narrow(datawriter);
+      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter* typed_datawriter = _narrow(datawriter);
 
       typed_datawriter->write(sample, DDS::HANDLE_NIL);
     }
@@ -142,7 +142,7 @@ void register_types__@(spec.srv_name)(
   void * untyped_participant, const char * request_type_name,
   const char * response_type_name)
 {
-  DDS::DomainParticipant_ptr participant = static_cast<DDS::DomainParticipant_ptr>(untyped_participant);
+  DDS::DomainParticipant* participant = static_cast<DDS::DomainParticipant*>(untyped_participant);
 
   std::cout << "  @(spec.pkg_name)::type_support::register_type__@(spec.srv_name)()" << std::endl;
 
@@ -173,8 +173,8 @@ void create_requester__@(spec.srv_name)(void * untyped_participant, const char *
   const std::string request_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_");
   const std::string response_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_");
 
-  DDS::DomainParticipant_ptr participant = static_cast<
-    DDS::DomainParticipant_ptr>(untyped_participant);
+  DDS::DomainParticipant* participant = static_cast<
+    DDS::DomainParticipant*>(untyped_participant);
 
   register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
@@ -187,7 +187,7 @@ void create_requester__@(spec.srv_name)(void * untyped_participant, const char *
         @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(
           participant, service_name, service_type_name));
 
-  DDS::DataReader_ptr typed_reader = requester->get_response_datareader();
+  DDS::DataReader* typed_reader = requester->get_response_datareader();
   *untyped_requester = requester;
   *untyped_reader = requester->get_response_datareader();
 }
@@ -200,8 +200,8 @@ void create_responder__@(spec.srv_name)(void * untyped_participant, const char *
   const std::string request_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_");
   const std::string response_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)Response_");
 
-  DDS::DomainParticipant_ptr participant = static_cast<
-    DDS::DomainParticipant_ptr>(untyped_participant);
+  DDS::DomainParticipant* participant = static_cast<
+    DDS::DomainParticipant*>(untyped_participant);
 
   register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
@@ -214,7 +214,7 @@ void create_responder__@(spec.srv_name)(void * untyped_participant, const char *
         @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(
           participant, service_name, service_type_name));
 
-  DDS::DataReader_ptr typed_reader = responder->get_request_datareader();
+  DDS::DataReader* typed_reader = responder->get_request_datareader();
   *untyped_responder = responder;
   *untyped_reader = responder->get_request_datareader();
 }

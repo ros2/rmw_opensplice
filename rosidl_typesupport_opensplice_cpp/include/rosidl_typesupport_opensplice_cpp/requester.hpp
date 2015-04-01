@@ -32,7 +32,7 @@ template<typename RequestT, typename ResponseT>
 class Requester
 {
   public:
-    Requester(DDS::DomainParticipant_ptr participant, const std::string& service_name,
+    Requester(DDS::DomainParticipant* participant, const std::string& service_name,
               const std::string& service_type_name) :
       participant_(participant), service_name_(service_name),
       service_type_name_(service_type_name), sequence_number_(0)
@@ -135,22 +135,22 @@ class Requester
       TemplateDataWriter< Sample<RequestT> >::write_sample(request_datawriter_, request);
     }
 
-    DDS::DataReader_ptr get_response_datareader()
+    DDS::DataReader* get_response_datareader()
     {
       return response_datareader_;
     }
 
   private:
-    DDS::DomainParticipant_ptr participant_;
+    DDS::DomainParticipant* participant_;
     std::string service_name_;
     std::string service_type_name_;
-    DDS::DataReader_ptr response_datareader_;
-    DDS::DataWriter_ptr request_datawriter_;
-    DDS::Topic_ptr response_topic_;
-    DDS::ContentFilteredTopic_ptr content_filtered_response_topic_;
-    DDS::Topic_ptr request_topic_;
-    DDS::Subscriber_ptr response_subscriber_;
-    DDS::Publisher_ptr request_publisher_;
+    DDS::DataReader* response_datareader_;
+    DDS::DataWriter* request_datawriter_;
+    DDS::Topic* response_topic_;
+    DDS::ContentFilteredTopic* content_filtered_response_topic_;
+    DDS::Topic* request_topic_;
+    DDS::Subscriber* response_subscriber_;
+    DDS::Publisher* request_publisher_;
     std::atomic<int64_t> sequence_number_;
     std::pair<uint64_t, uint64_t> writer_guid_;
 };
