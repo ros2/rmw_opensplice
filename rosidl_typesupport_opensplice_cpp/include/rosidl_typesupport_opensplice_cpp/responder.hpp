@@ -30,7 +30,7 @@ class Responder
 {
   public:
 
-    Responder(DDS::DomainParticipant_ptr participant, const std::string& service_name,
+    Responder(DDS::DomainParticipant* participant, const std::string& service_name,
       const std::string& service_type_name) : participant_(participant),
       service_name_(service_name), service_type_name_(service_type_name)
     {
@@ -121,15 +121,15 @@ class Responder
 
   private:
 
-    DDS::DomainParticipant_ptr participant_;
+    DDS::DomainParticipant* participant_;
     std::string service_name_;
     std::string service_type_name_;
-    DDS::DataReader_ptr request_datareader_;
-    DDS::Topic_ptr request_topic_;
-    DDS::Subscriber_ptr request_subscriber_;
-    DDS::DataWriter_ptr response_datawriter_;
-    DDS::Publisher_ptr response_publisher_;
-    DDS::Topic_ptr response_topic_;
+    DDS::DataReader* request_datareader_;
+    DDS::Topic* request_topic_;
+    DDS::Subscriber* request_subscriber_;
+    DDS::DataWriter* response_datawriter_;
+    DDS::Publisher* response_publisher_;
+    DDS::Topic* response_topic_;
 };
 
 }  // namespace rosidl_typesupport_opensplice_cpp
