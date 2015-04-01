@@ -43,14 +43,17 @@ def generate_dds_opensplice_cpp(
     return 0
 
 
-def generate_typesupport_opensplice_cpp(pkg_name, ros_interface_files, deps, output_dir, template_dir):
+def generate_typesupport_opensplice_cpp(
+    pkg_name, ros_interface_files, deps, output_dir, template_dir
+):
     mapping_msgs = {
         os.path.join(template_dir, 'msg_TypeSupport.h.template'): '%s_TypeSupport.h',
         os.path.join(template_dir, 'msg_TypeSupport.cpp.template'): '%s_TypeSupport.cpp',
     }
 
     mapping_srvs = {
-        os.path.join(template_dir, 'srv_ServiceTypeSupport.cpp.template'): '%s_ServiceTypeSupport.cpp',
+        os.path.join(template_dir, 'srv_ServiceTypeSupport.cpp.template'):
+        '%s_ServiceTypeSupport.cpp',
     }
 
     for template_file in mapping_msgs.keys():
@@ -113,6 +116,5 @@ def generate_typesupport_opensplice_cpp(pkg_name, ros_interface_files, deps, out
                 except Exception:
                     os.remove(generated_file)
                     raise
-
 
     return 0
