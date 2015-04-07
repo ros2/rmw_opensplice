@@ -34,7 +34,7 @@ public:
   Requester(
     DDS::DomainParticipant * participant, const std::string & service_name,
     const std::string & service_type_name)
-    : participant_(participant), service_name_(service_name),
+  : participant_(participant), service_name_(service_name),
     service_type_name_(service_type_name), sequence_number_(0)
   {
     std::random_device rd;

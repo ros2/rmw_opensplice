@@ -31,7 +31,7 @@ public:
   Responder(
     DDS::DomainParticipant * participant, const std::string & service_name,
     const std::string & service_type_name)
-    : participant_(participant),
+  : participant_(participant),
     service_name_(service_name), service_type_name_(service_type_name)
   {
     // Create request Publisher and DataWriter
