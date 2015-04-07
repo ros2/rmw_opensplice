@@ -103,7 +103,7 @@ public:
 
   bool take_request(Sample<RequestT> & request)
   {
-    return TemplateDataReader<Sample<RequestT> >::take_sample(request_datareader_, request);
+    return TemplateDataReader<Sample<RequestT>>::take_sample(request_datareader_, request);
   }
 
   void send_response(const rmw_request_id_t & request_header, Sample<ResponseT> & response)
@@ -113,7 +113,7 @@ public:
     response.client_guid_1_ = *(reinterpret_cast<const uint64_t *>(
         &request_header.writer_guid[0] + sizeof(response.client_guid_0_)));
 
-    TemplateDataWriter<Sample<ResponseT> >::write_sample(response_datawriter_, response);
+    TemplateDataWriter<Sample<ResponseT>>::write_sample(response_datawriter_, response);
   }
 
 private:

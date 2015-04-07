@@ -120,7 +120,7 @@ public:
 
   bool take_response(Sample<ResponseT> & response)
   {
-    return TemplateDataReader<Sample<ResponseT> >::take_sample(response_datareader_, response);
+    return TemplateDataReader<Sample<ResponseT>>::take_sample(response_datareader_, response);
   }
 
   void send_request(Sample<RequestT> & request)
@@ -129,7 +129,7 @@ public:
     request.client_guid_0_ = writer_guid_.first;
     request.client_guid_1_ = writer_guid_.second;
 
-    TemplateDataWriter<Sample<RequestT> >::write_sample(request_datawriter_, request);
+    TemplateDataWriter<Sample<RequestT>>::write_sample(request_datawriter_, request);
   }
 
   DDS::DataReader * get_response_datareader()
