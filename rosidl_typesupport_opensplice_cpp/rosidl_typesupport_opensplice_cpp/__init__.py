@@ -37,11 +37,6 @@ def generate_dds_opensplice_cpp(
             include_dirs.append(idl_base_path)
 
     for idl_file in dds_interface_files:
-        generated_file = os.path.join(
-            output_dir,
-            os.path.splitext(os.path.basename(idl_file))[0] + '.h/cpp')
-        print('Generating: %s' % generated_file)
-
         cmd = [idl_pp]
         for include_dir in include_dirs:
             cmd += ['-I', include_dir]
@@ -82,13 +77,11 @@ def generate_typesupport_opensplice_cpp(
         pass
 
     for idl_file in ros_interface_files:
-        print(pkg_name, idl_file)
         filename, extension = os.path.splitext(idl_file)
         if extension == '.msg':
             spec = parse_message_file(pkg_name, idl_file)
             for template_file, generated_filename in mapping_msgs.items():
                 generated_file = os.path.join(output_dir, generated_filename % spec.base_type.type)
-                print('Generating MESSAGE: %s' % generated_file)
 
                 try:
                     # TODO only touch generated file if its content actually changes
@@ -107,11 +100,11 @@ def generate_typesupport_opensplice_cpp(
                 except Exception:
                     os.remove(generated_file)
                     raise
+
         elif extension == '.srv':
             spec = parse_service_file(pkg_name, idl_file)
             for template_file, generated_filename in mapping_srvs.items():
                 generated_file = os.path.join(output_dir, generated_filename % spec.srv_name)
-                print('Generating SERVICE: %s' % generated_file)
 
                 try:
                     # TODO only touch generated file if its content actually changes
