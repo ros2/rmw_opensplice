@@ -22,6 +22,7 @@
 
 #include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
+#include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 
 @[for field in spec.fields]@
@@ -218,7 +219,7 @@ static message_type_support_callbacks_t callbacks = {
 };
 
 static rosidl_message_type_support_t handle = {
-    "opensplice_static",
+    rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier,
     &callbacks
 };
 
