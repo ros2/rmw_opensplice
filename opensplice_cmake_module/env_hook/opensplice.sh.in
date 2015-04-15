@@ -1,6 +1,6 @@
 export OSPL_HOME=@OpenSplice_HOME@
 if [ -f "$OSPL_HOME/release.com" ]; then
-  source "$OSPL_HOME/release.com" > /dev/null
+  . "$OSPL_HOME/release.com" > /dev/null
 else
   export OSPL_TMPL_PATH=$OSPL_HOME/etc/opensplice/idlpp
   export OSPL_URI=file://$OSPL_HOME/etc/opensplice/config/ospl.xml
