@@ -117,7 +117,5 @@ find_package_handle_standard_args(OpenSplice
   REQUIRED_VARS
     OpenSplice_INCLUDE_DIRS
     OpenSplice_LIBRARIES
-    OpenSplice_LIBRARY_DIRS
-    OpenSplice_DEFINITIONS
     OpenSplice_IDLPP
 )
