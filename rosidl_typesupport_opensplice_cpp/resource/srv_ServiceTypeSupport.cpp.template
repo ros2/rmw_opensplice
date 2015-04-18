@@ -16,11 +16,11 @@
 #include <iostream>
 
 #include <rosidl_generator_c/service_type_support.h>
-#include <rosidl_generator_c/visibility_control.h>
 // This is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder.
 #include <rosidl_generator_cpp/message_type_support.hpp>
 #include <rosidl_generator_cpp/service_type_support.hpp>
+#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 #include <rmw/rmw.h>
 
 #include "@(spec.pkg_name)/@(spec.srv_name)_Service.h"
@@ -364,7 +364,7 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 template<>
-ROSIDL_EXPORT
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_service_type_support_t *
 get_service_type_support_handle_opensplice<@(spec.pkg_name)::@(spec.srv_name)>()
 {

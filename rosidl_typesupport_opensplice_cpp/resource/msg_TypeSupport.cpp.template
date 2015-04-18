@@ -15,10 +15,10 @@
 #include <iostream>
 
 #include <rosidl_generator_c/message_type_support.h>
-#include <rosidl_generator_c/visibility_control.h>
 // This is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder.
 #include <rosidl_generator_cpp/message_type_support.hpp>
+#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 
 #include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
 #include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
@@ -231,7 +231,7 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 template<>
-ROSIDL_EXPORT
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_message_type_support_t *
 get_message_type_support_handle_opensplice<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
 {
