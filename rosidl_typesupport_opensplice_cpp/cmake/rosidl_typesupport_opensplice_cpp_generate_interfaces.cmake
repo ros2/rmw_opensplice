@@ -128,6 +128,26 @@ add_custom_command(
   VERBATIM
 )
 
+add_dependencies(
+  ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
+  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
+)
+
+install(
+  FILES ${_generated_files}
+  DESTINATION "include/${PROJECT_NAME}/dds_opensplice"
+)
+
+else()
+
+  # generate specific type support code for the builtin_msgs package
+  set(_generated_files
+    ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/Duration_TypeSupport.cpp
+    ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/Time_TypeSupport.cpp
+  )
+
+endif()
+
 set(_target_suffix "__dds_opensplice_cpp")
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
@@ -166,15 +186,7 @@ add_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
   ${rosidl_generate_interfaces_TARGET}__cpp
 )
-add_dependencies(
-  ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
-  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
-)
 
-install(
-  FILES ${_generated_files}
-  DESTINATION "include/${PROJECT_NAME}/dds_opensplice"
-)
 install(
   TARGETS ${rosidl_generate_interfaces_TARGET}${_target_suffix}
   ARCHIVE DESTINATION lib
@@ -183,7 +195,5 @@ install(
 )
 
 ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})
-
-endif()
 
 ament_export_include_directories(include)
