@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(_target_suffix "__rosidl_typesupport_opensplice_cpp")
+
 # avoid generating any opensplice specific stuff for builtin_msgs
 if(NOT "${PROJECT_NAME} " STREQUAL "builtin_msgs ")
 
@@ -147,8 +149,6 @@ else()
   )
 
 endif()
-
-set(_target_suffix "__dds_opensplice_cpp")
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED ${_generated_files})
