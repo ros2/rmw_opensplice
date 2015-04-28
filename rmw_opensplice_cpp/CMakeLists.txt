@@ -32,8 +32,8 @@ ament_target_dependencies(rmw_opensplice_cpp
 configure_rmw_library(rmw_opensplice_cpp)
 # Additionally, on Windows, add the -DROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL definition.
 if(WIN32)
-  set_target_properties(rmw_opensplice_cpp PROPERTIES
-    COMPILE_FLAGS "-DROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
+  target_compile_definitions(rmw_opensplice_cpp
+      PRIVATE "-DROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
 endif()
 
 ament_export_libraries(rmw_opensplice_cpp ${OpenSplice_LIBRARIES})
