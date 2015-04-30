@@ -27,7 +27,14 @@ ament_target_dependencies(rmw_opensplice_cpp
   "rosidl_generator_cpp"
   "rosidl_typesupport_opensplice_cpp"
   "OpenSplice")
+# On Windows this adds the RMW_BUILDING_DLL definition.
+# On Unix (GCC or Clang) it hides the symbols with -fvisibility=hidden.
 configure_rmw_library(rmw_opensplice_cpp)
+# Additionally, on Windows, add the ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL definition.
+if(WIN32)
+  target_compile_definitions(rmw_opensplice_cpp
+      PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
+endif()
 
 ament_export_libraries(rmw_opensplice_cpp ${OpenSplice_LIBRARIES})
 

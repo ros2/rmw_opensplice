@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <rosidl_typesupport_opensplice_cpp/identifier.hpp>
+#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 
 namespace rosidl_typesupport_opensplice_cpp
 {
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const char * typesupport_opensplice_identifier = "opensplice_static";
 
 }  // namespace rosidl_typesupport_opensplice_cpp
