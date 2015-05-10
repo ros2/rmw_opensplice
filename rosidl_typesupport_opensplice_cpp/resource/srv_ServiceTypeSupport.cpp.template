@@ -59,69 +59,76 @@ template <>
 class Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_> : public
 @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_
 {
-  public:
+public:
 
-    @(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_ & data() {
-      @[if suffix == 'Request']
-      return request_;
-      @[else]
-      return response_;
-      @[end if]
-    }
+  @(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_ & data() {
+    @[if suffix == 'Request']
+    return request_;
+    @[else]
+    return response_;
+    @[end if]
+  }
 
-    operator @(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_() {
-      return reinterpret_cast<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_ &>(*this);
-    }
+  operator @(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_() {
+    return reinterpret_cast<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_ &>(*this);
+  }
 };
 
 template <>
 class TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader
 {
-  public:
-    static bool take_sample(DDS::DataReader* datareader,
-                            Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& sample) {
-      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader* typed_datareader = _narrow(datareader);
+public:
 
-      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_Seq dds_messages;
-      DDS::SampleInfoSeq sample_infos;
-      DDS::ReturnCode_t status = typed_datareader->take(
-          dds_messages,
-          sample_infos,
-          1,
-          DDS::ANY_SAMPLE_STATE,
-          DDS::ANY_VIEW_STATE,
-          DDS::ALIVE_INSTANCE_STATE);
+  static bool take_sample(
+    DDS::DataReader* datareader,
+    Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& sample)
+  {
+    @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader* typed_datareader = _narrow(datareader);
 
-      if (status == DDS::RETCODE_NO_DATA) {
-          return false;
-      }
-      if (status != DDS::RETCODE_OK) {
-          printf("take() failed. Status = %d\n", status);
-          throw std::runtime_error("Read failed");
-      };
+    @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_Seq dds_messages;
+    DDS::SampleInfoSeq sample_infos;
+    DDS::ReturnCode_t status = typed_datareader->take(
+      dds_messages,
+      sample_infos,
+      1,
+      DDS::ANY_SAMPLE_STATE,
+      DDS::ANY_VIEW_STATE,
+      DDS::ALIVE_INSTANCE_STATE);
 
-      if (sample_infos.length() > 0 && sample_infos[0].valid_data) {
-        sample = reinterpret_cast< Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& >(dds_messages[0]);
-        typed_datareader->return_loan(dds_messages, sample_infos);
-        return true;
-      }
-
+    if (status == DDS::RETCODE_NO_DATA) {
       return false;
     }
+    if (status != DDS::RETCODE_OK) {
+      printf("take() failed. Status = %d\n", status);
+      throw std::runtime_error("Read failed");
+    };
+
+    if (sample_infos.length() > 0 && sample_infos[0].valid_data) {
+      sample = reinterpret_cast< Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& >(dds_messages[0]);
+      typed_datareader->return_loan(dds_messages, sample_infos);
+      return true;
+    }
+
+    return false;
+  }
 };
 
 template <>
 class TemplateDataReader<Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_> > : public TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> {};
 
 template <>
-class TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter {
-  public:
-    static void write_sample(DDS::DataWriter* datawriter,
-                             Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& sample) {
-      @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter* typed_datawriter = _narrow(datawriter);
+class TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter
+{
+public:
 
-      typed_datawriter->write(sample, DDS::HANDLE_NIL);
-    }
+  static void write_sample(
+    DDS::DataWriter* datawriter,
+    Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& sample)
+  {
+    @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter* typed_datawriter = _narrow(datawriter);
+
+    typed_datawriter->write(sample, DDS::HANDLE_NIL);
+  }
 };
 
 template <>
@@ -166,8 +173,9 @@ void register_types__@(spec.srv_name)(
   //delete ros_response_ts;
 }
 
-void create_requester__@(spec.srv_name)(void * untyped_participant, const char * service_name,
-                                        void **untyped_requester, void ** untyped_reader)
+void create_requester__@(spec.srv_name)(
+  void * untyped_participant, const char * service_name,
+  void **untyped_requester, void ** untyped_reader)
 {
   const std::string service_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)");
 
@@ -193,8 +201,9 @@ void create_requester__@(spec.srv_name)(void * untyped_participant, const char *
   *untyped_reader = requester->get_response_datareader();
 }
 
-void create_responder__@(spec.srv_name)(void * untyped_participant, const char * service_name,
-                                        void **untyped_responder, void **untyped_reader)
+void create_responder__@(spec.srv_name)(
+  void * untyped_participant, const char * service_name,
+  void **untyped_responder, void **untyped_reader)
 {
   const std::string service_type_name("@(spec.pkg_name)::dds_::Sample@(spec.srv_name)");
 
@@ -220,7 +229,8 @@ void create_responder__@(spec.srv_name)(void * untyped_participant, const char *
   *untyped_reader = responder->get_request_datareader();
 }
 
-int64_t send_request__@(spec.srv_name)(void * untyped_requester, const void * untyped_ros_request)
+int64_t send_request__@(spec.srv_name)(
+  void * untyped_requester, const void * untyped_ros_request)
 {
   rosidl_typesupport_opensplice_cpp::Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_> request;
   const @(spec.pkg_name)::@(spec.srv_name)Request & ros_request = *(reinterpret_cast<const @(spec.pkg_name)::@(spec.srv_name)Request *>(untyped_ros_request));
@@ -237,8 +247,9 @@ int64_t send_request__@(spec.srv_name)(void * untyped_requester, const void * un
   return request.sequence_number_;
 }
 
-bool take_request__@(spec.srv_name)(void * untyped_responder, void * untyped_ros_request_header,
-                                    void * untyped_ros_request)
+bool take_request__@(spec.srv_name)(
+  void * untyped_responder, void * untyped_ros_request_header,
+  void * untyped_ros_request)
 {
   @(spec.pkg_name)::@(spec.srv_name)Request & ros_request = *(@(spec.pkg_name)::@(spec.srv_name)Request *)untyped_ros_request;
   rmw_request_id_t & request_header = *(static_cast<rmw_request_id_t *>(untyped_ros_request_header));
@@ -253,8 +264,7 @@ bool take_request__@(spec.srv_name)(void * untyped_responder, void * untyped_ros
   rosidl_typesupport_opensplice_cpp::Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)Request_> request;
   bool taken = responder->take_request(request);
 
-  if(taken)
-  {
+  if (taken) {
     @(spec.pkg_name)::type_support::convert_dds_message_to_ros(request.data(), ros_request);
 
     request_header.sequence_number = request.sequence_number_;
@@ -268,8 +278,8 @@ bool take_request__@(spec.srv_name)(void * untyped_responder, void * untyped_ros
 }
 
 void send_response__@(spec.srv_name)(
-    void * untyped_responder, const void * untyped_ros_request_header,
-    const void * untyped_ros_response)
+  void * untyped_responder, const void * untyped_ros_request_header,
+  const void * untyped_ros_response)
 {
   rosidl_typesupport_opensplice_cpp::Sample<
     @(spec.pkg_name)::dds_::@(spec.srv_name)Response_> response;
@@ -290,8 +300,9 @@ void send_response__@(spec.srv_name)(
   responder->send_response(request_header, response);
 }
 
-bool take_response__@(spec.srv_name)(void * untyped_requester, void * untyped_ros_request_header,
-                                     void * untyped_ros_response)
+bool take_response__@(spec.srv_name)(
+  void * untyped_requester, void * untyped_ros_request_header,
+  void * untyped_ros_response)
 {
   @(spec.pkg_name)::@(spec.srv_name)Response & ros_response = *(@(spec.pkg_name)::@(spec.srv_name)Response *)untyped_ros_response;
   rosidl_typesupport_opensplice_cpp::Requester<
@@ -303,8 +314,7 @@ bool take_response__@(spec.srv_name)(void * untyped_requester, void * untyped_ro
 
   rosidl_typesupport_opensplice_cpp::Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)Response_> response;
   bool received = requester->take_response(response);
-  if(received)
-  {
+  if (received) {
     rmw_request_id_t & req_id = *(reinterpret_cast<rmw_request_id_t *>(untyped_ros_request_header));
 
     req_id.sequence_number = response.sequence_number_;
