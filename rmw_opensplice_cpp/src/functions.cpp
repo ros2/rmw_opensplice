@@ -180,16 +180,23 @@ rmw_create_publisher(
     return nullptr;
   }
 
-  DDS::DataWriterQos default_datawriter_qos;
-  status = dds_publisher->get_default_datawriter_qos(default_datawriter_qos);
+  DDS::DataWriterQos datawriter_qos;
+  status = dds_publisher->get_default_datawriter_qos(datawriter_qos);
   if (status != DDS::RETCODE_OK) {
     rmw_set_error_string("failed to get default datawriter qos");
     // printf("get_default_datawriter_qos() failed. Status = %d\n", status);
     return nullptr;
   }
 
+  // ensure the history depth is at least the requested queue size
+  if (datawriter_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
+    datawriter_qos.history.depth < queue_size
+  ) {
+    datawriter_qos.history.depth = queue_size;
+  }
+
   DDS::DataWriter * topic_writer = dds_publisher->create_datawriter(
-    topic, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic, datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic_writer) {
     rmw_set_error_string("failed to create datawriter");
     return nullptr;
@@ -299,16 +306,23 @@ rmw_create_subscription(
     return nullptr;
   }
 
-  DDS::DataReaderQos default_datareader_qos;
-  status = dds_subscriber->get_default_datareader_qos(default_datareader_qos);
+  DDS::DataReaderQos datareader_qos;
+  status = dds_subscriber->get_default_datareader_qos(datareader_qos);
   if (status != DDS::RETCODE_OK) {
     rmw_set_error_string("failed to get default datareader qos");
     // printf("get_default_datareader_qos() failed. Status = %d\n", status);
     return nullptr;
   }
 
+  // ensure the history depth is at least the requested queue size
+  if (datareader_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
+    datareader_qos.history.depth < queue_size
+  ) {
+    datareader_qos.history.depth = queue_size;
+  }
+
   DDS::DataReader * topic_reader = dds_subscriber->create_datareader(
-    topic, default_datareader_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic, datareader_qos, NULL, DDS::STATUS_MASK_NONE);
 
   OpenSpliceStaticSubscriberInfo * subscriber_info = \
     static_cast<OpenSpliceStaticSubscriberInfo *>(rmw_allocate(
