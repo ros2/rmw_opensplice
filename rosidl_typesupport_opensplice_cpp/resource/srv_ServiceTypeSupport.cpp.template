@@ -196,7 +196,6 @@ void create_requester__@(spec.srv_name)(
         @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(
           participant, service_name, service_type_name));
 
-  DDS::DataReader* typed_reader = requester->get_response_datareader();
   *untyped_requester = requester;
   *untyped_reader = requester->get_response_datareader();
 }
@@ -224,7 +223,6 @@ void create_responder__@(spec.srv_name)(
         @(spec.pkg_name)::dds_::@(spec.srv_name)Response_>(
           participant, service_name, service_type_name));
 
-  DDS::DataReader* typed_reader = responder->get_request_datareader();
   *untyped_responder = responder;
   *untyped_reader = responder->get_request_datareader();
 }
