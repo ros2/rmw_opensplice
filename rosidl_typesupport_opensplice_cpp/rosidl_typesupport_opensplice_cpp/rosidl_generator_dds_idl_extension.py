@@ -14,6 +14,8 @@
 
 from rosidl_generator_dds_idl import get_include_directives as \
     get_default_include_directives
+from rosidl_generator_dds_idl import get_post_struct_lines as \
+    get_default_post_struct_lines
 from rosidl_generator_dds_idl import msg_type_to_idl as \
     default_msg_type_to_idl
 from rosidl_generator_dds_idl import _msg_type_to_idl
@@ -34,6 +36,12 @@ def get_include_directives(spec, subfolders):
                 '#endif']
             break
     return includes
+
+
+def get_post_struct_lines(spec):
+    lines = get_default_post_struct_lines(spec)
+    lines.append('#pragma keylist %s_' % spec.base_type.type)
+    return lines
 
 
 def msg_type_to_idl(type_):
