@@ -3,6 +3,7 @@
 import argparse
 import sys
 
+from rosidl_parser import UnknownMessageType
 from rosidl_typesupport_opensplice_cpp import generate_dds_opensplice_cpp
 from rosidl_typesupport_opensplice_cpp import generate_typesupport_opensplice_cpp
 
@@ -45,22 +46,26 @@ def main(argv=sys.argv[1:]):
         help='The location of the template files')
     args = parser.parse_args(argv)
 
-    rc = generate_dds_opensplice_cpp(
+    try:
+        rc = generate_typesupport_opensplice_cpp(
+            args.pkg_name,
+            args.ros_interface_files,
+            args.deps,
+            args.output_dir,
+            args.template_dir,
+        )
+    except UnknownMessageType as e:
+        print(str(e), file=sys.stderr)
+        return 1
+    if rc:
+        return rc
+    return generate_dds_opensplice_cpp(
         args.pkg_name,
         args.dds_interface_files,
         args.dds_interface_base_path,
         args.deps,
         args.output_dir,
         args.idl_pp,
-    )
-    if rc:
-        return rc
-    return generate_typesupport_opensplice_cpp(
-        args.pkg_name,
-        args.ros_interface_files,
-        args.deps,
-        args.output_dir,
-        args.template_dir,
     )
 
 
