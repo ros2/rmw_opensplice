@@ -17,7 +17,10 @@ from io import StringIO
 import os
 import subprocess
 
-from rosidl_parser import parse_message_file, parse_service_file
+from rosidl_cmake import extract_message_types
+from rosidl_parser import parse_message_file
+from rosidl_parser import parse_service_file
+from rosidl_parser import validate_field_types
 
 
 def generate_dds_opensplice_cpp(
@@ -29,7 +32,8 @@ def generate_dds_opensplice_cpp(
 
     include_dirs = [dds_interface_base_path]
     for dep in deps:
-        dep_parts = dep.split(':')
+        # only take the first : for separation, as Windows follows with a C:\
+        dep_parts = dep.split(':', 1)
         assert(len(dep_parts) == 2)
         idl_path = dep_parts[1]
         idl_base_path = os.path.dirname(
@@ -77,10 +81,13 @@ def generate_typesupport_opensplice_cpp(
     except FileExistsError:
         pass
 
+    known_msg_types = extract_message_types(pkg_name, ros_interface_files, deps)
+
     for idl_file in ros_interface_files:
         filename, extension = os.path.splitext(idl_file)
         if extension == '.msg':
             spec = parse_message_file(pkg_name, idl_file)
+            validate_field_types(spec, known_msg_types)
             for template_file, generated_filename in mapping_msgs.items():
                 generated_file = os.path.join(output_dir, generated_filename % spec.base_type.type)
 
@@ -112,6 +119,7 @@ def generate_typesupport_opensplice_cpp(
 
         elif extension == '.srv':
             spec = parse_service_file(pkg_name, idl_file)
+            validate_field_types(spec, known_msg_types)
             for template_file, generated_filename in mapping_srvs.items():
                 generated_file = os.path.join(output_dir, generated_filename % spec.srv_name)
 
