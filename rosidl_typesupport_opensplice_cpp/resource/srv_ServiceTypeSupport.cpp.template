@@ -42,12 +42,21 @@ class DataReader;
 class DataWriter;
 }  // namespace DDS
 
+// forward declaration of conversion functions
 namespace @(spec.pkg_name) {
 namespace type_support {
-void convert_ros_message_to_dds(const @(spec.pkg_name)::@(spec.srv_name)Request&, @(spec.pkg_name)::dds_::@(spec.srv_name)Request_&);
-void convert_ros_message_to_dds(const @(spec.pkg_name)::@(spec.srv_name)Response&, @(spec.pkg_name)::dds_::@(spec.srv_name)Response_&);
-void convert_dds_message_to_ros(const @(spec.pkg_name)::dds_::@(spec.srv_name)Request_&, @(spec.pkg_name)::@(spec.srv_name)Request&);
-void convert_dds_message_to_ros(const @(spec.pkg_name)::dds_::@(spec.srv_name)Response_&, @(spec.pkg_name)::@(spec.srv_name)Response&);
+void convert_ros_message_to_dds(
+  const @(spec.pkg_name)::@(spec.srv_name)Request &,
+  @(spec.pkg_name)::dds_::@(spec.srv_name)Request_ &);
+void convert_ros_message_to_dds(
+  const @(spec.pkg_name)::@(spec.srv_name)Response &,
+  @(spec.pkg_name)::dds_::@(spec.srv_name)Response_ &);
+void convert_dds_message_to_ros(
+  const @(spec.pkg_name)::dds_::@(spec.srv_name)Request_ &,
+  @(spec.pkg_name)::@(spec.srv_name)Request &);
+void convert_dds_message_to_ros(
+  const @(spec.pkg_name)::dds_::@(spec.srv_name)Response_ &,
+  @(spec.pkg_name)::@(spec.srv_name)Response &);
 }  // namespace type_support
 }  // namespace @(spec.pkg_name)
 
@@ -56,8 +65,8 @@ namespace rosidl_typesupport_opensplice_cpp
 
 @[for suffix in ['Request', 'Response']]
 template <>
-class Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_> : public
-@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_
+class Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_> :
+public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_
 {
 public:
 
@@ -75,7 +84,8 @@ public:
 };
 
 template <>
-class TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader
+class TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_>
+: public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataReader
 {
 public:
 
@@ -104,7 +114,7 @@ public:
     };
 
     if (sample_infos.length() > 0 && sample_infos[0].valid_data) {
-      sample = reinterpret_cast< Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>& >(dds_messages[0]);
+      sample = reinterpret_cast< Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>&>(dds_messages[0]);
       typed_datareader->return_loan(dds_messages, sample_infos);
       return true;
     }
@@ -114,10 +124,13 @@ public:
 };
 
 template <>
-class TemplateDataReader<Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_> > : public TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> {};
+class TemplateDataReader<Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>>
+: public TemplateDataReader<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_>
+{};
 
 template <>
-class TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> : public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter
+class TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_>
+: public @(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_DataWriter
 {
 public:
 
@@ -132,7 +145,9 @@ public:
 };
 
 template <>
-class TemplateDataWriter<Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_> > : public TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_> {};
+class TemplateDataWriter<Sample<@(spec.pkg_name)::dds_::@(spec.srv_name)@(suffix)_>>
+: public TemplateDataWriter<@(spec.pkg_name)::dds_::Sample@(spec.srv_name)@(suffix)_>
+{};
 
 
 @[end for]
@@ -151,8 +166,6 @@ void register_types__@(spec.srv_name)(
   const char * response_type_name)
 {
   DDS::DomainParticipant* participant = static_cast<DDS::DomainParticipant*>(untyped_participant);
-
-  std::cout << "  @(spec.pkg_name)::type_support::register_type__@(spec.srv_name)()" << std::endl;
 
   @(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_TypeSupport * ros_request_ts = new @(spec.pkg_name)::dds_::Sample@(spec.srv_name)Request_TypeSupport();
   DDS::ReturnCode_t status = ros_request_ts->register_type(participant, request_type_name);
