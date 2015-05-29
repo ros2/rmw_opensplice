@@ -138,7 +138,7 @@ rmw_create_publisher(
   const message_type_support_callbacks_t * callbacks = \
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
   std::string type_name = std::string(callbacks->package_name) + \
-    "::dds_::" + callbacks->message_name + "_";
+    "::msg::dds_::" + callbacks->message_name + "_";
 
   callbacks->register_type(participant, type_name.c_str());
 
@@ -271,7 +271,7 @@ rmw_create_subscription(
   const message_type_support_callbacks_t * callbacks = \
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
   std::string type_name = std::string(callbacks->package_name) + \
-    "::dds_::" + callbacks->message_name + "_";
+    "::msg::dds_::" + callbacks->message_name + "_";
 
   callbacks->register_type(participant, type_name.c_str());
 
@@ -694,8 +694,6 @@ rmw_create_service(
     participant, service_name,
     reinterpret_cast<void **>(&responder),
     reinterpret_cast<void **>(&request_datareader));
-
-  assert(request_datareader != NULL);
 
   OpenSpliceStaticServiceInfo * service_info = new OpenSpliceStaticServiceInfo();
   service_info->responder_ = responder;

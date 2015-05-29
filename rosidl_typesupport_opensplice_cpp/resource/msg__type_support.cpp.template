@@ -1,21 +1,25 @@
-// generated from rosidl_typesupport_opensplice_cpp/resource/msg_TypeSupport.cpp.template
+// generated from rosidl_typesupport_opensplice_cpp/resource/msg__type_support.cpp.template
 
 @#######################################################################
-@# EmPy template for generating <msg>_TypeSupport.cpp files
+@# EmPy template for generating <msg>__type_support.cpp files
 @#
 @# Context:
 @#  - spec (rosidl_parser.MessageSpecification)
 @#    Parsed specification of the .msg file
+@#  - subfolder (string)
+@#    The subfolder / subnamespace of the message
+@#    Either 'msg' or 'srv'
+@#  - get_header_filename_from_msg_name (function)
 @#######################################################################
-
+@
 #include <rosidl_generator_c/message_type_support.h>
 // this is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder
 #include <rosidl_generator_cpp/message_type_support.hpp>
 #include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 
-#include "@(spec.base_type.pkg_name)/@(spec.base_type.type)_Struct.h"
-#include "@(spec.base_type.pkg_name)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
+#include "@(spec.base_type.pkg_name)/@(subfolder)/@(get_header_filename_from_msg_name(spec.base_type.type))__struct.hpp"
+#include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 
@@ -23,21 +27,23 @@
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@
 @[if field.type.pkg_name == 'builtin_msgs']@
-#include "rosidl_typesupport_opensplice_cpp/Duration_TypeSupport.h"
-#include "rosidl_typesupport_opensplice_cpp/Time_TypeSupport.h"
+#include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
+#include "rosidl_typesupport_opensplice_cpp/time__type_support.hpp"
 @[else]@
 namespace @(field.type.pkg_name) {
+namespace msg {
 namespace dds_ {
 struct @(field.type.type)_;
 }  // namespace dds_
 namespace type_support {
 void convert_ros_message_to_dds(
-  const @(field.type.pkg_name)::@(field.type.type) &,
-  @(field.type.pkg_name)::dds_::@(field.type.type)_ &);
+  const @(field.type.pkg_name)::msg::@(field.type.type) &,
+  @(field.type.pkg_name)::msg::dds_::@(field.type.type)_ &);
 void convert_dds_message_to_ros(
-  const @(field.type.pkg_name)::dds_::@(field.type.type)_ &,
-  @(field.type.pkg_name)::@(field.type.type) &);
+  const @(field.type.pkg_name)::msg::dds_::@(field.type.type)_ &,
+  @(field.type.pkg_name)::msg::@(field.type.type) &);
 }  // namespace type_support
+}  // namespace msg
 }  // namespace @(field.type.pkg_name)
 @[end if]@
 
@@ -45,6 +51,9 @@ void convert_dds_message_to_ros(
 @[end for]@
 
 namespace @(spec.base_type.pkg_name)
+{
+
+namespace @(subfolder)
 {
 
 namespace type_support
@@ -56,8 +65,8 @@ register_type__@(spec.base_type.type)(
   const char * type_name)
 {
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(untyped_participant);
-  @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_TypeSupport * ros_message_ts =
-    new @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_TypeSupport();
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport * ros_message_ts =
+    new @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport();
   DDS::ReturnCode_t status = ros_message_ts->register_type(participant, type_name);
   if (status != DDS::RETCODE_OK) {
     printf("register_type() failed. Status = %d\n", status);
@@ -68,8 +77,8 @@ register_type__@(spec.base_type.type)(
 
 void
 convert_ros_message_to_dds(
-  const @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message,
-  @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_ & dds_message)
+  const @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message,
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ & dds_message)
 {
 @[for field in spec.fields]@
   // field.name @(field.name)
@@ -89,7 +98,7 @@ convert_ros_message_to_dds(
 @[elif field.type.is_primitive_type()]@
       dds_message.@(field.name)_[i] = ros_message.@(field.name)[i];
 @[else]@
-      @(field.type.pkg_name)::type_support::convert_ros_message_to_dds(
+      @(field.type.pkg_name)::msg::type_support::convert_ros_message_to_dds(
         ros_message.@(field.name)[i], dds_message.@(field.name)_[i]);
 @[end if]@
     }
@@ -99,7 +108,7 @@ convert_ros_message_to_dds(
 @[elif field.type.is_primitive_type()]@
   dds_message.@(field.name)_ = ros_message.@(field.name);
 @[else]@
-  @(field.type.pkg_name)::type_support::convert_ros_message_to_dds(
+  @(field.type.pkg_name)::msg::type_support::convert_ros_message_to_dds(
     ros_message.@(field.name), dds_message.@(field.name)_);
 @[end if]@
 
@@ -113,14 +122,14 @@ publish__@(spec.base_type.type)(
 {
   DDS::DataWriter * topic_writer = static_cast<DDS::DataWriter *>(untyped_topic_writer);
 
-  const @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message =
-    *(const @(spec.base_type.pkg_name)::@(spec.base_type.type) *)untyped_ros_message;
-  @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_ * dds_message =
-    new @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_();
+  const @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message =
+    *(const @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) *)untyped_ros_message;
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * dds_message =
+    new @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_();
   convert_ros_message_to_dds(ros_message, *dds_message);
 
-  @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataWriter * data_writer =
-    @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataWriter::_narrow(topic_writer);
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_DataWriter * data_writer =
+    @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_DataWriter::_narrow(topic_writer);
   DDS::ReturnCode_t status = data_writer->write(*dds_message, DDS::HANDLE_NIL);
   if (status != DDS::RETCODE_OK) {
     printf("write() failed. Status = %d\n", status);
@@ -132,8 +141,8 @@ publish__@(spec.base_type.type)(
 
 void
 convert_dds_message_to_ros(
-  const @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_ & dds_message,
-  @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message)
+  const @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ & dds_message,
+  @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message)
 {
 @[for field in spec.fields]@
   // field.name @(field.name)
@@ -151,7 +160,7 @@ convert_dds_message_to_ros(
 @[elif field.type.is_primitive_type()]@
       ros_message.@(field.name)[i] = dds_message.@(field.name)_[i];
 @[else]@
-      @(field.type.pkg_name)::type_support::convert_dds_message_to_ros(
+      @(field.type.pkg_name)::msg::type_support::convert_dds_message_to_ros(
         dds_message.@(field.name)_[i], ros_message.@(field.name)[i]);
 @[end if]@
     }
@@ -159,7 +168,7 @@ convert_dds_message_to_ros(
 @[elif field.type.is_primitive_type()]@
   ros_message.@(field.name) = dds_message.@(field.name)_;
 @[else]@
-  @(field.type.pkg_name)::type_support::convert_dds_message_to_ros(
+  @(field.type.pkg_name)::msg::type_support::convert_dds_message_to_ros(
     dds_message.@(field.name)_, ros_message.@(field.name));
 @[end if]@
 
@@ -173,10 +182,10 @@ take__@(spec.base_type.type)(
 {
   DDS::DataReader* topic_reader = static_cast<DDS::DataReader*>(untyped_topic_reader);
 
-  @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader* data_reader =
-    @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_DataReader* data_reader =
+    @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_DataReader::_narrow(topic_reader);
 
-  @(spec.base_type.pkg_name)::dds_::@(spec.base_type.type)_Seq dds_messages;
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_Seq dds_messages;
   DDS::SampleInfoSeq sample_infos;
   DDS::ReturnCode_t status = data_reader->take(
     dds_messages,
@@ -199,7 +208,7 @@ take__@(spec.base_type.type)(
     throw std::runtime_error("invalid ROS message pointer");
   };
 
-  @(spec.base_type.pkg_name)::@(spec.base_type.type) & ros_message = *(@(spec.base_type.pkg_name)::@(spec.base_type.type) *)untyped_ros_message;
+  @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message = *(@(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) *)untyped_ros_message;
   convert_dds_message_to_ros(dds_messages[0], ros_message);
 
   data_reader->return_loan(dds_messages, sample_infos);
@@ -222,6 +231,8 @@ static rosidl_message_type_support_t handle = {
 
 }  // namespace type_support
 
+}  // namespace @(subfolder)
+
 }  // namespace @(spec.base_type.pkg_name)
 
 namespace rosidl_typesupport_opensplice_cpp
@@ -230,9 +241,9 @@ namespace rosidl_typesupport_opensplice_cpp
 template<>
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_message_type_support_t *
-get_message_type_support_handle_opensplice<@(spec.base_type.pkg_name)::@(spec.base_type.type)>()
+get_message_type_support_handle_opensplice<@(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type)>()
 {
-  return &@(spec.base_type.pkg_name)::type_support::handle;
+  return &@(spec.base_type.pkg_name)::@(subfolder)::type_support::handle;
 }
 
 }  // namespace rosidl_typesupport_opensplice_cpp

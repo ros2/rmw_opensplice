@@ -12,31 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __rosidl_typesupport_openslice_cpp__Duration_TypeSupport__h__
-#define __rosidl_typesupport_openslice_cpp__Duration_TypeSupport__h__
+#ifndef __rosidl_typesupport_openslice_cpp__time__type_support__h__
+#define __rosidl_typesupport_openslice_cpp__time__type_support__h__
 
 #include <ccpp_dds_dcps.h>
 
 #include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 
-#include "builtin_msgs/Duration_Struct.h"
+#include "builtin_msgs/msg/time__struct.hpp"
 
 namespace builtin_msgs
+{
+namespace msg
 {
 namespace type_support
 {
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 extern void convert_ros_message_to_dds(
-  const builtin_msgs::Duration & ros_message,
-  DDS::Duration_t & dds_message);
+  const builtin_msgs::msg::Time & ros_message,
+  DDS::Time_t & dds_message);
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 extern void convert_dds_message_to_ros(
-  const DDS::Duration_t & dds_message,
-  builtin_msgs::Duration & ros_message);
+  const DDS::Time_t & dds_message,
+  builtin_msgs::msg::Time & ros_message);
 
 }  // namespace type_support
+}  // namespace msg
 }  // namespace builtin_msgs
 
-#endif  // __rosidl_typesupport_openslice_cpp__Duration_TypeSupport__h__
+#endif  // __rosidl_typesupport_openslice_cpp__time__type_support__h__
