@@ -54,6 +54,7 @@ public:
 
     // TODO(esteve): check status
     status = participant->get_default_publisher_qos(publisher_qos);
+    assert(status == DDS::RETCODE_OK);
 
     // TODO(esteve): check that request_publisher_ is valid
     request_publisher_ = participant->create_publisher(
@@ -64,6 +65,7 @@ public:
 
     // TODO(esteve): check status
     status = participant->get_default_topic_qos(default_topic_qos);
+    assert(status == DDS::RETCODE_OK);
 
     std::string request_type_name = service_type_name_ + "_Request_";
     std::string request_topic_name = service_name_ + "_Request";
@@ -78,6 +80,7 @@ public:
 
     // TODO(esteve): check status
     status = request_publisher_->get_default_datawriter_qos(default_datawriter_qos);
+    assert(status == DDS::RETCODE_OK);
 
     // TODO(esteve): check that request_datawriter_ is valid
     request_datawriter_ = request_publisher_->create_datawriter(
