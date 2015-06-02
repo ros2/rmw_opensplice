@@ -41,13 +41,14 @@ public:
     // TODO(esteve): check status
     status = participant->get_default_topic_qos(default_topic_qos);
 
-    std::string request_type_name = service_type_name_ + "Request_";
+    std::string request_type_name = service_type_name_ + "_Request_";
     std::string request_topic_name = service_name_ + "_Request";
 
     // TODO(esteve): check that request_topic_ is valid
     request_topic_ = participant->create_topic(
       request_topic_name.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
+    assert(request_topic_ != nullptr);
 
     // Create response Subscriber and DataReader
     DDS::SubscriberQos subscriber_qos;
@@ -56,6 +57,7 @@ public:
     // TODO(esteve): check that request_subscriber_ is valid
     request_subscriber_ = participant_->create_subscriber(
       subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
+    assert(request_subscriber_ != nullptr);
 
     DDS::DataReaderQos default_datareader_qos;
 
@@ -66,6 +68,7 @@ public:
     request_datareader_ = request_subscriber_->create_datareader(
       request_topic_,
       default_datareader_qos, NULL, DDS::STATUS_MASK_NONE);
+    assert(request_datareader_ != nullptr);
 
     // Create request Publisher and DataWriter
     DDS::PublisherQos publisher_qos;
@@ -76,14 +79,16 @@ public:
     // TODO(esteve): check that response_publisher_ is valid
     response_publisher_ = participant->create_publisher(
       publisher_qos, NULL, DDS::STATUS_MASK_NONE);
+    assert(response_publisher_ != nullptr);
 
-    std::string response_type_name = service_type_name_ + "Response_";
+    std::string response_type_name = service_type_name_ + "_Response_";
     std::string response_topic_name = service_name_ + "_Response";
 
     // TODO(esteve): check that response_topic_ is valid
     response_topic_ = participant->create_topic(
       response_topic_name.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
+    assert(response_topic_ != nullptr);
 
     DDS::DataWriterQos default_datawriter_qos;
 
@@ -93,7 +98,7 @@ public:
     // TODO(esteve): check that response_publisher_ is valid
     response_datawriter_ = response_publisher_->create_datawriter(
       response_topic_, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
-
+    assert(response_datawriter_ != nullptr);
   }
 
   DDS::DataReader * get_request_datareader()
