@@ -87,15 +87,14 @@ endforeach()
 
 # If not on Windows, disable some warnings with Connext's generated code
 if(NOT WIN32)
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(_opensplice_compile_flags)
-  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set(_opensplice_compile_flags)
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(_opensplice_compile_flags
-      "-Wno-unused-but-set-variable "
+      "-Wno-unused-but-set-variable"
     )
   endif()
   if(NOT "${_opensplice_compile_flags} " STREQUAL " ")
-    string(REPLACE ";" " " _opensplice_compile_flags ${_opensplice_compile_flags})
+    string(REPLACE ";" " " _opensplice_compile_flags "${_opensplice_compile_flags}")
     foreach(_gen_file ${_generated_files})
       set_source_files_properties("${_gen_file}"
         PROPERTIES COMPILE_FLAGS ${_opensplice_compile_flags})
