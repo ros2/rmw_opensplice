@@ -94,11 +94,13 @@ if(NOT WIN32)
       "-Wno-unused-but-set-variable "
     )
   endif()
-  string(REPLACE ";" " " _opensplice_compile_flags ${_opensplice_compile_flags})
-  foreach(_gen_file ${_generated_files})
-    set_source_files_properties("${_gen_file}"
-      PROPERTIES COMPILE_FLAGS ${_opensplice_compile_flags})
-  endforeach()
+  if(NOT "${_opensplice_compile_flags} " STREQUAL " ")
+    string(REPLACE ";" " " _opensplice_compile_flags ${_opensplice_compile_flags})
+    foreach(_gen_file ${_generated_files})
+      set_source_files_properties("${_gen_file}"
+        PROPERTIES COMPILE_FLAGS ${_opensplice_compile_flags})
+    endforeach()
+  endif()
 endif()
 
 set(_dependency_files "")
