@@ -85,6 +85,22 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   endif()
 endforeach()
 
+# If not on Windows, disable some warnings with Connext's generated code
+if(NOT WIN32)
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(_opensplice_compile_flags)
+  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(_opensplice_compile_flags
+      "-Wno-unused-but-set-variable "
+    )
+  endif()
+  string(REPLACE ";" " " _opensplice_compile_flags ${_opensplice_compile_flags})
+  foreach(_gen_file ${_generated_files})
+    set_source_files_properties("${_gen_file}"
+      PROPERTIES COMPILE_FLAGS ${_opensplice_compile_flags})
+  endforeach()
+endif()
+
 set(_dependency_files "")
 set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
