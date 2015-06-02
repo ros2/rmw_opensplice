@@ -85,7 +85,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   endif()
 endforeach()
 
-# If not on Windows, disable some warnings with Connext's generated code
+# If not on Windows, disable some warnings with OpenSplice's generated code
 if(NOT WIN32)
   set(_opensplice_compile_flags)
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
