@@ -37,6 +37,8 @@ def generate_dds_opensplice_cpp(
             os.path.dirname(os.path.dirname(os.path.normpath(idl_path))))
         if idl_base_path not in include_dirs:
             include_dirs.append(idl_base_path)
+    if 'OSPL_TMPL_PATH' in os.environ:
+        include_dirs.append(os.environ['OSPL_TMPL_PATH'])
 
     for idl_file in dds_interface_files:
         # get two level of parent folders for idl file
@@ -57,7 +59,6 @@ def generate_dds_opensplice_cpp(
         cmd += [
             '-S',
             '-l', 'cpp',
-            '-o', 'dds-types',
             '-d', output_path,
             idl_file
         ]

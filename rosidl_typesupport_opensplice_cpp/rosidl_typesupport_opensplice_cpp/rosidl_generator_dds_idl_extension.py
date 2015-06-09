@@ -30,10 +30,7 @@ def get_include_directives(spec, subfolders):
     # prepend directives to include opensplice specific idl file
     for field in spec.fields:
         if field.type.pkg_name == 'builtin_msgs':
-            includes[:0] = [
-                '#ifndef OSPL_IDL_COMPILER',
-                '#include <dds_dcps.idl>',
-                '#endif']
+            includes.insert(0, '#include <dds_dcps.idl>')
             break
     return includes
 
