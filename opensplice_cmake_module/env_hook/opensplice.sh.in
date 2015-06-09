@@ -20,3 +20,6 @@ else
   fi
   unset _IS_DARWIN
 fi
+
+export OSPL_INFOFILE="<stdout>"
+export OSPL_ERRORFILE="<stderr>"
