@@ -64,7 +64,6 @@ if(NOT "${_ospl_home} " STREQUAL " ")
     "${_ospl_home}/include/dcps/C++/SACPP")
   set(OpenSplice_LIBRARIES
     "cmxml"
-    "commonserv"
     "dcpsgapi"
     "dcpssac"
     "ddsconfparser"
