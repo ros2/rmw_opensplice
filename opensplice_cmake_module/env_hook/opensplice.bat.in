@@ -4,3 +4,4 @@ call "%OSPL_HOME%\release.bat" 1> nul
 
 set "OSPL_INFOFILE=<stdout>"
 set "OSPL_ERRORFILE=<stderr>"
+set OSPL_VERBOSITY=2
