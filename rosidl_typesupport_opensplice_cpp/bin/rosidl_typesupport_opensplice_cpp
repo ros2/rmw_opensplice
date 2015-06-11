@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import sys
 
 from rosidl_parser import UnknownMessageType
 from rosidl_typesupport_opensplice_cpp import generate_dds_opensplice_cpp
 from rosidl_typesupport_opensplice_cpp import generate_typesupport_opensplice_cpp
+
+
+def is_valid_file(parser, file_name):
+    if not os.path.exists(file_name):
+        parser.error("File does not exist: '{0}'".format(file_name))
+    file_name_abs = os.path.abspath(file_name)
+    if not os.path.isfile(file_name_abs):
+        parser.error("Path exists but is not a file: '{0}'".format(file_name_abs))
+    return file_name
 
 
 def main(argv=sys.argv[1:]):
@@ -21,9 +31,10 @@ def main(argv=sys.argv[1:]):
         nargs='*',
         help='The ROS interface files')
     parser.add_argument(
-        '--dds-interface-files',
-        nargs='*',
-        help='The DDS interface files')
+        '--dds-interface-files-file',
+        required=True, metavar='FILE',
+        type=lambda x: is_valid_file(parser, x),
+        help='The file containing a list of the DDS interface files')
     parser.add_argument(
         '--dds-interface-base-path',
         required=True,
@@ -59,9 +70,12 @@ def main(argv=sys.argv[1:]):
         return 1
     if rc:
         return rc
+    dds_interface_files = []
+    with open(args.dds_interface_files_file, 'r') as f:
+        dds_interface_files = [l for l in f.read().splitlines() if l]
     return generate_dds_opensplice_cpp(
         args.pkg_name,
-        args.dds_interface_files,
+        dds_interface_files,
         args.dds_interface_base_path,
         args.deps,
         args.output_dir,

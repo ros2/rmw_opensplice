@@ -119,12 +119,16 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   endforeach()
 endforeach()
 
+set(_dds_idl_files_file "${_output_path}/dds_idl_files.txt")
+string(REPLACE ";" "\n" _dds_idl_files_lines "${_dds_idl_files}")
+file(WRITE "${_dds_idl_files_file}" ${_dds_idl_files_lines})
+
 add_custom_command(
   OUTPUT ${_generated_msg_files} ${_generated_srv_files}
   COMMAND ${PYTHON_EXECUTABLE} ${rosidl_typesupport_opensplice_cpp_BIN}
   --pkg-name ${PROJECT_NAME}
   --ros-interface-files ${rosidl_generate_interfaces_IDL_FILES}
-  --dds-interface-files ${_dds_idl_files}
+  --dds-interface-files-file ${_dds_idl_files_file}
   --dds-interface-base-path ${_dds_idl_base_path}
   --deps ${_dependencies}
   --output-dir "${_output_path}"
