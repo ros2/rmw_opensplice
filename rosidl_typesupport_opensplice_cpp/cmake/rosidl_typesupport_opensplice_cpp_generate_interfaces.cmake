@@ -208,7 +208,6 @@ endforeach()
 ament_target_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
   "OpenSplice"
-  "rosidl_generator_cpp"
   "rosidl_typesupport_opensplice_cpp")
 
 add_dependencies(
