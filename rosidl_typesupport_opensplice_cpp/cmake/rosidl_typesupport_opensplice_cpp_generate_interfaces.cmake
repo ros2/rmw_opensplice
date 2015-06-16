@@ -45,7 +45,9 @@ endforeach()
 
 set(_output_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_cpp/${PROJECT_NAME}")
 set(_generated_msg_files "")
+set(_generated_external_msg_files "")
 set(_generated_srv_files "")
+set(_generated_external_srv_files "")
 foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(_extension "${_idl_file}" EXT)
   get_filename_component(_msg_name "${_idl_file}" NAME_WE)
@@ -53,7 +55,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   if("${_extension} " STREQUAL ".msg ")
     get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
     get_filename_component(_parent_folder "${_parent_folder}" NAME)
-    list(APPEND _generated_msg_files
+    list(APPEND _generated_external_msg_files
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_.h"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_.cpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_Dcps.h"
@@ -62,14 +64,15 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_Dcps_impl.cpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_SplDcps.h"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_SplDcps.cpp"
-      "${_output_path}/${_parent_folder}/dds_opensplice/ccpp_${_msg_name}_.h"
+      "${_output_path}/${_parent_folder}/dds_opensplice/ccpp_${_msg_name}_.h")
+    list(APPEND _generated_msg_files
       "${_output_path}/${_parent_folder}/dds_opensplice/${_header_name}__type_support.hpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_header_name}__type_support.cpp")
   elseif("${_extension} " STREQUAL ".srv ")
     list(APPEND _generated_srv_files "${_output_path}/srv/dds_opensplice/${_header_name}__type_support.cpp")
 
     foreach(_suffix "_Request" "_Response")
-      list(APPEND _generated_srv_files
+      list(APPEND _generated_external_srv_files
         "${_output_path}/srv/dds_opensplice/Sample_${_msg_name}${_suffix}_.h"
         "${_output_path}/srv/dds_opensplice/Sample_${_msg_name}${_suffix}_.cpp"
         "${_output_path}/srv/dds_opensplice/Sample_${_msg_name}${_suffix}_Dcps.h"
@@ -84,6 +87,23 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
     message(FATAL_ERROR "Interface file with unknown extension: ${_idl_file}")
   endif()
 endforeach()
+
+# If not on Windows, disable some warnings with OpenSplice's generated code
+if(NOT WIN32)
+  set(_opensplice_compile_flags)
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(_opensplice_compile_flags
+      "-Wno-unused-but-set-variable"
+    )
+  endif()
+  if(NOT "${_opensplice_compile_flags} " STREQUAL " ")
+    string(REPLACE ";" " " _opensplice_compile_flags "${_opensplice_compile_flags}")
+    foreach(_gen_file ${_generated_external_msg_files} ${_generated_external_srv_files})
+      set_source_files_properties("${_gen_file}"
+        PROPERTIES COMPILE_FLAGS ${_opensplice_compile_flags})
+    endforeach()
+  endif()
+endif()
 
 set(_dependency_files "")
 set(_dependencies "")
@@ -124,7 +144,11 @@ string(REPLACE ";" "\n" _dds_idl_files_lines "${_dds_idl_files}")
 file(WRITE "${_dds_idl_files_file}" ${_dds_idl_files_lines})
 
 add_custom_command(
-  OUTPUT ${_generated_msg_files} ${_generated_srv_files}
+  OUTPUT
+  ${_generated_msg_files}
+  ${_generated_external_msg_files}
+  ${_generated_srv_files}
+  ${_generated_external_srv_files}
   COMMAND ${PYTHON_EXECUTABLE} ${rosidl_typesupport_opensplice_cpp_BIN}
   --pkg-name ${PROJECT_NAME}
   --ros-interface-files ${rosidl_generate_interfaces_IDL_FILES}
@@ -151,15 +175,15 @@ add_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
 )
 
-if(NOT "${_generated_msg_files} " STREQUAL " ")
+if(NOT "${_generated_msg_files}${_generated_external_msg_files} " STREQUAL " ")
   install(
-    FILES ${_generated_msg_files}
+    FILES ${_generated_msg_files} ${_generated_external_msg_files}
     DESTINATION "include/${PROJECT_NAME}/msg/dds_opensplice"
   )
 endif()
-if(NOT "${_generated_srv_files} " STREQUAL " ")
+if(NOT "${_generated_srv_files}${_generated_external_srv_files} " STREQUAL " ")
   install(
-    FILES ${_generated_srv_files}
+    FILES ${_generated_srv_files} ${_generated_external_srv_files}
     DESTINATION "include/${PROJECT_NAME}/srv/dds_opensplice"
   )
 endif()
@@ -171,13 +195,18 @@ else()
     ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/duration__type_support.cpp
     ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/time__type_support.cpp
   )
+  set(_generated_external_msg_files)
   set(_generated_srv_files)
+  set(_generated_external_srv_files)
 
 endif()
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED
-  ${_generated_msg_files} ${_generated_srv_files})
+  ${_generated_msg_files}
+  ${_generated_external_msg_files}
+  ${_generated_srv_files}
+  ${_generated_external_srv_files})
 if(WIN32)
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PRIVATE "ROSIDL_BUILDING_DLL")
