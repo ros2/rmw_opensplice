@@ -19,9 +19,9 @@
 
 #include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 
-#include "builtin_msgs/msg/time__struct.hpp"
+#include "builtin_interfaces/msg/time__struct.hpp"
 
-namespace builtin_msgs
+namespace builtin_interfaces
 {
 namespace msg
 {
@@ -30,16 +30,16 @@ namespace type_support
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 extern void convert_ros_message_to_dds(
-  const builtin_msgs::msg::Time & ros_message,
+  const builtin_interfaces::msg::Time & ros_message,
   DDS::Time_t & dds_message);
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 extern void convert_dds_message_to_ros(
   const DDS::Time_t & dds_message,
-  builtin_msgs::msg::Time & ros_message);
+  builtin_interfaces::msg::Time & ros_message);
 
 }  // namespace type_support
 }  // namespace msg
-}  // namespace builtin_msgs
+}  // namespace builtin_interfaces
 
 #endif  // __rosidl_typesupport_openslice_cpp__time__type_support__h__

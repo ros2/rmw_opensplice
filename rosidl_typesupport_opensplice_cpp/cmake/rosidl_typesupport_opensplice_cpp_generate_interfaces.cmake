@@ -14,8 +14,8 @@
 
 set(_target_suffix "__rosidl_typesupport_opensplice_cpp")
 
-# avoid generating any opensplice specific stuff for builtin_msgs
-if(NOT "${PROJECT_NAME} " STREQUAL "builtin_msgs ")
+# avoid generating any opensplice specific stuff for builtin_interfaces
+if(NOT "${PROJECT_NAME} " STREQUAL "builtin_interfaces ")
 
 rosidl_generate_dds_interfaces(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
@@ -113,8 +113,8 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
     if("${_extension} " STREQUAL ".msg ")
       get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
       get_filename_component(_parent_folder "${_parent_folder}" NAME)
-      # ignore builtin_msgs since it does not have any idl files
-      if(NOT "${_pkg_name} " STREQUAL "builtin_msgs ")
+      # ignore builtin_interfaces since it does not have any idl files
+      if(NOT "${_pkg_name} " STREQUAL "builtin_interfaces ")
         get_filename_component(_name "${_idl_file}" NAME_WE)
         set(_abs_idl_file "${${_pkg_name}_DIR}/../${_parent_folder}/dds_opensplice/${_name}_.idl")
         normalize_path(_abs_idl_file "${_abs_idl_file}")
@@ -190,7 +190,7 @@ endif()
 
 else()
 
-  # generate specific type support code for the builtin_msgs package
+  # generate specific type support code for the builtin_interfaces package
   set(_generated_msg_files
     ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/duration__type_support.cpp
     ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/time__type_support.cpp

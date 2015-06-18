@@ -14,7 +14,7 @@
 
 #include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
 
-namespace builtin_msgs
+namespace builtin_interfaces
 {
 namespace msg
 {
@@ -23,7 +23,7 @@ namespace type_support
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 void convert_ros_message_to_dds(
-  const builtin_msgs::msg::Duration & ros_message,
+  const builtin_interfaces::msg::Duration & ros_message,
   DDS::Duration_t & dds_message)
 {
   dds_message.sec = ros_message.sec;
@@ -33,7 +33,7 @@ void convert_ros_message_to_dds(
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 void convert_dds_message_to_ros(
   const DDS::Duration_t & dds_message,
-  builtin_msgs::msg::Duration & ros_message)
+  builtin_interfaces::msg::Duration & ros_message)
 {
   ros_message.sec = dds_message.sec;
   ros_message.nanosec = dds_message.nanosec;
@@ -41,4 +41,4 @@ void convert_dds_message_to_ros(
 
 }  // namespace type_support
 }  // namespace msg
-}  // namespace builtin_msgs
+}  // namespace builtin_interfaces
