@@ -26,7 +26,7 @@
 // forward declaration of message dependencies and their conversion functions
 @[for field in spec.fields]@
 @[if not field.type.is_primitive_type()]@
-@[if field.type.pkg_name == 'builtin_msgs']@
+@[if field.type.pkg_name == 'builtin_interfaces']@
 #include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/time__type_support.hpp"
 @[else]@

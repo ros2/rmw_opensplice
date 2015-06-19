@@ -24,12 +24,12 @@ from rosidl_generator_dds_idl import _msg_type_to_idl
 def get_include_directives(spec, subfolders):
     includes = get_default_include_directives(spec, subfolders)
 
-    # remove directives for builtin_msgs
-    includes = [i for i in includes if '"builtin_msgs/' not in i]
+    # remove directives for builtin_interfaces
+    includes = [i for i in includes if '"builtin_interfaces/' not in i]
 
     # prepend directives to include opensplice specific idl file
     for field in spec.fields:
-        if field.type.pkg_name == 'builtin_msgs':
+        if field.type.pkg_name == 'builtin_interfaces':
             includes.insert(0, '#include <dds_dcps.idl>')
             break
     return includes
@@ -42,7 +42,7 @@ def get_post_struct_lines(spec):
 
 
 def msg_type_to_idl(type_):
-    if type_.pkg_name == 'builtin_msgs':
+    if type_.pkg_name == 'builtin_interfaces':
         idl_type = 'DDS::%s_t' % type_.type
         return _msg_type_to_idl(type_, idl_type)
     return default_msg_type_to_idl(type_)
