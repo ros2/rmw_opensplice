@@ -30,12 +30,16 @@
 #include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/time__type_support.hpp"
 @[else]@
-namespace @(field.type.pkg_name) {
-namespace msg {
-namespace dds_ {
+namespace @(field.type.pkg_name)
+{
+namespace msg
+{
+namespace dds_
+{
 struct @(field.type.type)_;
 }  // namespace dds_
-namespace type_support {
+namespace type_support
+{
 void convert_ros_message_to_dds(
   const @(field.type.pkg_name)::msg::@(field.type.type) &,
   @(field.type.pkg_name)::msg::dds_::@(field.type.type)_ &);
