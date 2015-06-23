@@ -41,6 +41,7 @@ struct OpenSpliceStaticSubscriberInfo
 {
   DDS::DataReader * topic_reader;
   const message_type_support_callbacks_t * callbacks;
+  bool ignore_local_publications;
 };
 
 struct OpenSpliceStaticClientInfo
@@ -258,7 +259,8 @@ rmw_create_subscription(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_support,
   const char * topic_name,
-  size_t queue_size)
+  size_t queue_size,
+  bool ignore_local_publications)
 {
   if (node->implementation_identifier != opensplice_cpp_identifier) {
     rmw_set_error_string("node does not share this implementation");
@@ -335,6 +337,7 @@ rmw_create_subscription(
       sizeof(OpenSpliceStaticSubscriberInfo)));
   subscriber_info->topic_reader = topic_reader;
   subscriber_info->callbacks = callbacks;
+  subscriber_info->ignore_local_publications = ignore_local_publications;
 
   rmw_subscription_t * subscription = rmw_subscription_allocate();
   if (!subscription) {
@@ -378,9 +381,10 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
   const message_type_support_callbacks_t * callbacks = \
     subscriber_info->callbacks;
 
-  *taken = callbacks->take(topic_reader, ros_message);
+  bool success = callbacks->take(
+    topic_reader, subscriber_info->ignore_local_publications, ros_message, taken);
 
-  return RMW_RET_OK;
+  return success ? RMW_RET_OK : RMW_RET_ERROR;
 }
 
 rmw_guard_condition_t *

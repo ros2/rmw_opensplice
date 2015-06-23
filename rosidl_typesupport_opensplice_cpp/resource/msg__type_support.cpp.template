@@ -12,6 +12,8 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
+#include <u_instanceHandle.h>
+
 #include <rosidl_generator_c/message_type_support.h>
 // this is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder
@@ -182,7 +184,9 @@ convert_dds_message_to_ros(
 bool
 take__@(spec.base_type.type)(
   void * untyped_topic_reader,
-  void * untyped_ros_message)
+  bool ignore_local_publications,
+  void * untyped_ros_message,
+  bool * taken)
 {
   DDS::DataReader* topic_reader = static_cast<DDS::DataReader*>(untyped_topic_reader);
 
@@ -212,8 +216,25 @@ take__@(spec.base_type.type)(
     throw std::runtime_error("invalid ROS message pointer");
   };
 
-  @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message = *(@(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) *)untyped_ros_message;
-  convert_dds_message_to_ros(dds_messages[0], ros_message);
+  bool ignore_sample = false;
+  if (ignore_local_publications) {
+    // compare the system id from the sender and this receiver
+    // if they are equal the sample has been sent from this process and should be ignored
+    DDS::SampleInfo & sample_info = sample_infos[0];
+    DDS::InstanceHandle_t sender_handle = sample_info.publication_handle;
+    DDS::InstanceHandle_t receiver_handle = topic_reader->get_instance_handle();
+    auto sender_gid = u_instanceHandleToGID(sender_handle);
+    auto receiver_gid = u_instanceHandleToGID(receiver_handle);
+    ignore_sample = sender_gid.systemId == receiver_gid.systemId;
+  }
+
+  if (!ignore_sample) {
+    @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message = *(@(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) *)untyped_ros_message;
+    convert_dds_message_to_ros(dds_messages[0], ros_message);
+    *taken = true;
+  } else {
+    *taken = false;
+  }
 
   data_reader->return_loan(dds_messages, sample_infos);
 
