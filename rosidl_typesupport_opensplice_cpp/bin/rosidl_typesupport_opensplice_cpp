@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 
+from rosidl_cmake import read_generator_arguments
 from rosidl_parser import UnknownMessageType
 from rosidl_typesupport_opensplice_cpp import generate_dds_opensplice_cpp
 from rosidl_typesupport_opensplice_cpp import generate_typesupport_opensplice_cpp
@@ -23,62 +24,34 @@ def main(argv=sys.argv[1:]):
         description='Generate the C++ interfaces for OpenSplice.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--pkg-name',
+        '--generator-arguments-file',
         required=True,
-        help='The package name to generate interfaces for')
-    parser.add_argument(
-        '--ros-interface-files',
-        nargs='*',
-        help='The ROS interface files')
-    parser.add_argument(
-        '--dds-interface-files-file',
-        required=True, metavar='FILE',
-        type=lambda x: is_valid_file(parser, x),
-        help='The file containing a list of the DDS interface files')
+        help='The location of the file containing the generator arguments')
     parser.add_argument(
         '--dds-interface-base-path',
         required=True,
         help='The base location of the DDS interface files')
     parser.add_argument(
-        '--deps',
-        nargs='*',
-        help="The dependencies (each as '<pkgname>:<abs_interface_file>')")
-    parser.add_argument(
-        '--output-dir',
-        required=True,
-        help='The location of the generated C++ interfaces')
-    parser.add_argument(
         '--idl-pp',
         required=True,
         help='The location of the IDL preprocessor')
-    parser.add_argument(
-        '--template-dir',
-        required=True,
-        help='The location of the template files')
     args = parser.parse_args(argv)
 
+    generator_args = read_generator_arguments(args.generator_arguments_file)
+
     try:
-        rc = generate_typesupport_opensplice_cpp(
-            args.pkg_name,
-            args.ros_interface_files,
-            args.deps,
-            args.output_dir,
-            args.template_dir,
-        )
+        rc = generate_typesupport_opensplice_cpp(generator_args)
     except UnknownMessageType as e:
         print(str(e), file=sys.stderr)
         return 1
     if rc:
         return rc
-    dds_interface_files = []
-    with open(args.dds_interface_files_file, 'r') as f:
-        dds_interface_files = [l for l in f.read().splitlines() if l]
     return generate_dds_opensplice_cpp(
-        args.pkg_name,
-        dds_interface_files,
+        generator_args['package_name'],
+        generator_args.get('additional_files', []),
         args.dds_interface_base_path,
-        args.deps,
-        args.output_dir,
+        generator_args.get('ros_interface_dependencies', []),
+        generator_args['output_dir'],
         args.idl_pp,
     )
 
