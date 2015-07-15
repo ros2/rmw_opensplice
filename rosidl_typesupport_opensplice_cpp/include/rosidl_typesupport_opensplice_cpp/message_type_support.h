@@ -21,12 +21,18 @@ typedef struct message_type_support_callbacks_t
 {
   const char * package_name;
   const char * message_name;
-  // Function to register type with given dds_participant
-  void (* register_type)(void * dds_participant, const char * type_name);
+  // Function to register type with given dds_participant.
+  // Returns NULL if the registration was successful, otherwise an error string.
+  const char * (*register_type)(
+    void * untyped_participant, const char * type_name);
   // Function to publish a ROS message with a given DDS data_writer
-  void (* publish)(void * dds_data_writer, const void * ros_message);
+  // Returns NULL if the publish was successful, otherwise an error string.
+  const char * (*publish)(
+    void * dds_data_writer, const void * ros_message);
   // Function to take a ROS message from a dds data reader
-  bool (* take)(
+  // Returns NULL if the take was successful, otherwise an error string.
+  // If no data is available to be taken, NULL is returned but taken will be set to false.
+  const char * (*take)(
     void * dds_data_reader, bool ignore_local_publications, void * ros_message, bool * taken);
 } message_type_support_callbacks_t;
 
