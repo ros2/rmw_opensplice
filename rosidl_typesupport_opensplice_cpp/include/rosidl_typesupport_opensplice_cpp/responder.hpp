@@ -15,11 +15,14 @@
 #ifndef __rosidl_typesupport_opensplice_cpp__responder__h__
 #define __rosidl_typesupport_opensplice_cpp__responder__h__
 
+#include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
+
 #include <ccpp_dds_dcps.h>
 #include <u_entity.h>
 
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 #include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
+#include <rmw/rmw.h>
 
 namespace rosidl_typesupport_opensplice_cpp
 {
@@ -33,76 +36,141 @@ public:
     const std::string & service_type_name)
   : participant_(participant),
     service_name_(service_name), service_type_name_(service_type_name)
+  {}
+
+  const char * init()
   {
-    // Create request Publisher and DataWriter
     DDS::ReturnCode_t status;
     DDS::TopicQos default_topic_qos;
-
-    // TODO(esteve): check status
-    status = participant->get_default_topic_qos(default_topic_qos);
-    assert(status == DDS::RETCODE_OK);
-
+    DDS::SubscriberQos subscriber_qos;
+    DDS::DataReaderQos default_datareader_qos;
+    DDS::PublisherQos publisher_qos;
+    DDS::DataWriterQos default_datawriter_qos;
     std::string request_type_name = service_type_name_ + "_Request_";
     std::string request_topic_name = service_name_ + "_Request";
+    std::string response_type_name = service_type_name_ + "_Response_";
+    std::string response_topic_name = service_name_ + "_Response";
+    const char * estr = nullptr;
+    request_topic_ = nullptr;
+    request_subscriber_ = nullptr;
+    request_datareader_ = nullptr;
+    response_publisher_ = nullptr;
+    response_topic_ = nullptr;
+    response_datawriter_ = nullptr;
 
-    // TODO(esteve): check that request_topic_ is valid
-    request_topic_ = participant->create_topic(
+    // Create request Publisher and DataWriter
+    status = participant_->get_default_topic_qos(default_topic_qos);
+    if (nullptr != (estr = impl::check_get_default_topic_qos(status))) {
+      goto fail;
+    }
+
+    request_topic_ = participant_->create_topic(
       request_topic_name.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
-    assert(request_topic_ != nullptr);
+    if (!request_topic_) {
+      estr = "DomainParticipant::create_topic: failed";
+      goto fail;
+    }
 
     // Create response Subscriber and DataReader
-    DDS::SubscriberQos subscriber_qos;
-    participant->get_default_subscriber_qos(subscriber_qos);
+    status = participant_->get_default_subscriber_qos(subscriber_qos);
+    if (nullptr != (estr = impl::check_get_default_subscriber_qos(status))) {
+      goto fail;
+    }
 
-    // TODO(esteve): check that request_subscriber_ is valid
     request_subscriber_ = participant_->create_subscriber(
       subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
-    assert(request_subscriber_ != nullptr);
+    if (!request_subscriber_) {
+      estr = "DomainParticipant::create_subscriber: failed";
+      goto fail;
+    }
 
-    DDS::DataReaderQos default_datareader_qos;
-
-    // TODO(esteve): check status
     status = request_subscriber_->get_default_datareader_qos(default_datareader_qos);
-    assert(status == DDS::RETCODE_OK);
+    if (nullptr != (estr = impl::check_get_default_datareader_qos(status))) {
+      goto fail;
+    }
 
-    // TODO(esteve): check that request_datareader_ is valid
     request_datareader_ = request_subscriber_->create_datareader(
       request_topic_,
       default_datareader_qos, NULL, DDS::STATUS_MASK_NONE);
-    assert(request_datareader_ != nullptr);
+    if (!request_datareader_) {
+      estr = "Subscriber::create_datareader: failed";
+      goto fail;
+    }
 
     // Create request Publisher and DataWriter
-    DDS::PublisherQos publisher_qos;
+    status = participant_->get_default_publisher_qos(publisher_qos);
+    if (nullptr != (estr = impl::check_get_default_publisher_qos(status))) {
+      goto fail;
+    }
 
-    // TODO(esteve): check status
-    status = participant->get_default_publisher_qos(publisher_qos);
-    assert(status == DDS::RETCODE_OK);
-
-    // TODO(esteve): check that response_publisher_ is valid
-    response_publisher_ = participant->create_publisher(
+    response_publisher_ = participant_->create_publisher(
       publisher_qos, NULL, DDS::STATUS_MASK_NONE);
-    assert(response_publisher_ != nullptr);
+    if (!response_publisher_) {
+      estr = "DomainParticipant::create_publisher: failed";
+      goto fail;
+    }
 
-    std::string response_type_name = service_type_name_ + "_Response_";
-    std::string response_topic_name = service_name_ + "_Response";
-
-    // TODO(esteve): check that response_topic_ is valid
-    response_topic_ = participant->create_topic(
+    response_topic_ = participant_->create_topic(
       response_topic_name.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
-    assert(response_topic_ != nullptr);
+    if (!response_topic_) {
+      estr = "DomainParticipant::create_topic: failed";
+      goto fail;
+    }
 
-    DDS::DataWriterQos default_datawriter_qos;
-
-    // TODO(esteve): check status
     status = response_publisher_->get_default_datawriter_qos(default_datawriter_qos);
-    assert(status == DDS::RETCODE_OK);
+    if (nullptr != (estr = impl::check_get_default_datawriter_qos(status))) {
+      goto fail;
+    }
 
-    // TODO(esteve): check that response_publisher_ is valid
     response_datawriter_ = response_publisher_->create_datawriter(
       response_topic_, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
-    assert(response_datawriter_ != nullptr);
+    if (!response_datawriter_) {
+      estr = "Publisher::create_datawriter: failed";
+      goto fail;
+    }
+    return nullptr;
+fail:
+    if (response_datawriter_) {
+      // Assumption: publisher is not null at this point.
+      status = response_publisher_->delete_datawriter(response_datawriter_);
+      if (nullptr != impl::check_delete_datawriter(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_datawriter(status));
+      }
+    }
+    if (response_topic_) {
+      status = participant_->delete_topic(response_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+      }
+    }
+    if (response_publisher_) {
+      status = participant_->delete_publisher(response_publisher_);
+      if (nullptr != impl::check_delete_publisher(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_publisher(status));
+      }
+    }
+    if (request_datareader_) {
+      // Assumption: subscriber is not null at this point.
+      status = request_subscriber_->delete_datareader(request_datareader_);
+      if (nullptr != impl::check_delete_datareader(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_datareader(status));
+      }
+    }
+    if (request_subscriber_) {
+      status = participant_->delete_subscriber(request_subscriber_);
+      if (nullptr != impl::check_delete_subscriber(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_subscriber(status));
+      }
+    }
+    if (request_topic_) {
+      status = participant_->delete_topic(request_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+      }
+    }
+    return estr;
   }
 
   DDS::DataReader * get_request_datareader()
@@ -110,19 +178,21 @@ public:
     return request_datareader_;
   }
 
-  bool take_request(Sample<RequestT> & request)
+  const char * take_request(Sample<RequestT> & request, bool * taken)
+  noexcept
   {
-    return TemplateDataReader<Sample<RequestT>>::take_sample(request_datareader_, request);
+    return TemplateDataReader<Sample<RequestT>>::take_sample(request_datareader_, request, taken);
   }
 
-  void send_response(const rmw_request_id_t & request_header, Sample<ResponseT> & response)
+  const char * send_response(const rmw_request_id_t & request_header, Sample<ResponseT> & response)
+  noexcept
   {
     response.sequence_number_ = request_header.sequence_number;
     response.client_guid_0_ = *(reinterpret_cast<const uint64_t *>(&request_header.writer_guid[0]));
     response.client_guid_1_ = *(reinterpret_cast<const uint64_t *>(
         &request_header.writer_guid[0] + sizeof(response.client_guid_0_)));
 
-    TemplateDataWriter<Sample<ResponseT>>::write_sample(response_datawriter_, response);
+    return TemplateDataWriter<Sample<ResponseT>>::write_sample(response_datawriter_, response);
   }
 
 private:

@@ -15,6 +15,9 @@
 #ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_SERVICE_TYPE_SUPPORT_H_
 #define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_SERVICE_TYPE_SUPPORT_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "rosidl_generator_c/service_type_support.h"
 
 typedef struct service_type_support_callbacks_t
@@ -22,26 +25,45 @@ typedef struct service_type_support_callbacks_t
   const char * package_name;
   const char * service_name;
   // Function to create a requester
-  void (* create_requester)(
-    void * participant, const char * service_name,
-    void ** requester, void ** reader);
+  // Returns NULL if the requester was successfully created, otherwise an error string.
+  // Passing NULL to the allocator will result in malloc being used.
+  const char * (*create_requester)(
+    void * participant, const char * service_name, void ** requester, void ** reader,
+    void * (*allocator)(size_t));
+  // De-allocatea a requester
+  // The deallocator should match the allocator passed to create_requester.
+  // Returns NULL if the requester was successfully destroyed, otherwise an error string.
+  // Passing NULL for the deallocator will result in free being used.
+  const char * (*destroy_requester)(void * untyped_requester, void (* deallocator)(void *));
   // Function to create a responder
-  void (* create_responder)(
-    void * participant, const char * service_name,
-    void ** responder, void ** reader);
+  // Returns NULL if the responder was successfully created, otherwise an error string.
+  // Passing NULL to the allocator will result in malloc being used.
+  const char * (*create_responder)(
+    void * participant, const char * service_name, void ** responder, void ** reader,
+    void * (*allocator)(size_t));
+  // De-allocatea a responder
+  // The deallocator should match the allocator passed to create_respnder.
+  // Returns NULL if the responder was successfully destroyed, otherwise an error string.
+  // Passing NULL for the deallocator will result in free being used.
+  const char * (*destroy_responder)(void * untyped_requester, void (* deallocator)(void *));
   // Function to send ROS requests
-  int64_t (* send_request)(void * requester, const void * ros_request);
+  // Returns NULL if the request was successfully sent, otherwise an error string.
+  const char * (*send_request)(
+    void * requester, const void * ros_request, int64_t * sequence_number);
   // Function to read a ROS request from the wire
-  bool (* take_request)(void * responder, void * ros_request_header, void * ros_request);
+  // Returns NULL if the request was successfully taken, otherwise an error string.
+  // If no data is available to be taken, NULL is returned but taken will be set to false.
+  const char * (*take_request)(
+    void * responder, void * ros_request_header, void * ros_request, bool * taken);
   // Function to send ROS responses
-  void (* send_response)(
+  // Returns NULL if the response was successfully sent, otherwise an error string.
+  const char * (*send_response)(
     void * responder, const void * ros_request_header, const void * ros_response);
   // Function to read a ROS response from the wire
-  bool (* take_response)(void * requester, void * ros_request_header, void * ros_response);
-  // De-allocatea a requester
-  void (* destroy_requester)(void * untyped_requester);
-  // De-allocatea a responder
-  void (* destroy_responder)(void * untyped_requester);
+  // Returns NULL if the response was successfully taken, otherwise an error string.
+  // If no data is available to be taken, NULL is returned but taken will be set to false.
+  const char * (*take_response)(
+    void * requester, void * ros_request_header, void * ros_response, bool * taken);
 } service_type_support_callbacks_t;
 
 #endif  /* ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_SERVICE_TYPE_SUPPORT_H_ */
