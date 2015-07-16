@@ -18,7 +18,7 @@ namespace builtin_interfaces
 {
 namespace msg
 {
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 
 void convert_ros_message_to_dds(
@@ -37,6 +37,6 @@ void convert_dds_message_to_ros(
   ros_message.nanosec = dds_message.nanosec;
 }
 
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace builtin_interfaces

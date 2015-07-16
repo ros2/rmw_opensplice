@@ -18,7 +18,7 @@ namespace builtin_interfaces
 {
 namespace msg
 {
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
@@ -39,6 +39,6 @@ void convert_dds_message_to_ros(
   ros_message.nanosec = dds_message.nanosec;
 }
 
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace builtin_interfaces

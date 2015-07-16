@@ -222,7 +222,7 @@ namespace @(spec.pkg_name)
 namespace srv
 {
 
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 
 const char *
@@ -394,7 +394,7 @@ send_request__@(spec.srv_name)(
 
   SampleT request;
   auto ros_request = reinterpret_cast<const ROSRequestT *>(untyped_ros_request);
-  @(spec.pkg_name)::srv::type_support::convert_ros_message_to_dds(*ros_request, request.data());
+  @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_request, request.data());
 
   typedef
   rosidl_typesupport_opensplice_cpp::Requester<
@@ -439,7 +439,7 @@ take_request__@(spec.srv_name)(
   }
 
   if (taken) {
-    @(spec.pkg_name)::srv::type_support::convert_dds_message_to_ros(request.data(), *ros_request);
+    @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_dds_message_to_ros(request.data(), *ros_request);
 
     request_header->sequence_number = request.sequence_number_;
     *(reinterpret_cast<uint64_t *>(&request_header->writer_guid[0])) = request.client_guid_0_;
@@ -461,7 +461,7 @@ send_response__@(spec.srv_name)(
   typedef @(spec.pkg_name)::srv::@(spec.srv_name)_Response ROSResponseT;
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
   auto ros_response = reinterpret_cast<const ROSResponseT *>(untyped_ros_response);
-  @(spec.pkg_name)::srv::type_support::convert_ros_message_to_dds(*ros_response, response.data());
+  @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_response, response.data());
 
   auto request_header = reinterpret_cast<const rmw_request_id_t *>(untyped_ros_request_header);
 
@@ -506,7 +506,7 @@ take_response__@(spec.srv_name)(
 
     req_id->sequence_number = response.sequence_number_;
 
-    @(spec.pkg_name)::srv::type_support::convert_dds_message_to_ros(
+    @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_dds_message_to_ros(
       response.data(), *ros_response);
     return nullptr;
   }
@@ -583,7 +583,7 @@ static rosidl_service_type_support_t handle = {
   &callbacks
 };
 
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 
 }  // namespace srv
 
@@ -598,7 +598,7 @@ ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_service_type_support_t *
 get_service_type_support_handle_opensplice<@(spec.pkg_name)::srv::@(spec.srv_name)>()
 {
-  return &@(spec.pkg_name)::srv::type_support::handle;
+  return &@(spec.pkg_name)::srv::typesupport_opensplice_cpp::handle;
 }
 
 }  // namespace rosidl_typesupport_opensplice_cpp

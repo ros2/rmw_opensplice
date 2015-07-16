@@ -43,7 +43,7 @@ namespace dds_
 {
 struct @(field.type.type)_;
 }  // namespace dds_
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 void convert_ros_message_to_dds(
   const @(field.type.pkg_name)::msg::@(field.type.type) &,
@@ -51,7 +51,7 @@ void convert_ros_message_to_dds(
 void convert_dds_message_to_ros(
   const @(field.type.pkg_name)::msg::dds_::@(field.type.type)_ &,
   @(field.type.pkg_name)::msg::@(field.type.type) &);
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace @(field.type.pkg_name)
 @[end if]@
@@ -65,7 +65,7 @@ namespace @(spec.base_type.pkg_name)
 namespace @(subfolder)
 {
 
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 
 @{
@@ -132,7 +132,7 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
 @[elif field.type.is_primitive_type()]@
       dds_message.@(field.name)_[i] = ros_message.@(field.name)[i];
 @[else]@
-      @(field.type.pkg_name)::msg::type_support::convert_ros_message_to_dds(
+      @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_ros_message_to_dds(
         ros_message.@(field.name)[i], dds_message.@(field.name)_[i]);
 @[end if]@
     }
@@ -142,7 +142,7 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
 @[elif field.type.is_primitive_type()]@
   dds_message.@(field.name)_ = ros_message.@(field.name);
 @[else]@
-  @(field.type.pkg_name)::msg::type_support::convert_ros_message_to_dds(
+  @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_ros_message_to_dds(
     ros_message.@(field.name), dds_message.@(field.name)_);
 @[end if]@
 
@@ -212,7 +212,7 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
 @[elif field.type.is_primitive_type()]@
       ros_message.@(field.name)[i] = dds_message.@(field.name)_[i];
 @[else]@
-      @(field.type.pkg_name)::msg::type_support::convert_dds_message_to_ros(
+      @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
         dds_message.@(field.name)_[i], ros_message.@(field.name)[i]);
 @[end if]@
     }
@@ -220,7 +220,7 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
 @[elif field.type.is_primitive_type()]@
   ros_message.@(field.name) = dds_message.@(field.name)_;
 @[else]@
-  @(field.type.pkg_name)::msg::type_support::convert_dds_message_to_ros(
+  @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
     dds_message.@(field.name)_, ros_message.@(field.name));
 @[end if]@
 
@@ -355,7 +355,7 @@ static rosidl_message_type_support_t handle = {
   &callbacks
 };
 
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 
 }  // namespace @(subfolder)
 
@@ -371,7 +371,7 @@ get_message_type_support_handle_opensplice<
   @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type)
 >()
 {
-  return &@(spec.base_type.pkg_name)::@(subfolder)::type_support::handle;
+  return &@(spec.base_type.pkg_name)::@(subfolder)::typesupport_opensplice_cpp::handle;
 }
 
 }  // namespace rosidl_typesupport_opensplice_cpp

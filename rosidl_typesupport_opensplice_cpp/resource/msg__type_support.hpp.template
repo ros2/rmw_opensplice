@@ -31,7 +31,7 @@ namespace @(spec.base_type.pkg_name)
 namespace @(subfolder)
 {
 
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 
 void register_type__@(spec.base_type.type)(
@@ -56,7 +56,7 @@ bool take__@(spec.base_type.type)(
   void * untyped_ros_message,
   bool * taken);
 
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 
 }  // namespace @(subfolder)
 
