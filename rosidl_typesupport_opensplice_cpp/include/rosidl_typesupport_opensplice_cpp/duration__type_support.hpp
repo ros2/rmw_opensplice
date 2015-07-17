@@ -25,7 +25,7 @@ namespace builtin_interfaces
 {
 namespace msg
 {
-namespace type_support
+namespace typesupport_opensplice_cpp
 {
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
@@ -38,7 +38,7 @@ extern void convert_dds_message_to_ros(
   const DDS::Duration_t & dds_message,
   builtin_interfaces::msg::Duration & ros_message);
 
-}  // namespace type_support
+}  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace builtin_interfaces
 
