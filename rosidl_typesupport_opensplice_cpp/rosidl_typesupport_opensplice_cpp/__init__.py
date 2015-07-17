@@ -94,7 +94,10 @@ def generate_typesupport_opensplice_cpp(args):
     functions = {
         'get_header_filename_from_msg_name': convert_camel_case_to_lower_case_underscore,
     }
-    latest_target_timestamp = get_newest_modification_time(args['target_dependencies'])
+    # generate_dds_opensplice_cpp() and therefore the make target depend on the additional files
+    # therefore they must be listed here even if the generated type support files are independent
+    latest_target_timestamp = get_newest_modification_time(
+        args['target_dependencies'] + args.get('additional_files', []))
 
     for idl_file in args['ros_interface_files']:
         extension = os.path.splitext(idl_file)[1]
