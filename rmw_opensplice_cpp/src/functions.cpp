@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -100,6 +101,8 @@ rmw_init()
 rmw_node_t *
 rmw_create_node(const char * name)
 {
+  (void)name;
+
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
     rmw_set_error_string("failed to get domain participant factory");
@@ -266,11 +269,11 @@ rmw_create_publisher(
   }
 
   // ensure the history depth is at least the requested queue size
-  // *INDENT-OFF*
+  assert(datawriter_qos.history.depth >= 0);
   if (
     datawriter_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
-    datawriter_qos.history.depth < queue_size)
-  // *INDENT-ON*
+    static_cast<size_t>(datawriter_qos.history.depth) < queue_size
+  )
   {
     datawriter_qos.history.depth = queue_size;
   }
@@ -512,11 +515,11 @@ rmw_create_subscription(
   }
 
   // ensure the history depth is at least the requested queue size
-  // *INDENT-OFF*
+  assert(datareader_qos.history.depth >= 0);
   if (
     datareader_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
-    datareader_qos.history.depth < queue_size)
-  // *INDENT-ON*
+    static_cast<size_t>(datareader_qos.history.depth) < queue_size
+  )
   {
     datareader_qos.history.depth = queue_size;
   }

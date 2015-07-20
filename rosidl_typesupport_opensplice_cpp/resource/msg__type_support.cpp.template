@@ -114,6 +114,10 @@ register_type__@(spec.base_type.type)(
 void
 convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & dds_message)
 {
+@[if not spec.fields]@
+  (void)ros_message;
+  (void)dds_message;
+@[end if]@
 @[for field in spec.fields]@
   // field.name @(field.name)
 @[if field.type.is_array]@
@@ -196,6 +200,10 @@ publish__@(spec.base_type.type)(
 void
 convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & ros_message)
 {
+@[if not spec.fields]@
+  (void)ros_message;
+  (void)dds_message;
+@[end if]@
 @[for field in spec.fields]@
   // field.name @(field.name)
 @[if field.type.is_array]@
