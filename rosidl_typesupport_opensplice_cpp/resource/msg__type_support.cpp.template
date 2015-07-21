@@ -259,7 +259,7 @@ take__@(spec.base_type.type)(
     1,
     DDS::ANY_SAMPLE_STATE,
     DDS::ANY_VIEW_STATE,
-    DDS::ALIVE_INSTANCE_STATE);
+    DDS::ANY_INSTANCE_STATE);
 
   const char * errs = nullptr;
   bool ignore_sample = false;
