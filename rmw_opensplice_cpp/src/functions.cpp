@@ -91,7 +91,7 @@ rmw_init()
 {
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
-    rmw_set_error_string("failed to get domain participant factory");
+    RMW_SET_ERROR_MSG("failed to get domain participant factory");
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
@@ -102,7 +102,7 @@ rmw_create_node(const char * name)
 {
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
-    rmw_set_error_string("failed to get domain participant factory");
+    RMW_SET_ERROR_MSG("failed to get domain participant factory");
     return nullptr;
   }
 
@@ -112,14 +112,14 @@ rmw_create_node(const char * name)
 
   rmw_node_t * node = rmw_node_allocate();
   if (!node) {
-    rmw_set_error_string("failed to allocate rmw_node_t");
+    RMW_SET_ERROR_MSG("failed to allocate rmw_node_t");
     goto fail;
   }
 
   participant = dp_factory->create_participant(
     domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE);
   if (!participant) {
-    rmw_set_error_string("failed to create domain participant");
+    RMW_SET_ERROR_MSG("failed to create domain participant");
     goto fail;
   }
 
@@ -146,7 +146,7 @@ rmw_ret_t
 rmw_destroy_node(rmw_node_t * node)
 {
   if (!node) {
-    rmw_set_error_string("received null pointer");
+    RMW_SET_ERROR_MSG("received null pointer");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -156,13 +156,13 @@ rmw_destroy_node(rmw_node_t * node)
 
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
-    rmw_set_error_string("failed to get domain participant factory");
+    RMW_SET_ERROR_MSG("failed to get domain participant factory");
     return RMW_RET_ERROR;
   }
   auto result = RMW_RET_OK;
   if (node->data) {
     if (dp_factory->delete_participant((DDS::DomainParticipant *)node->data) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to delete participant");
+      RMW_SET_ERROR_MSG("failed to delete participant");
       result = RMW_RET_ERROR;
     }
   }
@@ -178,7 +178,7 @@ rmw_create_publisher(
   size_t queue_size)
 {
   if (!node) {
-    rmw_set_error_string("node handle is null");
+    RMW_SET_ERROR_MSG("node handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -187,7 +187,7 @@ rmw_create_publisher(
     return nullptr)
 
   if (!type_support) {
-    rmw_set_error_string("type support handle is null");
+    RMW_SET_ERROR_MSG("type support handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -197,21 +197,21 @@ rmw_create_publisher(
 
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
   if (!participant) {
-    rmw_set_error_string("participant handle is null");
+    RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
   }
 
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
   std::string type_name = _create_type_name(callbacks, "msg");
 
   const char * error_string = callbacks->register_type(participant, type_name.c_str());
   if (error_string) {
-    rmw_set_error_string((std::string("failed to register the type: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to register the type: ") + error_string).c_str());
     return nullptr;
   }
 
@@ -219,7 +219,7 @@ rmw_create_publisher(
   DDS::ReturnCode_t status;
   status = participant->get_default_publisher_qos(publisher_qos);
   if (nullptr != check_get_default_publisher_qos(status)) {
-    rmw_set_error_string(check_get_default_publisher_qos(status));
+    RMW_SET_ERROR_MSG(check_get_default_publisher_qos(status));
     return nullptr;
   }
   // Past this point, a failure results in unrolling code in the goto fail block.
@@ -233,35 +233,35 @@ rmw_create_publisher(
   // Begin initializing elements.
   publisher = rmw_publisher_allocate();
   if (!publisher) {
-    rmw_set_error_string("failed to allocate rmw_publisher_t");
+    RMW_SET_ERROR_MSG("failed to allocate rmw_publisher_t");
     goto fail;
   }
   dds_publisher = participant->create_publisher(publisher_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!dds_publisher) {
-    rmw_set_error_string("failed to create publisher");
+    RMW_SET_ERROR_MSG("failed to create publisher");
     goto fail;
   }
 
   status = participant->get_default_topic_qos(default_topic_qos);
   if (nullptr != check_get_default_topic_qos(status)) {
-    rmw_set_error_string(check_get_default_topic_qos(status));
+    RMW_SET_ERROR_MSG(check_get_default_topic_qos(status));
     goto fail;
   }
 
   if (std::string(topic_name).find("/") != std::string::npos) {
-    rmw_set_error_string("topic_name contains a '/'");
+    RMW_SET_ERROR_MSG("topic_name contains a '/'");
     goto fail;
   }
   topic = participant->create_topic(
     topic_name, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
-    rmw_set_error_string("failed to create topic");
+    RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
   }
 
   status = dds_publisher->get_default_datawriter_qos(datawriter_qos);
   if (nullptr != check_get_default_datawriter_qos(status)) {
-    rmw_set_error_string(check_get_default_datawriter_qos(status));
+    RMW_SET_ERROR_MSG(check_get_default_datawriter_qos(status));
     goto fail;
   }
 
@@ -278,7 +278,7 @@ rmw_create_publisher(
   topic_writer = dds_publisher->create_datawriter(
     topic, datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic_writer) {
-    rmw_set_error_string("failed to create datawriter");
+    RMW_SET_ERROR_MSG("failed to create datawriter");
     goto fail;
   }
 
@@ -325,7 +325,7 @@ rmw_ret_t
 rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
 {
   if (!node) {
-    rmw_set_error_string("node handle is null");
+    RMW_SET_ERROR_MSG("node handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -334,7 +334,7 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
     return RMW_RET_ERROR)
 
   if (!publisher) {
-    rmw_set_error_string("pointer handle is null");
+    RMW_SET_ERROR_MSG("pointer handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -344,7 +344,7 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
 
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
   if (!participant) {
-    rmw_set_error_string("participant handle is null");
+    RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
   }
   auto result = RMW_RET_OK;
@@ -357,13 +357,13 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
       if (topic_writer) {
         DDS::ReturnCode_t status = dds_publisher->delete_datawriter(topic_writer);
         if (nullptr != check_delete_datawriter(status)) {
-          rmw_set_error_string(check_delete_datawriter(status));
+          RMW_SET_ERROR_MSG(check_delete_datawriter(status));
           result = RMW_RET_ERROR;
         }
       }
       DDS::ReturnCode_t status = participant->delete_publisher(dds_publisher);
       if (nullptr != check_delete_publisher(status)) {
-        rmw_set_error_string(check_delete_publisher(status));
+        RMW_SET_ERROR_MSG(check_delete_publisher(status));
         result = RMW_RET_ERROR;
       }
     }
@@ -385,7 +385,7 @@ rmw_ret_t
 rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
 {
   if (!publisher) {
-    rmw_set_error_string("publisher handle is null");
+    RMW_SET_ERROR_MSG("publisher handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -393,26 +393,26 @@ rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
     publisher->implementation_identifier, opensplice_cpp_identifier,
     return RMW_RET_ERROR)
   if (!ros_message) {
-    rmw_set_error_string("ros message handle is null");
+    RMW_SET_ERROR_MSG("ros message handle is null");
     return RMW_RET_ERROR;
   }
 
   const OpenSpliceStaticPublisherInfo * publisher_info =
     static_cast<const OpenSpliceStaticPublisherInfo *>(publisher->data);
   if (!publisher_info) {
-    rmw_set_error_string("publisher info handle is null");
+    RMW_SET_ERROR_MSG("publisher info handle is null");
     return RMW_RET_ERROR;
   }
   DDS::DataWriter * topic_writer = publisher_info->topic_writer;
   const message_type_support_callbacks_t * callbacks = publisher_info->callbacks;
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
 
   const char * error_string = callbacks->publish(topic_writer, ros_message);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to publish:") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to publish:") + error_string).c_str());
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
@@ -427,7 +427,7 @@ rmw_create_subscription(
   bool ignore_local_publications)
 {
   if (!node) {
-    rmw_set_error_string("node handle is null");
+    RMW_SET_ERROR_MSG("node handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -436,7 +436,7 @@ rmw_create_subscription(
     return NULL)
 
   if (!type_support) {
-    rmw_set_error_string("type support handle is null");
+    RMW_SET_ERROR_MSG("type support handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -446,28 +446,28 @@ rmw_create_subscription(
 
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
   if (!participant) {
-    rmw_set_error_string("participant handle is null");
+    RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
   }
 
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(type_support->data);
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
   std::string type_name = _create_type_name(callbacks, "msg");
 
   const char * error_string = callbacks->register_type(participant, type_name.c_str());
   if (error_string) {
-    rmw_set_error_string((std::string("failed to register the type: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to register the type: ") + error_string).c_str());
     return nullptr;
   }
 
   DDS::SubscriberQos subscriber_qos;
   DDS::ReturnCode_t status = participant->get_default_subscriber_qos(subscriber_qos);
   if (nullptr != check_get_default_datareader_qos(status)) {
-    rmw_set_error_string(check_get_default_datareader_qos(status));
+    RMW_SET_ERROR_MSG(check_get_default_datareader_qos(status));
     return nullptr;
   }
 
@@ -483,31 +483,31 @@ rmw_create_subscription(
   // Begin initializing elements.
   subscription = rmw_subscription_allocate();
   if (!subscription) {
-    rmw_set_error_string("failed to allocate rmw_subscription_t");
+    RMW_SET_ERROR_MSG("failed to allocate rmw_subscription_t");
     goto fail;
   }
   dds_subscriber = participant->create_subscriber(subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!dds_subscriber) {
-    rmw_set_error_string("failed to create subscriber");
+    RMW_SET_ERROR_MSG("failed to create subscriber");
     goto fail;
   }
 
   status = participant->get_default_topic_qos(default_topic_qos);
   if (nullptr != check_get_default_topic_qos(status)) {
-    rmw_set_error_string(check_get_default_topic_qos(status));
+    RMW_SET_ERROR_MSG(check_get_default_topic_qos(status));
     goto fail;
   }
 
   topic = participant->create_topic(
     topic_name, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
-    rmw_set_error_string("failed to create topic");
+    RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
   }
 
   status = dds_subscriber->get_default_datareader_qos(datareader_qos);
   if (nullptr != check_get_default_datareader_qos(status)) {
-    rmw_set_error_string(check_get_default_datareader_qos(status));
+    RMW_SET_ERROR_MSG(check_get_default_datareader_qos(status));
     goto fail;
   }
 
@@ -527,7 +527,7 @@ rmw_create_subscription(
   // Allocate memory for the OpenSpliceStaticSubscriberInfo object.
   buf = rmw_allocate(sizeof(OpenSpliceStaticSubscriberInfo));
   if (!buf) {
-    rmw_set_error_string("failed to allocate memory");
+    RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
   // Use a placement new to construct the instance in the preallocated buffer.
@@ -577,7 +577,7 @@ rmw_ret_t
 rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
 {
   if (!node) {
-    rmw_set_error_string("node handle is null");
+    RMW_SET_ERROR_MSG("node handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -586,7 +586,7 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
     return RMW_RET_ERROR)
 
   if (!subscription) {
-    rmw_set_error_string("subscription handle is null");
+    RMW_SET_ERROR_MSG("subscription handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -596,7 +596,7 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
 
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
   if (!participant) {
-    rmw_set_error_string("participant handle is null");
+    RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
   }
   auto result = RMW_RET_OK;
@@ -608,18 +608,18 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
       DDS::DataReader * topic_reader = subscription_info->topic_reader;
       if (topic_reader) {
         if (topic_reader->delete_contained_entities() != DDS::RETCODE_OK) {
-          rmw_set_error_string("failed to delete contained entities of datareader");
+          RMW_SET_ERROR_MSG("failed to delete contained entities of datareader");
           result = RMW_RET_ERROR;
         }
         DDS::ReturnCode_t status = dds_subscriber->delete_datareader(topic_reader);
         if (nullptr != check_delete_datareader(status)) {
-          rmw_set_error_string(check_delete_datareader(status));
+          RMW_SET_ERROR_MSG(check_delete_datareader(status));
           result = RMW_RET_ERROR;
         }
       }
       DDS::ReturnCode_t status = participant->delete_subscriber(dds_subscriber);
       if (nullptr != check_delete_subscriber(status)) {
-        rmw_set_error_string(check_delete_subscriber(status));
+        RMW_SET_ERROR_MSG(check_delete_subscriber(status));
         result = RMW_RET_ERROR;
       }
     }
@@ -641,7 +641,7 @@ rmw_ret_t
 rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * taken)
 {
   if (!subscription) {
-    rmw_set_error_string("subscription handle is null");
+    RMW_SET_ERROR_MSG("subscription handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -650,29 +650,29 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
     return RMW_RET_ERROR)
 
   if (ros_message == nullptr) {
-    rmw_set_error_string("ros_message argument cannot be null");
+    RMW_SET_ERROR_MSG("ros_message argument cannot be null");
     return RMW_RET_ERROR;
   }
 
   if (taken == nullptr) {
-    rmw_set_error_string("taken argument cannot be null");
+    RMW_SET_ERROR_MSG("taken argument cannot be null");
     return RMW_RET_ERROR;
   }
 
   OpenSpliceStaticSubscriberInfo * subscriber_info =
     static_cast<OpenSpliceStaticSubscriberInfo *>(subscription->data);
   if (!subscriber_info) {
-    rmw_set_error_string("subscriber info handle is null");
+    RMW_SET_ERROR_MSG("subscriber info handle is null");
     return RMW_RET_ERROR;
   }
   DDS::DataReader * topic_reader = subscriber_info->topic_reader;
   if (!topic_reader) {
-    rmw_set_error_string("topic reader handle is null");
+    RMW_SET_ERROR_MSG("topic reader handle is null");
     return RMW_RET_ERROR;
   }
   const message_type_support_callbacks_t * callbacks = subscriber_info->callbacks;
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
 
@@ -682,7 +682,7 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
     ros_message, taken);
   // If no data was taken, that's not captured as an error here, but instead taken is set to false.
   if (error_string) {
-    rmw_set_error_string((std::string("failed to take: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to take: ") + error_string).c_str());
     return RMW_RET_ERROR;
   }
 
@@ -694,13 +694,13 @@ rmw_create_guard_condition()
 {
   rmw_guard_condition_t * guard_condition = rmw_guard_condition_allocate();
   if (!guard_condition) {
-    rmw_set_error_string("failed to allocate guard condition");
+    RMW_SET_ERROR_MSG("failed to allocate guard condition");
     goto fail;
   }
   guard_condition->implementation_identifier = opensplice_cpp_identifier;
   guard_condition->data = rmw_allocate(sizeof(DDS::GuardCondition));
   if (!guard_condition->data) {
-    rmw_set_error_string("failed to allocate dds guard condition");
+    RMW_SET_ERROR_MSG("failed to allocate dds guard condition");
     goto fail;
   }
   RMW_TRY_PLACEMENT_NEW(
@@ -721,7 +721,7 @@ rmw_ret_t
 rmw_destroy_guard_condition(rmw_guard_condition_t * guard_condition)
 {
   if (!guard_condition) {
-    rmw_set_error_string("guard condition handle is null");
+    RMW_SET_ERROR_MSG("guard condition handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -744,7 +744,7 @@ rmw_ret_t
 rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition)
 {
   if (!guard_condition) {
-    rmw_set_error_string("guard condition handle is null");
+    RMW_SET_ERROR_MSG("guard condition handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -755,11 +755,11 @@ rmw_trigger_guard_condition(const rmw_guard_condition_t * guard_condition)
   DDS::GuardCondition * dds_guard_condition =
     static_cast<DDS::GuardCondition *>(guard_condition->data);
   if (!dds_guard_condition) {
-    rmw_set_error_string("guard condition is null");
+    RMW_SET_ERROR_MSG("guard condition is null");
     return RMW_RET_ERROR;
   }
   if (dds_guard_condition->set_trigger_value(true) != DDS::RETCODE_OK) {
-    rmw_set_error_string("failed to set trigger value to true");
+    RMW_SET_ERROR_MSG("failed to set trigger value to true");
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
@@ -780,25 +780,25 @@ rmw_wait(
     OpenSpliceStaticSubscriberInfo * subscriber_info =
       static_cast<OpenSpliceStaticSubscriberInfo *>(subscriptions->subscribers[i]);
     if (!subscriber_info) {
-      rmw_set_error_string("subscriber info handle is null");
+      RMW_SET_ERROR_MSG("subscriber info handle is null");
       return RMW_RET_ERROR;
     }
     DDS::DataReader * topic_reader = subscriber_info->topic_reader;
     if (!topic_reader) {
-      rmw_set_error_string("topic reader handle is null");
+      RMW_SET_ERROR_MSG("topic reader handle is null");
       return RMW_RET_ERROR;
     }
     DDS::StatusCondition * condition = topic_reader->get_statuscondition();
     if (!condition) {
-      rmw_set_error_string("failed to get status condition from datareader");
+      RMW_SET_ERROR_MSG("failed to get status condition from datareader");
       return RMW_RET_ERROR;
     }
     if (condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to set enabled statuses on condition");
+      RMW_SET_ERROR_MSG("failed to set enabled statuses on condition");
       return RMW_RET_ERROR;
     }
     if (waitset.attach_condition(condition) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to attach condition to waitset");
+      RMW_SET_ERROR_MSG("failed to attach condition to waitset");
       return RMW_RET_ERROR;
     }
   }
@@ -808,11 +808,11 @@ rmw_wait(
     DDS::GuardCondition * guard_condition =
       static_cast<DDS::GuardCondition *>(guard_conditions->guard_conditions[i]);
     if (!guard_condition) {
-      rmw_set_error_string("guard condition handle is null");
+      RMW_SET_ERROR_MSG("guard condition handle is null");
       return RMW_RET_ERROR;
     }
     if (waitset.attach_condition(guard_condition) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to attach condition to waitset");
+      RMW_SET_ERROR_MSG("failed to attach condition to waitset");
       return RMW_RET_ERROR;
     }
   }
@@ -822,25 +822,25 @@ rmw_wait(
     OpenSpliceStaticServiceInfo * service_info =
       static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
     if (!service_info) {
-      rmw_set_error_string("service info handle is null");
+      RMW_SET_ERROR_MSG("service info handle is null");
       return RMW_RET_ERROR;
     }
     DDS::DataReader * request_datareader = service_info->request_datareader_;
     if (!request_datareader) {
-      rmw_set_error_string("request datareader handle is null");
+      RMW_SET_ERROR_MSG("request datareader handle is null");
       return RMW_RET_ERROR;
     }
     DDS::StatusCondition * condition = request_datareader->get_statuscondition();
     if (!condition) {
-      rmw_set_error_string("failed to get status condition from request datareader");
+      RMW_SET_ERROR_MSG("failed to get status condition from request datareader");
       return RMW_RET_ERROR;
     }
     if (condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to set enabled statuses on condition");
+      RMW_SET_ERROR_MSG("failed to set enabled statuses on condition");
       return RMW_RET_ERROR;
     }
     if (waitset.attach_condition(condition) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to attach condition to waitset");
+      RMW_SET_ERROR_MSG("failed to attach condition to waitset");
       return RMW_RET_ERROR;
     }
   }
@@ -850,25 +850,25 @@ rmw_wait(
     OpenSpliceStaticClientInfo * client_info =
       static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
     if (!client_info) {
-      rmw_set_error_string("client info handle is null");
+      RMW_SET_ERROR_MSG("client info handle is null");
       return RMW_RET_ERROR;
     }
     DDS::DataReader * response_datareader = client_info->response_datareader_;
     if (!response_datareader) {
-      rmw_set_error_string("response datareader handle is null");
+      RMW_SET_ERROR_MSG("response datareader handle is null");
       return RMW_RET_ERROR;
     }
     DDS::StatusCondition * condition = response_datareader->get_statuscondition();
     if (!condition) {
-      rmw_set_error_string("failed to get status condition from response datareader");
+      RMW_SET_ERROR_MSG("failed to get status condition from response datareader");
       return RMW_RET_ERROR;
     }
     if (condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to set enabled statuses on condition");
+      RMW_SET_ERROR_MSG("failed to set enabled statuses on condition");
       return RMW_RET_ERROR;
     }
     if (waitset.attach_condition(condition) != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to attach condition to waitset");
+      RMW_SET_ERROR_MSG("failed to attach condition to waitset");
       return RMW_RET_ERROR;
     }
   }
@@ -888,7 +888,7 @@ rmw_wait(
       continue;
     }
     if (status != DDS::RETCODE_OK) {
-      rmw_set_error_string("failed to wait on waitset");
+      RMW_SET_ERROR_MSG("failed to wait on waitset");
       return RMW_RET_ERROR;
     }
   }
@@ -898,17 +898,17 @@ rmw_wait(
     OpenSpliceStaticSubscriberInfo * subscriber_info =
       static_cast<OpenSpliceStaticSubscriberInfo *>(subscriptions->subscribers[i]);
     if (!subscriber_info) {
-      rmw_set_error_string("subscriber info handle is null");
+      RMW_SET_ERROR_MSG("subscriber info handle is null");
       return RMW_RET_ERROR;
     }
     DDS::DataReader * topic_reader = subscriber_info->topic_reader;
     if (!topic_reader) {
-      rmw_set_error_string("topic reader handle is null");
+      RMW_SET_ERROR_MSG("topic reader handle is null");
       return RMW_RET_ERROR;
     }
     DDS::StatusCondition * condition = topic_reader->get_statuscondition();
     if (!condition) {
-      rmw_set_error_string("failed to get status condition from datareader");
+      RMW_SET_ERROR_MSG("failed to get status condition from datareader");
       return RMW_RET_ERROR;
     }
     if (!condition->get_trigger_value()) {
@@ -923,7 +923,7 @@ rmw_wait(
     DDS::GuardCondition * guard_condition =
       static_cast<DDS::GuardCondition *>(guard_conditions->guard_conditions[i]);
     if (!guard_condition) {
-      rmw_set_error_string("guard condition handle is null");
+      RMW_SET_ERROR_MSG("guard condition handle is null");
       return RMW_RET_ERROR;
     }
 
@@ -934,7 +934,7 @@ rmw_wait(
     } else {
       // reset the trigger value
       if (guard_condition->set_trigger_value(false) != DDS::RETCODE_OK) {
-        rmw_set_error_string("failed to set trigger value to false");
+        RMW_SET_ERROR_MSG("failed to set trigger value to false");
         return RMW_RET_ERROR;
       }
     }
@@ -945,17 +945,17 @@ rmw_wait(
     OpenSpliceStaticServiceInfo * service_info =
       static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
     if (!service_info) {
-      rmw_set_error_string("service info handle is null");
+      RMW_SET_ERROR_MSG("service info handle is null");
       return RMW_RET_ERROR;
     }
     DDS::DataReader * request_datareader = service_info->request_datareader_;
     if (!request_datareader) {
-      rmw_set_error_string("request datareader handle is null");
+      RMW_SET_ERROR_MSG("request datareader handle is null");
       return RMW_RET_ERROR;
     }
     DDS::StatusCondition * condition = request_datareader->get_statuscondition();
     if (!condition) {
-      rmw_set_error_string("failed to get status condition from request datareader");
+      RMW_SET_ERROR_MSG("failed to get status condition from request datareader");
       return RMW_RET_ERROR;
     }
 
@@ -978,17 +978,17 @@ rmw_wait(
     OpenSpliceStaticClientInfo * client_info =
       static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
     if (!client_info) {
-      rmw_set_error_string("client info handle is null");
+      RMW_SET_ERROR_MSG("client info handle is null");
       return RMW_RET_ERROR;
     }
     DDS::DataReader * response_datareader = client_info->response_datareader_;
     if (!response_datareader) {
-      rmw_set_error_string("response datareader handle is null");
+      RMW_SET_ERROR_MSG("response datareader handle is null");
       return RMW_RET_ERROR;
     }
     DDS::StatusCondition * condition = response_datareader->get_statuscondition();
     if (!condition) {
-      rmw_set_error_string("failed to get status condition from response datareader");
+      RMW_SET_ERROR_MSG("failed to get status condition from response datareader");
       return RMW_RET_ERROR;
     }
 
@@ -1015,7 +1015,7 @@ rmw_create_client(
   const char * service_name)
 {
   if (!node) {
-    rmw_set_error_string("node handle is null");
+    RMW_SET_ERROR_MSG("node handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1024,7 +1024,7 @@ rmw_create_client(
     return nullptr)
 
   if (!type_support) {
-    rmw_set_error_string("type support handle is null");
+    RMW_SET_ERROR_MSG("type support handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1034,14 +1034,14 @@ rmw_create_client(
 
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
   if (!participant) {
-    rmw_set_error_string("participant handle is null");
+    RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
   }
 
   const service_type_support_callbacks_t * callbacks =
     static_cast<const service_type_support_callbacks_t *>(type_support->data);
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
   // Past this point, a failure results in unrolling code in the goto fail block.
@@ -1053,7 +1053,7 @@ rmw_create_client(
   // Begin initializing elements.
   client = rmw_client_allocate();
   if (!client) {
-    rmw_set_error_string("failed to allocate client");
+    RMW_SET_ERROR_MSG("failed to allocate client");
     goto fail;
   }
   error_string = callbacks->create_requester(
@@ -1062,22 +1062,22 @@ rmw_create_client(
     reinterpret_cast<void **>(&response_datareader),
     &rmw_allocate);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to create requester: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to create requester: ") + error_string).c_str());
     goto fail;
   }
   if (!requester) {
-    rmw_set_error_string("failed to create requester: requester is null");
+    RMW_SET_ERROR_MSG("failed to create requester: requester is null");
     goto fail;
   }
   if (!response_datareader) {
-    rmw_set_error_string("failed to create requester: response_datareader is null");
+    RMW_SET_ERROR_MSG("failed to create requester: response_datareader is null");
     goto fail;
   }
 
   client_info = static_cast<OpenSpliceStaticClientInfo *>(
     rmw_allocate(sizeof(OpenSpliceStaticClientInfo)));
   if (!client_info) {
-    rmw_set_error_string("failed to allocate memory");
+    RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
   client_info->requester_ = requester;
@@ -1110,7 +1110,7 @@ rmw_ret_t
 rmw_destroy_client(rmw_client_t * client)
 {
   if (!client) {
-    rmw_set_error_string("client handle is null");
+    RMW_SET_ERROR_MSG("client handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1121,20 +1121,20 @@ rmw_destroy_client(rmw_client_t * client)
   OpenSpliceStaticClientInfo * client_info =
     static_cast<OpenSpliceStaticClientInfo *>(client->data);
   if (!client_info) {
-    rmw_set_error_string("client_info handle is null");
+    RMW_SET_ERROR_MSG("client_info handle is null");
     return RMW_RET_ERROR;
   }
 
   const service_type_support_callbacks_t * callbacks =
     static_cast<const service_type_support_callbacks_t *>(client_info->callbacks_);
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
 
   const char * error_string = callbacks->destroy_requester(client_info->requester_, &rmw_free);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to destroy requester: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to destroy requester: ") + error_string).c_str());
     return RMW_RET_ERROR;
   }
 
@@ -1149,7 +1149,7 @@ rmw_send_request(
   int64_t * sequence_id)
 {
   if (!client) {
-    rmw_set_error_string("client handle is null");
+    RMW_SET_ERROR_MSG("client handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1158,29 +1158,29 @@ rmw_send_request(
     return RMW_RET_ERROR)
 
   if (!ros_request) {
-    rmw_set_error_string("ros request handle is null");
+    RMW_SET_ERROR_MSG("ros request handle is null");
     return RMW_RET_ERROR;
   }
 
   OpenSpliceStaticClientInfo * client_info =
     static_cast<OpenSpliceStaticClientInfo *>(client->data);
   if (!client_info) {
-    rmw_set_error_string("client info handle is null");
+    RMW_SET_ERROR_MSG("client info handle is null");
     return RMW_RET_ERROR;
   }
   void * requester = client_info->requester_;
   if (!requester) {
-    rmw_set_error_string("requester handle is null");
+    RMW_SET_ERROR_MSG("requester handle is null");
     return RMW_RET_ERROR;
   }
   const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
   const char * error_string = callbacks->send_request(requester, ros_request, sequence_id);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to send request: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to send request: ") + error_string).c_str());
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
@@ -1191,7 +1191,7 @@ rmw_take_response(const rmw_client_t * client, void * ros_request_header,
   void * ros_response, bool * taken)
 {
   if (!client) {
-    rmw_set_error_string("client handle is null");
+    RMW_SET_ERROR_MSG("client handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1200,38 +1200,38 @@ rmw_take_response(const rmw_client_t * client, void * ros_request_header,
     return RMW_RET_ERROR)
 
   if (!ros_request_header) {
-    rmw_set_error_string("ros request header handle is null");
+    RMW_SET_ERROR_MSG("ros request header handle is null");
     return RMW_RET_ERROR;
   }
   if (!ros_response) {
-    rmw_set_error_string("ros response handle is null");
+    RMW_SET_ERROR_MSG("ros response handle is null");
     return RMW_RET_ERROR;
   }
   if (taken == nullptr) {
-    rmw_set_error_string("taken argument cannot be null");
+    RMW_SET_ERROR_MSG("taken argument cannot be null");
     return RMW_RET_ERROR;
   }
 
   OpenSpliceStaticClientInfo * client_info =
     static_cast<OpenSpliceStaticClientInfo *>(client->data);
   if (!client_info) {
-    rmw_set_error_string("client info handle is null");
+    RMW_SET_ERROR_MSG("client info handle is null");
     return RMW_RET_ERROR;
   }
   void * requester = client_info->requester_;
   if (!requester) {
-    rmw_set_error_string("requester handle is null");
+    RMW_SET_ERROR_MSG("requester handle is null");
     return RMW_RET_ERROR;
   }
   const service_type_support_callbacks_t * callbacks = client_info->callbacks_;
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
   const char * error_string =
     callbacks->take_response(requester, ros_request_header, ros_response, taken);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to take response: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to take response: ") + error_string).c_str());
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
@@ -1244,7 +1244,7 @@ rmw_create_service(
   const char * service_name)
 {
   if (!node) {
-    rmw_set_error_string("node handle is null");
+    RMW_SET_ERROR_MSG("node handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1253,7 +1253,7 @@ rmw_create_service(
     return nullptr)
 
   if (!type_support) {
-    rmw_set_error_string("type support handle is null");
+    RMW_SET_ERROR_MSG("type support handle is null");
     return nullptr;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1263,14 +1263,14 @@ rmw_create_service(
 
   DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
   if (!participant) {
-    rmw_set_error_string("participant handle is null");
+    RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
   }
 
   const service_type_support_callbacks_t * callbacks =
     static_cast<const service_type_support_callbacks_t *>(type_support->data);
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
   // Past this point, a failure results in unrolling code in the goto fail block.
@@ -1282,7 +1282,7 @@ rmw_create_service(
   // Begin initialization of elements.
   service = rmw_service_allocate();
   if (!service) {
-    rmw_set_error_string("failed to allocate service");
+    RMW_SET_ERROR_MSG("failed to allocate service");
     goto fail;
   }
   error_string = callbacks->create_responder(
@@ -1291,14 +1291,14 @@ rmw_create_service(
     reinterpret_cast<void **>(&request_datareader),
     &rmw_allocate);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to create responder: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to create responder: ") + error_string).c_str());
     goto fail;
   }
 
   service_info =
     static_cast<OpenSpliceStaticServiceInfo *>(rmw_allocate(sizeof(OpenSpliceStaticServiceInfo)));
   if (!service_info) {
-    rmw_set_error_string("failed to allocate memory");
+    RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
   service_info->responder_ = responder;
@@ -1331,7 +1331,7 @@ rmw_ret_t
 rmw_destroy_service(rmw_service_t * service)
 {
   if (!service) {
-    rmw_set_error_string("service handle is null");
+    RMW_SET_ERROR_MSG("service handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1342,19 +1342,19 @@ rmw_destroy_service(rmw_service_t * service)
   OpenSpliceStaticServiceInfo * service_info =
     static_cast<OpenSpliceStaticServiceInfo *>(service->data);
   if (!service_info) {
-    rmw_set_error_string("service info handle is null");
+    RMW_SET_ERROR_MSG("service info handle is null");
     return RMW_RET_ERROR;
   }
 
   const service_type_support_callbacks_t * callbacks =
     static_cast<const service_type_support_callbacks_t *>(service_info->callbacks_);
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
   const char * error_string = callbacks->destroy_responder(service_info->responder_, &rmw_free);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to destroy responder: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to destroy responder: ") + error_string).c_str());
   }
 
   rmw_free(service_info);
@@ -1368,7 +1368,7 @@ rmw_take_request(
   void * ros_request_header, void * ros_request, bool * taken)
 {
   if (!service) {
-    rmw_set_error_string("service handle is null");
+    RMW_SET_ERROR_MSG("service handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1377,38 +1377,38 @@ rmw_take_request(
     return RMW_RET_ERROR)
 
   if (!ros_request_header) {
-    rmw_set_error_string("ros request header handle is null");
+    RMW_SET_ERROR_MSG("ros request header handle is null");
     return RMW_RET_ERROR;
   }
   if (!ros_request) {
-    rmw_set_error_string("ros request handle is null");
+    RMW_SET_ERROR_MSG("ros request handle is null");
     return RMW_RET_ERROR;
   }
   if (taken == nullptr) {
-    rmw_set_error_string("taken argument cannot be null");
+    RMW_SET_ERROR_MSG("taken argument cannot be null");
     return RMW_RET_ERROR;
   }
 
   OpenSpliceStaticServiceInfo * service_info =
     static_cast<OpenSpliceStaticServiceInfo *>(service->data);
   if (!service_info) {
-    rmw_set_error_string("service info handle is null");
+    RMW_SET_ERROR_MSG("service info handle is null");
     return RMW_RET_ERROR;
   }
   void * responder = service_info->responder_;
   if (!responder) {
-    rmw_set_error_string("responder handle is null");
+    RMW_SET_ERROR_MSG("responder handle is null");
     return RMW_RET_ERROR;
   }
   const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
   const char * error_string =
     callbacks->take_request(responder, ros_request_header, ros_request, taken);
   if (error_string) {
-    rmw_set_error_string((std::string("failed to take request: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to take request: ") + error_string).c_str());
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
@@ -1420,7 +1420,7 @@ rmw_send_response(
   void * ros_request_header, void * ros_response)
 {
   if (!service) {
-    rmw_set_error_string("service handle is null");
+    RMW_SET_ERROR_MSG("service handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -1429,34 +1429,34 @@ rmw_send_response(
     return RMW_RET_ERROR)
 
   if (!ros_request_header) {
-    rmw_set_error_string("ros request header handle is null");
+    RMW_SET_ERROR_MSG("ros request header handle is null");
     return RMW_RET_ERROR;
   }
   if (!ros_response) {
-    rmw_set_error_string("ros response handle is null");
+    RMW_SET_ERROR_MSG("ros response handle is null");
     return RMW_RET_ERROR;
   }
 
   OpenSpliceStaticServiceInfo * service_info =
     static_cast<OpenSpliceStaticServiceInfo *>(service->data);
   if (!service_info) {
-    rmw_set_error_string("service info handle is null");
+    RMW_SET_ERROR_MSG("service info handle is null");
     return RMW_RET_ERROR;
   }
   void * responder = service_info->responder_;
   if (!responder) {
-    rmw_set_error_string("responder handle is null");
+    RMW_SET_ERROR_MSG("responder handle is null");
     return RMW_RET_ERROR;
   }
   const service_type_support_callbacks_t * callbacks = service_info->callbacks_;
   if (!callbacks) {
-    rmw_set_error_string("callbacks handle is null");
+    RMW_SET_ERROR_MSG("callbacks handle is null");
     return RMW_RET_ERROR;
   }
   const char * error_string =
     callbacks->send_response(responder, ros_request_header, ros_response);
   if (error_string) {
-    rmw_set_error_string(error_string);
+    RMW_SET_ERROR_MSG(error_string);
     return RMW_RET_ERROR;
   }
   return RMW_RET_OK;
