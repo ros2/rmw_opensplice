@@ -17,8 +17,6 @@
 
 #include <ccpp_dds_dcps.h>
 
-#include "builtin_interfaces/msg/duration__struct.hpp"
-
 namespace rosidl_typesupport_opensplice_cpp
 {
 namespace impl
