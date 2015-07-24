@@ -24,6 +24,7 @@
 
 @{header_file_name = get_header_filename_from_msg_name(spec.base_type.type)}@
 #include "@(spec.base_type.pkg_name)/@(subfolder)/@(header_file_name)__struct.hpp"
+#include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/@(header_file_name)__type_support.hpp"
 #include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
@@ -75,6 +76,7 @@ __dds_msg_type_prefix = "{}::{}::dds_::{}_".format(
 typedef @(__dds_msg_type_prefix) __dds_msg_type;
 typedef @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) __ros_msg_type;
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 const char *
 register_type__@(spec.base_type.type)(
   void * untyped_participant,
@@ -111,6 +113,7 @@ register_type__@(spec.base_type.type)(
   }
 }
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 void
 convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & dds_message)
 {
@@ -153,6 +156,7 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
 @[end for]@
 }
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 const char *
 publish__@(spec.base_type.type)(
   void * untyped_topic_writer,
@@ -197,6 +201,7 @@ publish__@(spec.base_type.type)(
   }
 }
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 void
 convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & ros_message)
 {
@@ -235,6 +240,7 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
 @[end for]@
 }
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 const char *
 take__@(spec.base_type.type)(
   void * untyped_topic_reader,

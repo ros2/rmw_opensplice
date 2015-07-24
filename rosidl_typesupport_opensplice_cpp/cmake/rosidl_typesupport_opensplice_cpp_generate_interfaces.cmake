@@ -184,6 +184,16 @@ add_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
 )
 
+# generate header to switch between export and import for a specific package on Windows
+set(_visibility_control_file
+  "${_output_path}/msg/dds_opensplice/visibility_control.h")
+configure_file(
+  "${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/visibility_control.h.in"
+  "${_visibility_control_file}"
+  @ONLY
+)
+list(APPEND _generated_msg_files "${_visibility_control_file}")
+
 if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
   if(NOT "${_generated_msg_files}${_generated_external_msg_files} " STREQUAL " ")
     install(
@@ -224,6 +234,8 @@ if(WIN32)
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
 endif()
+target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
+  PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL_${PROJECT_NAME}")
 target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   PUBLIC
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp

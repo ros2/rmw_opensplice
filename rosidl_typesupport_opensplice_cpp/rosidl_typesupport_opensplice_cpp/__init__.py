@@ -64,6 +64,11 @@ def generate_dds_opensplice_cpp(
             '-d', output_path,
             idl_file
         ]
+        if os.name == 'nt':
+            cmd[-1:-1] = [
+                '-P',
+                'ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_%s,%s' %
+                (pkg_name, '%s/msg/dds_opensplice/visibility_control.h' % pkg_name)]
         subprocess.check_call(cmd)
 
     return 0
