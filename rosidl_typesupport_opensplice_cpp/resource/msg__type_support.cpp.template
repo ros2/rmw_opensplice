@@ -12,7 +12,8 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
-#include <sstream>
+#include <limits>
+#include <stdexcept>
 
 #include <u_instanceHandle.h>
 
@@ -129,7 +130,11 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
     size_t size = @(field.type.array_size);
 @[else]@
     size_t size = ros_message.@(field.name).size();
-    dds_message.@(field.name)_.length(size);
+    if (size > (std::numeric_limits<DDS::Long>::max)()) {
+      throw std::runtime_error("array size exceeds maximum DDS sequence size");
+    }
+    DDS::Long length = static_cast<DDS::Long>(size);
+    dds_message.@(field.name)_.length(length);
 @[end if]@
     for (DDS::ULong i = 0; i < size; i++) {
 @[if field.type.type == 'string']@

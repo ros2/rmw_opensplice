@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -275,7 +276,12 @@ rmw_create_publisher(
     static_cast<size_t>(datawriter_qos.history.depth) < queue_size
   )
   {
-    datawriter_qos.history.depth = queue_size;
+    if (queue_size > (std::numeric_limits<DDS::Long>::max)()) {
+      RMW_SET_ERROR_MSG(
+        "failed to set history depth since the requested queue size exceeds the DDS type");
+      goto fail;
+    }
+    datawriter_qos.history.depth = static_cast<DDS::Long>(queue_size);
   }
 
   topic_writer = dds_publisher->create_datawriter(
@@ -521,7 +527,12 @@ rmw_create_subscription(
     static_cast<size_t>(datareader_qos.history.depth) < queue_size
   )
   {
-    datareader_qos.history.depth = queue_size;
+    if (queue_size > (std::numeric_limits<DDS::Long>::max)()) {
+      RMW_SET_ERROR_MSG(
+        "failed to set history depth since the requested queue size exceeds the DDS type");
+      goto fail;
+    }
+    datareader_qos.history.depth = static_cast<DDS::Long>(queue_size);
   }
 
   topic_reader = dds_subscriber->create_datareader(
@@ -821,7 +832,7 @@ rmw_wait(
   }
 
   // add a condition for each service
-  for (unsigned long i = 0; i < services->service_count; ++i) {
+  for (size_t i = 0; i < services->service_count; ++i) {
     OpenSpliceStaticServiceInfo * service_info =
       static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
     if (!service_info) {
@@ -849,7 +860,7 @@ rmw_wait(
   }
 
   // add a condition for each client
-  for (unsigned long i = 0; i < clients->client_count; ++i) {
+  for (size_t i = 0; i < clients->client_count; ++i) {
     OpenSpliceStaticClientInfo * client_info =
       static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
     if (!client_info) {
@@ -944,7 +955,7 @@ rmw_wait(
   }
 
   // set service handles to zero for all not triggered conditions
-  for (unsigned long i = 0; i < services->service_count; ++i) {
+  for (size_t i = 0; i < services->service_count; ++i) {
     OpenSpliceStaticServiceInfo * service_info =
       static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
     if (!service_info) {
@@ -977,7 +988,7 @@ rmw_wait(
   }
 
   // set client handles to zero for all not triggered conditions
-  for (unsigned long i = 0; i < clients->client_count; ++i) {
+  for (size_t i = 0; i < clients->client_count; ++i) {
     OpenSpliceStaticClientInfo * client_info =
       static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
     if (!client_info) {
