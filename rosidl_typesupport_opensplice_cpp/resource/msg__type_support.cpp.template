@@ -12,7 +12,8 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
-#include <sstream>
+#include <limits>
+#include <stdexcept>
 
 #include <u_instanceHandle.h>
 
@@ -129,7 +130,11 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
     size_t size = @(field.type.array_size);
 @[else]@
     size_t size = ros_message.@(field.name).size();
-    dds_message.@(field.name)_.length(size);
+    if (size > (std::numeric_limits<DDS::Long>::max)()) {
+      throw std::runtime_error("array size exceeds maximum DDS sequence size");
+    }
+    DDS::Long length = static_cast<DDS::Long>(size);
+    dds_message.@(field.name)_.length(length);
 @[end if]@
     for (DDS::ULong i = 0; i < size; i++) {
 @[if field.type.type == 'string']@
@@ -223,7 +228,8 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
 @[if field.type.type == 'bool']@
       ros_message.@(field.name)[i] = (dds_message.@(field.name)_[i] != 0);
 @[elif field.type.is_primitive_type()]@
-      ros_message.@(field.name)[i] = dds_message.@(field.name)_[i];
+      ros_message.@(field.name)[i] =
+        dds_message.@(field.name)_[i]@(' == TRUE' if field.type.type == 'bool' else '');
 @[else]@
       @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
         dds_message.@(field.name)_[i], ros_message.@(field.name)[i]);
@@ -231,7 +237,8 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
     }
   }
 @[elif field.type.is_primitive_type()]@
-  ros_message.@(field.name) = dds_message.@(field.name)_;
+  ros_message.@(field.name) =
+    dds_message.@(field.name)_@(' == TRUE' if field.type.type == 'bool' else '');
 @[else]@
   @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
     dds_message.@(field.name)_, ros_message.@(field.name));
