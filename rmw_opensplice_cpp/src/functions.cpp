@@ -64,6 +64,7 @@ struct OpenSpliceStaticSubscriberInfo
   DDS::Topic * dds_topic;
   DDS::Subscriber * dds_subscriber;
   DDS::DataReader * topic_reader;
+  DDS::ReadCondition * read_condition;
   const message_type_support_callbacks_t * callbacks;
   bool ignore_local_publications;
 };
@@ -487,6 +488,7 @@ rmw_create_subscription(
   DDS::Topic * topic = nullptr;
   DDS::DataReaderQos datareader_qos;
   DDS::DataReader * topic_reader = nullptr;
+  DDS::ReadCondition * read_condition = nullptr;
   void * buf = nullptr;
   OpenSpliceStaticSubscriberInfo * subscriber_info = nullptr;
   // Begin initializing elements.
@@ -537,6 +539,17 @@ rmw_create_subscription(
 
   topic_reader = dds_subscriber->create_datareader(
     topic, datareader_qos, NULL, DDS::STATUS_MASK_NONE);
+  if (!topic_reader) {
+    RMW_SET_ERROR_MSG("failed to create topic reader");
+    goto fail;
+  }
+
+  read_condition = topic_reader->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (!read_condition) {
+    RMW_SET_ERROR_MSG("failed to create read condition");
+    goto fail;
+  }
 
   // Allocate memory for the OpenSpliceStaticSubscriberInfo object.
   buf = rmw_allocate(sizeof(OpenSpliceStaticSubscriberInfo));
@@ -550,6 +563,7 @@ rmw_create_subscription(
   subscriber_info->dds_topic = topic;
   subscriber_info->dds_subscriber = dds_subscriber;
   subscriber_info->topic_reader = topic_reader;
+  subscriber_info->read_condition = read_condition;
   subscriber_info->callbacks = callbacks;
   subscriber_info->ignore_local_publications = ignore_local_publications;
 
@@ -559,6 +573,11 @@ rmw_create_subscription(
 fail:
   if (dds_subscriber) {
     if (topic_reader) {
+      if (read_condition) {
+        if (topic_reader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
+          fprintf(stderr, "leaking readcondition while handling failure\n");
+        }
+      }
       status = dds_subscriber->delete_datareader(topic_reader);
       if (nullptr != check_delete_datareader(status)) {
         fprintf(stderr, "%s\n", check_delete_datareader(status));
@@ -621,6 +640,14 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
     if (dds_subscriber) {
       DDS::DataReader * topic_reader = subscription_info->topic_reader;
       if (topic_reader) {
+        DDS::ReadCondition * read_condition = subscription_info->read_condition;
+        if (read_condition) {
+          if (topic_reader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
+            RMW_SET_ERROR_MSG("failed to delete readcondition");
+            result = RMW_RET_ERROR;
+          }
+          subscription_info->read_condition = nullptr;
+        }
         if (topic_reader->delete_contained_entities() != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("failed to delete contained entities of datareader");
           result = RMW_RET_ERROR;
@@ -797,21 +824,12 @@ rmw_wait(
       RMW_SET_ERROR_MSG("subscriber info handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::DataReader * topic_reader = subscriber_info->topic_reader;
-    if (!topic_reader) {
-      RMW_SET_ERROR_MSG("topic reader handle is null");
+    DDS::ReadCondition * read_condition = subscriber_info->read_condition;
+    if (!read_condition) {
+      RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
-    if (!condition) {
-      RMW_SET_ERROR_MSG("failed to get status condition from datareader");
-      return RMW_RET_ERROR;
-    }
-    if (condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to set enabled statuses on condition");
-      return RMW_RET_ERROR;
-    }
-    if (waitset.attach_condition(condition) != DDS::RETCODE_OK) {
+    if (waitset.attach_condition(read_condition) != DDS::RETCODE_OK) {
       RMW_SET_ERROR_MSG("failed to attach condition to waitset");
       return RMW_RET_ERROR;
     }
@@ -915,17 +933,12 @@ rmw_wait(
       RMW_SET_ERROR_MSG("subscriber info handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::DataReader * topic_reader = subscriber_info->topic_reader;
-    if (!topic_reader) {
-      RMW_SET_ERROR_MSG("topic reader handle is null");
+    DDS::ReadCondition * read_condition = subscriber_info->read_condition;
+    if (!read_condition) {
+      RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::StatusCondition * condition = topic_reader->get_statuscondition();
-    if (!condition) {
-      RMW_SET_ERROR_MSG("failed to get status condition from datareader");
-      return RMW_RET_ERROR;
-    }
-    if (!condition->get_trigger_value()) {
+    if (!read_condition->get_trigger_value()) {
       // if the status condition was not triggered
       // reset the subscriber handle
       subscriptions->subscribers[i] = 0;
