@@ -15,10 +15,14 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <map>
+#include <set>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 #include <ccpp_dds_dcps.h>
+#include <dds_dcps.h>
 
 #include <rmw/allocators.h>
 #include <rmw/error_handling.h>
@@ -50,6 +54,114 @@ extern "C"
 
 using rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier;
 const char * opensplice_cpp_identifier = "opensplice_static";
+
+class EmptyDataReaderListener
+  : public DDS::DataReaderListener
+{
+public:
+  void on_requested_deadline_missed(
+    DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus &)
+  {}
+  void on_requested_incompatible_qos(
+    DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus &)
+  {}
+  void on_sample_rejected(
+    DDS::DataReader_ptr, const DDS::SampleRejectedStatus &)
+  {}
+  void on_liveliness_changed(
+    DDS::DataReader_ptr, const DDS::LivelinessChangedStatus &)
+  {}
+  void on_data_available(
+    DDS::DataReader_ptr)
+  {}
+  void on_subscription_matched(
+    DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus &)
+  {}
+  void on_sample_lost(
+    DDS::DataReader_ptr, const DDS::SampleLostStatus &)
+  {}
+};
+
+class CustomPublisherListener
+  : public EmptyDataReaderListener
+{
+public:
+  virtual void on_data_available(DDS::DataReader * reader)
+  {
+    DDS::PublicationBuiltinTopicDataDataReader * builtin_reader =
+      DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
+
+    DDS::PublicationBuiltinTopicDataSeq data_seq;
+    DDS::SampleInfoSeq info_seq;
+    DDS::ReturnCode_t retcode = builtin_reader->take(
+      data_seq, info_seq, DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+    if (retcode == DDS::RETCODE_NO_DATA) {
+      return;
+    }
+    if (retcode != DDS::RETCODE_OK) {
+      fprintf(stderr, "failed to access data from the built-in reader\n");
+      return;
+    }
+
+    for (size_t i = 0; i < data_seq.length(); ++i) {
+      if (info_seq[i].valid_data) {
+        auto & topic_types = topic_names_and_types[data_seq[i].topic_name.in()];
+        topic_types.push_back(data_seq[i].type_name.in());
+      } else {
+        // TODO(dirk-thomas) remove related topic name / type
+      }
+    }
+
+    builtin_reader->return_loan(data_seq, info_seq);
+  }
+  std::map<std::string, std::vector<std::string>> topic_names_and_types;
+};
+
+class CustomSubscriberListener
+  : public EmptyDataReaderListener
+{
+public:
+  virtual void on_data_available(DDS::DataReader * reader)
+  {
+    DDS::SubscriptionBuiltinTopicDataDataReader * builtin_reader =
+      DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
+
+    DDS::SubscriptionBuiltinTopicDataSeq data_seq;
+    DDS::SampleInfoSeq info_seq;
+    DDS::ReturnCode_t retcode = builtin_reader->take(
+      data_seq, info_seq, DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+    if (retcode == DDS::RETCODE_NO_DATA) {
+      return;
+    }
+    if (retcode != DDS::RETCODE_OK) {
+      fprintf(stderr, "failed to access data from the built-in reader\n");
+      return;
+    }
+
+    for (size_t i = 0; i < data_seq.length(); ++i) {
+      if (info_seq[i].valid_data) {
+        auto & topic_types = topic_names_and_types[data_seq[i].topic_name.in()];
+        topic_types.push_back(data_seq[i].type_name.in());
+      } else {
+        // TODO(dirk-thomas) remove related topic name / type
+      }
+    }
+
+    builtin_reader->return_loan(data_seq, info_seq);
+  }
+  std::map<std::string, std::vector<std::string>> topic_names_and_types;
+};
+
+struct OpenSpliceStaticNodeInfo
+{
+  DDS::DomainParticipant * participant;
+  CustomPublisherListener * publisher_listener;
+  CustomSubscriberListener * subscriber_listener;
+};
 
 struct OpenSpliceStaticPublisherInfo
 {
@@ -114,27 +226,86 @@ rmw_create_node(const char * name, size_t domain_id)
   DDS::DomainId_t domain = static_cast<DDS::DomainId_t>(domain_id);
   DDS::DomainParticipant * participant = nullptr;
 
-  rmw_node_t * node = rmw_node_allocate();
+  participant = dp_factory->create_participant(
+    domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE);
+  if (!participant) {
+    RMW_SET_ERROR_MSG("failed to create domain participant");
+    return NULL;
+  }
+
+  rmw_node_t * node = nullptr;
+  OpenSpliceStaticNodeInfo * node_info = nullptr;
+  CustomPublisherListener * publisher_listener = nullptr;
+  CustomSubscriberListener * subscriber_listener = nullptr;
+  void * buf = nullptr;
+
+  DDS::DataReader * data_reader = nullptr;
+  DDS::PublicationBuiltinTopicDataDataReader * builtin_publication_datareader = nullptr;
+  DDS::SubscriptionBuiltinTopicDataDataReader * builtin_subscription_datareader = nullptr;
+  DDS::Subscriber * builtin_subscriber = participant->get_builtin_subscriber();
+  if (!builtin_subscriber) {
+    RMW_SET_ERROR_MSG("builtin subscriber handle is null");
+    goto fail;
+  }
+
+  // setup publisher listener
+  data_reader = builtin_subscriber->lookup_datareader("DCPSPublication");
+  builtin_publication_datareader =
+    DDS::PublicationBuiltinTopicDataDataReader::_narrow(data_reader);
+  if (!builtin_publication_datareader) {
+    RMW_SET_ERROR_MSG("builtin publication datareader handle is null");
+    goto fail;
+  }
+
+  buf = rmw_allocate(sizeof(CustomPublisherListener));
+  if (!buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail;
+  }
+  RMW_TRY_PLACEMENT_NEW(publisher_listener, buf, goto fail, CustomPublisherListener)
+  buf = nullptr;
+  builtin_publication_datareader->set_listener(publisher_listener, DDS::DATA_AVAILABLE_STATUS);
+
+  data_reader = builtin_subscriber->lookup_datareader("DCPSSubscription");
+  builtin_subscription_datareader =
+    DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(data_reader);
+  if (!builtin_subscription_datareader) {
+    RMW_SET_ERROR_MSG("builtin subscription datareader handle is null");
+    goto fail;
+  }
+
+  // setup subscriber listener
+  buf = rmw_allocate(sizeof(CustomSubscriberListener));
+  if (!buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail;
+  }
+  RMW_TRY_PLACEMENT_NEW(subscriber_listener, buf, goto fail, CustomSubscriberListener)
+  buf = nullptr;
+  builtin_subscription_datareader->set_listener(subscriber_listener, DDS::DATA_AVAILABLE_STATUS);
+
+  node = rmw_node_allocate();
   if (!node) {
     RMW_SET_ERROR_MSG("failed to allocate rmw_node_t");
     goto fail;
   }
 
-  participant = dp_factory->create_participant(
-    domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE);
-  if (!participant) {
-    RMW_SET_ERROR_MSG("failed to create domain participant");
+  buf = rmw_allocate(sizeof(OpenSpliceStaticNodeInfo));
+  if (!buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
+  RMW_TRY_PLACEMENT_NEW(node_info, buf, goto fail, OpenSpliceStaticNodeInfo)
+  buf = nullptr;
+  node_info->participant = participant;
+  node_info->publisher_listener = publisher_listener;
+  node_info->subscriber_listener = subscriber_listener;
 
   node->implementation_identifier = opensplice_cpp_identifier;
-  node->data = participant;
+  node->data = node_info;
 
   return node;
 fail:
-  if (node) {
-    rmw_node_free(node);
-  }
   if (participant) {
     if (dp_factory->delete_participant(participant) != DDS::RETCODE_OK) {
       std::stringstream ss;
@@ -142,6 +313,27 @@ fail:
         __FILE__ << ":" << __LINE__ << '\n';
       (std::cerr << ss.str()).flush();
     }
+  }
+  if (publisher_listener) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      publisher_listener->~CustomPublisherListener(), CustomPublisherListener)
+    rmw_free(publisher_listener);
+  }
+  if (subscriber_listener) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      subscriber_listener->~CustomSubscriberListener(), CustomSubscriberListener)
+    rmw_free(subscriber_listener);
+  }
+  if (node_info) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      node_info->~OpenSpliceStaticNodeInfo(), OpenSpliceStaticNodeInfo)
+    rmw_free(node_info);
+  }
+  if (buf) {
+    rmw_free(buf);
+  }
+  if (node) {
+    rmw_node_free(node);
   }
   return nullptr;
 }
@@ -163,13 +355,37 @@ rmw_destroy_node(rmw_node_t * node)
     RMW_SET_ERROR_MSG("failed to get domain participant factory");
     return RMW_RET_ERROR;
   }
-  auto result = RMW_RET_OK;
-  if (node->data) {
-    if (dp_factory->delete_participant((DDS::DomainParticipant *)node->data) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to delete participant");
-      result = RMW_RET_ERROR;
-    }
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
   }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
+  if (!participant) {
+    RMW_SET_ERROR_MSG("participant handle is null");
+    return RMW_RET_ERROR;
+  }
+  auto result = RMW_RET_OK;
+  if (dp_factory->delete_participant(participant) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to delete participant");
+    result = RMW_RET_ERROR;
+  }
+
+  if (node_info->publisher_listener) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      node_info->publisher_listener->~CustomPublisherListener(), CustomPublisherListener)
+    rmw_free(node_info->publisher_listener);
+    node_info->publisher_listener = nullptr;
+  }
+  if (node_info->subscriber_listener) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      node_info->subscriber_listener->~CustomSubscriberListener(), CustomSubscriberListener)
+    rmw_free(node_info->subscriber_listener);
+    node_info->subscriber_listener = nullptr;
+  }
+
+  rmw_free(node_info);
+  node->data = nullptr;
   rmw_node_free(node);
   return result;
 }
@@ -199,7 +415,12 @@ rmw_create_publisher(
     type_support->typesupport_identifier, typesupport_opensplice_identifier,
     return nullptr)
 
-  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return NULL;
+  }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -375,7 +596,12 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
     publisher->implementation_identifier, opensplice_cpp_identifier,
     return RMW_RET_ERROR)
 
-  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
+  }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
@@ -477,7 +703,12 @@ rmw_create_subscription(
     type_support->typesupport_identifier, typesupport_opensplice_identifier,
     return nullptr)
 
-  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return NULL;
+  }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -674,7 +905,12 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
     subscription->implementation_identifier, opensplice_cpp_identifier,
     return RMW_RET_ERROR)
 
-  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
+  }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
@@ -1106,7 +1342,12 @@ rmw_create_client(
     type_support->typesupport_identifier, typesupport_opensplice_identifier,
     return nullptr)
 
-  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return NULL;
+  }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -1335,7 +1576,12 @@ rmw_create_service(
     type_support->typesupport_identifier, typesupport_opensplice_identifier,
     return nullptr)
 
-  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(node->data);
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return NULL;
+  }
+  auto participant = static_cast<DDS::DomainParticipant *>(node_info->participant);
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
     return NULL;
@@ -1532,6 +1778,244 @@ rmw_send_response(
   if (error_string) {
     RMW_SET_ERROR_MSG(error_string);
     return RMW_RET_ERROR;
+  }
+  return RMW_RET_OK;
+}
+
+void
+destroy_topic_names_and_types(
+  rmw_topic_names_and_types_t * topic_names_and_types)
+{
+  if (topic_names_and_types->topic_count) {
+    for (size_t i = 0; i < topic_names_and_types->topic_count; ++i) {
+      delete topic_names_and_types->topic_names[i];
+      delete topic_names_and_types->type_names[i];
+      topic_names_and_types->topic_names[i] = nullptr;
+      topic_names_and_types->type_names[i] = nullptr;
+    }
+    if (topic_names_and_types->topic_names) {
+      rmw_free(topic_names_and_types->topic_names);
+      topic_names_and_types->topic_names = nullptr;
+    }
+    if (topic_names_and_types->type_names) {
+      rmw_free(topic_names_and_types->type_names);
+      topic_names_and_types->type_names = nullptr;
+    }
+    topic_names_and_types->topic_count = 0;
+  }
+}
+
+rmw_ret_t
+rmw_get_topic_names_and_types(
+  const rmw_node_t * node,
+  rmw_topic_names_and_types_t * topic_names_and_types)
+{
+  if (!node) {
+    RMW_SET_ERROR_MSG("node handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (node->implementation_identifier != opensplice_cpp_identifier) {
+    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+    return RMW_RET_ERROR;
+  }
+  if (!topic_names_and_types) {
+    RMW_SET_ERROR_MSG("topics handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (topic_names_and_types->topic_count) {
+    RMW_SET_ERROR_MSG("topic count is not zero");
+    return RMW_RET_ERROR;
+  }
+  if (topic_names_and_types->topic_names) {
+    RMW_SET_ERROR_MSG("topic names is not null");
+    return RMW_RET_ERROR;
+  }
+  if (topic_names_and_types->type_names) {
+    RMW_SET_ERROR_MSG("type names is not null");
+    return RMW_RET_ERROR;
+  }
+
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (!node_info->publisher_listener) {
+    RMW_SET_ERROR_MSG("publisher listener handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (!node_info->subscriber_listener) {
+    RMW_SET_ERROR_MSG("subscriber listener handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  // combine publisher and subscriber information
+  std::map<std::string, std::set<std::string>> topics_with_multiple_types;
+  for (auto it : node_info->publisher_listener->topic_names_and_types) {
+    for (auto & jt : it.second) {
+      topics_with_multiple_types[it.first].insert(jt);
+    }
+  }
+  for (auto it : node_info->subscriber_listener->topic_names_and_types) {
+    for (auto & jt : it.second) {
+      topics_with_multiple_types[it.first].insert(jt);
+    }
+  }
+
+  // ignore inconsistent types
+  std::map<std::string, std::string> topics;
+  for (auto & it : topics_with_multiple_types) {
+    if (it.second.size() != 1) {
+      fprintf(stderr, "topic type mismatch - ignoring topic '%s'\n", it.first.c_str());
+      continue;
+    }
+    topics[it.first] = *it.second.begin();
+  }
+
+  // reformat type name
+  std::string substr = "::msg::dds_::";
+  for (auto & it : topics) {
+    size_t substr_pos = it.second.find(substr);
+    if (it.second[it.second.size() - 1] == '_' && substr_pos != std::string::npos) {
+      it.second = it.second.substr(0, substr_pos) + "/" + it.second.substr(
+        substr_pos + substr.size(), it.second.size() - substr_pos - substr.size() - 1);
+    }
+  }
+
+  // copy data into result handle
+  if (topics.size() > 0) {
+    topic_names_and_types->topic_names = static_cast<char **>(
+      rmw_allocate(sizeof(char *) * topics.size()));
+    if (!topic_names_and_types->topic_names) {
+      RMW_SET_ERROR_MSG("failed to allocate memory for topic names")
+      return RMW_RET_ERROR;
+    }
+    topic_names_and_types->type_names = static_cast<char **>(
+      rmw_allocate(sizeof(char *) * topics.size()));
+    if (!topic_names_and_types->type_names) {
+      rmw_free(topic_names_and_types->topic_names);
+      RMW_SET_ERROR_MSG("failed to allocate memory for type names")
+      return RMW_RET_ERROR;
+    }
+    for (auto it : topics) {
+      char * topic_name = strdup(it.first.c_str());
+      if (!topic_name) {
+        RMW_SET_ERROR_MSG("failed to allocate memory for topic name")
+        goto fail;
+      }
+      char * type_name = strdup(it.second.c_str());
+      if (!type_name) {
+        rmw_free(topic_name);
+        RMW_SET_ERROR_MSG("failed to allocate memory for type name")
+        goto fail;
+      }
+      size_t i = topic_names_and_types->topic_count;
+      topic_names_and_types->topic_names[i] = topic_name;
+      topic_names_and_types->type_names[i] = type_name;
+      ++topic_names_and_types->topic_count;
+    }
+  }
+
+  return RMW_RET_OK;
+fail:
+  destroy_topic_names_and_types(topic_names_and_types);
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_destroy_topic_names_and_types(
+  rmw_topic_names_and_types_t * topic_names_and_types)
+{
+  if (!topic_names_and_types) {
+    RMW_SET_ERROR_MSG("topics handle is null");
+    return RMW_RET_ERROR;
+  }
+  destroy_topic_names_and_types(topic_names_and_types);
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_count_publishers(
+  const rmw_node_t * node,
+  const char * topic_name,
+  size_t * count)
+{
+  if (!node) {
+    RMW_SET_ERROR_MSG("node handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (node->implementation_identifier != opensplice_cpp_identifier) {
+    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+    return RMW_RET_ERROR;
+  }
+  if (!topic_name) {
+    RMW_SET_ERROR_MSG("topic name is null");
+    return RMW_RET_ERROR;
+  }
+  if (!count) {
+    RMW_SET_ERROR_MSG("count handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (!node_info->publisher_listener) {
+    RMW_SET_ERROR_MSG("publisher listener handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  const auto & topic_names_and_types = node_info->publisher_listener->topic_names_and_types;
+  auto it = topic_names_and_types.find(topic_name);
+  if (it == topic_names_and_types.end()) {
+    *count = 0;
+  } else {
+    *count = it->second.size();
+  }
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_count_subscribers(
+  const rmw_node_t * node,
+  const char * topic_name,
+  size_t * count)
+{
+  if (!node) {
+    RMW_SET_ERROR_MSG("node handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (node->implementation_identifier != opensplice_cpp_identifier) {
+    RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+    return RMW_RET_ERROR;
+  }
+  if (!topic_name) {
+    RMW_SET_ERROR_MSG("topic name is null");
+    return RMW_RET_ERROR;
+  }
+  if (!count) {
+    RMW_SET_ERROR_MSG("count handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (!node_info->subscriber_listener) {
+    RMW_SET_ERROR_MSG("subscriber listener handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  const auto & topic_names_and_types = node_info->subscriber_listener->topic_names_and_types;
+  auto it = topic_names_and_types.find(topic_name);
+  if (it == topic_names_and_types.end()) {
+    *count = 0;
+  } else {
+    *count = it->second.size();
   }
   return RMW_RET_OK;
 }
