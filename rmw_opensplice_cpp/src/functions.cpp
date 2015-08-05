@@ -101,7 +101,7 @@ rmw_init()
 }
 
 rmw_node_t *
-rmw_create_node(const char * name)
+rmw_create_node(const char * name, size_t domain_id)
 {
   (void)name;
 
@@ -111,8 +111,7 @@ rmw_create_node(const char * name)
     return nullptr;
   }
 
-  // TODO: take the domain id from configuration
-  DDS::DomainId_t domain = 0;
+  DDS::DomainId_t domain = static_cast<DDS::DomainId_t>(domain_id);
   DDS::DomainParticipant * participant = nullptr;
 
   rmw_node_t * node = rmw_node_allocate();
