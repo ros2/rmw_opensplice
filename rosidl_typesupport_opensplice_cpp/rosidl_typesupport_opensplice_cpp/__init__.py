@@ -71,7 +71,35 @@ def generate_dds_opensplice_cpp(
                 (pkg_name, '%s/msg/dds_opensplice/visibility_control.h' % pkg_name)]
         subprocess.check_call(cmd)
 
+        # modify generated code to compile with Visual Studio 2015
+        msg_name = os.path.splitext(os.path.basename(idl_file))[0]
+        dcps_impl_h_filename = os.path.join(output_path, '%sDcps_impl.h' % msg_name)
+        _modify(dcps_impl_h_filename, msg_name, _copy_constructor_and_assignment_operator)
+
     return 0
+
+
+def _modify(filename, msg_name, callback):
+    with open(filename, 'r') as h:
+        lines = h.read().split('\n')
+    modified = callback(lines, msg_name)
+    if modified:
+        with open(filename, 'w') as h:
+            h.write('\n'.join(lines))
+
+
+def _copy_constructor_and_assignment_operator(lines, msg_name):
+    for i, line in enumerate(lines):
+        if line.strip() == 'public:':
+            new_lines = [
+                '%sTypeSupportFactory(const %sTypeSupportFactory & o) = delete;' %
+                (msg_name, msg_name),
+                '%sTypeSupportFactory & operator=(const %sTypeSupportFactory & o) = delete;' %
+                (msg_name, msg_name),
+            ]
+            lines[i + 1:i + 1] = [' ' * 16 + l for l in new_lines]
+            return lines
+    assert False, 'Failed to find insertion point'
 
 
 def generate_typesupport_opensplice_cpp(args):
