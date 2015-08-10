@@ -26,6 +26,7 @@ ament_export_include_directories(${OpenSplice_INCLUDE_DIRS})
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(rmw_opensplice_cpp SHARED src/functions.cpp)
+target_link_libraries(rmw_opensplice_cpp pthread)
 ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
   "rosidl_generator_cpp"
