@@ -312,15 +312,20 @@ take__@(spec.base_type.type)(
       goto finally;
   }
 
-  if (ignore_local_publications) {
-    // compare the system id from the sender and this receiver
-    // if they are equal the sample has been sent from this process and should be ignored
+  {
     DDS::SampleInfo & sample_info = sample_infos[0];
-    DDS::InstanceHandle_t sender_handle = sample_info.publication_handle;
-    DDS::InstanceHandle_t receiver_handle = topic_reader->get_instance_handle();
-    auto sender_gid = u_instanceHandleToGID(sender_handle);
-    auto receiver_gid = u_instanceHandleToGID(receiver_handle);
-    ignore_sample = sender_gid.systemId == receiver_gid.systemId;
+    if (!sample_info.valid_data) {
+      // skip sample without data
+      ignore_sample = true;
+    } else if (ignore_local_publications) {
+      // compare the system id from the sender and this receiver
+      // if they are equal the sample has been sent from this process and should be ignored
+      DDS::InstanceHandle_t sender_handle = sample_info.publication_handle;
+      DDS::InstanceHandle_t receiver_handle = topic_reader->get_instance_handle();
+      auto sender_gid = u_instanceHandleToGID(sender_handle);
+      auto receiver_gid = u_instanceHandleToGID(receiver_handle);
+      ignore_sample = sender_gid.systemId == receiver_gid.systemId;
+    }
   }
 
   if (!ignore_sample) {
