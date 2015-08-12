@@ -105,7 +105,7 @@ public:
       return;
     }
 
-    for (size_t i = 0; i < data_seq.length(); ++i) {
+    for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
       if (info_seq[i].valid_data) {
         auto & topic_types = topic_names_and_types[data_seq[i].topic_name.in()];
         topic_types.push_back(data_seq[i].type_name.in());
@@ -142,7 +142,7 @@ public:
       return;
     }
 
-    for (size_t i = 0; i < data_seq.length(); ++i) {
+    for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
       if (info_seq[i].valid_data) {
         auto & topic_types = topic_names_and_types[data_seq[i].topic_name.in()];
         topic_types.push_back(data_seq[i].type_name.in());
