@@ -74,8 +74,8 @@ namespace typesupport_opensplice_cpp
 __dds_msg_type_prefix = "{}::{}::dds_::{}_".format(
   spec.base_type.pkg_name, subfolder, spec.base_type.type)
 }@
-typedef @(__dds_msg_type_prefix) __dds_msg_type;
-typedef @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) __ros_msg_type;
+using __dds_msg_type = @(__dds_msg_type_prefix);
+using __ros_msg_type = @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type);
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 const char *
