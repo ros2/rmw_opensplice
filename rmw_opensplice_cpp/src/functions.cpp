@@ -256,8 +256,14 @@ rmw_get_implementation_identifier()
 }
 
 rmw_ret_t
-rmw_init()
+rmw_init(const char * qos_xml_filename)
 {
+  std::string qos_xml_filename_str(qos_xml_filename);
+  if (!qos_xml_filename_str.empty()) {
+    RMW_SET_ERROR_MSG("rmw_opensplice does not support passing QoS profiles via XML files");
+    return RMW_RET_ERROR;
+  }
+
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
     RMW_SET_ERROR_MSG("failed to get domain participant factory");
