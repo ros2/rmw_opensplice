@@ -295,12 +295,10 @@ create_requester__@(spec.srv_name)(
     return error_string;
   }
 
-  typedef
-  rosidl_typesupport_opensplice_cpp::Requester<
+  using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  RequesterT;
+  >;
 
   RequesterT * requester = static_cast<RequesterT *>(_allocator(sizeof(RequesterT)));
   if (!requester) {
@@ -349,12 +347,10 @@ create_responder__@(spec.srv_name)(
     return error_string;
   }
 
-  typedef
-  rosidl_typesupport_opensplice_cpp::Responder<
+  using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  ResponderT;
+  >;
 
   ResponderT * responder = static_cast<ResponderT *>(_allocator(sizeof(ResponderT)));
   if (!responder) {
@@ -387,21 +383,17 @@ const char *
 send_request__@(spec.srv_name)(
   void * untyped_requester, const void * untyped_ros_request, int64_t * sequence_number)
 {
-  typedef
-  rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Request_>
-  SampleT;
-  typedef @(spec.pkg_name)::srv::@(spec.srv_name)_Request ROSRequestT;
+  using SampleT = rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Request_>;
+  using ROSRequestT = @(spec.pkg_name)::srv::@(spec.srv_name)_Request;
 
   SampleT request;
   auto ros_request = reinterpret_cast<const ROSRequestT *>(untyped_ros_request);
   @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_request, request.data());
 
-  typedef
-  rosidl_typesupport_opensplice_cpp::Requester<
+  using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  RequesterT;
+  >;
 
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
@@ -419,13 +411,11 @@ take_request__@(spec.srv_name)(
   void * untyped_responder, void * untyped_ros_request_header, void * untyped_ros_request,
   bool * taken)
 {
-  typedef
-  rosidl_typesupport_opensplice_cpp::Responder<
+  using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  ResponderT;
-  typedef @(spec.pkg_name)::srv::@(spec.srv_name)_Request ROSRequestT;
+  >;
+  using ROSRequestT = @(spec.pkg_name)::srv::@(spec.srv_name)_Request;
 
   auto ros_request = static_cast<ROSRequestT *>(untyped_ros_request);
   auto request_header = static_cast<rmw_request_id_t *>(untyped_ros_request_header);
@@ -458,19 +448,17 @@ send_response__@(spec.srv_name)(
   void * untyped_responder, const void * untyped_ros_request_header,
   const void * untyped_ros_response)
 {
-  typedef @(spec.pkg_name)::srv::@(spec.srv_name)_Response ROSResponseT;
+  using ROSResponseT = @(spec.pkg_name)::srv::@(spec.srv_name)_Response;
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
   auto ros_response = reinterpret_cast<const ROSResponseT *>(untyped_ros_response);
   @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_response, response.data());
 
   auto request_header = reinterpret_cast<const rmw_request_id_t *>(untyped_ros_request_header);
 
-  typedef
-  rosidl_typesupport_opensplice_cpp::Responder<
+  using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  ResponderT;
+  >;
   auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
 
   const char * error_string = responder->send_response(*request_header, response);
@@ -485,15 +473,13 @@ take_response__@(spec.srv_name)(
   void * untyped_requester, void * untyped_ros_request_header, void * untyped_ros_response,
   bool * taken)
 {
-  typedef @(spec.pkg_name)::srv::@(spec.srv_name)_Response ROSResponseT;
+  using ROSResponseT = @(spec.pkg_name)::srv::@(spec.srv_name)_Response;
   auto ros_response = static_cast<ROSResponseT *>(untyped_ros_response);
 
-  typedef
-  rosidl_typesupport_opensplice_cpp::Requester<
+  using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  RequesterT;
+  >;
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
@@ -517,12 +503,10 @@ take_response__@(spec.srv_name)(
 const char *
 destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocator)(void *))
 {
-  typedef
-  rosidl_typesupport_opensplice_cpp::Requester<
+  using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  RequesterT;
+  >;
 
   auto requester = static_cast<RequesterT *>(untyped_requester);
   try {
@@ -543,12 +527,10 @@ destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocato
 const char *
 destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocator)(void *))
 {
-  typedef
-  rosidl_typesupport_opensplice_cpp::Responder<
+  using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
     @(__dds_msg_type_prefix)_Request_,
     @(__dds_msg_type_prefix)_Response_
-  >
-  ResponderT;
+  >;
   auto responder = static_cast<ResponderT *>(untyped_responder);
   try {
     responder->~ResponderT();
