@@ -81,6 +81,7 @@ public:
     DDS::DataReader_ptr, const DDS::SampleLostStatus &)
   {}
   std::map<std::string, std::multiset<std::string>> topic_names_and_types;
+
 protected:
   virtual void add_information(
     const DDS::SampleInfo & sample_info,
@@ -113,6 +114,7 @@ protected:
       }
     }
   }
+
 private:
   struct TopicDescriptor
   {
