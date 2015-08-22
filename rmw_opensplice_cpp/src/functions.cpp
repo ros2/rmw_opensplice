@@ -419,7 +419,15 @@ rmw_destroy_node(rmw_node_t * node)
     RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
   }
+
   auto result = RMW_RET_OK;
+  // This unregisters types and destroys topics which were shared between
+  // publishers and subscribers and could not be cleaned up in the delete functions.
+  if (participant->delete_contained_entities() != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to delete contained entities of participant");
+    result = RMW_RET_ERROR;
+  }
+
   if (dp_factory->delete_participant(participant) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to delete participant");
     result = RMW_RET_ERROR;
