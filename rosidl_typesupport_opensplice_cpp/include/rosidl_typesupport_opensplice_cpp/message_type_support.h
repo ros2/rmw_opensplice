@@ -33,7 +33,8 @@ typedef struct message_type_support_callbacks_t
   // Returns NULL if the take was successful, otherwise an error string.
   // If no data is available to be taken, NULL is returned but taken will be set to false.
   const char * (*take)(
-    void * dds_data_reader, bool ignore_local_publications, void * ros_message, bool * taken);
+    void * dds_data_reader, bool ignore_local_publications, void * ros_message, bool * taken,
+    void * sending_publication_handle);
 } message_type_support_callbacks_t;
 
 #endif  /* ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_MESSAGE_TYPE_SUPPORT_H_ */

@@ -23,6 +23,7 @@
 
 #include <ccpp_dds_dcps.h>
 #include <dds_dcps.h>
+#include <u_instanceHandle.h>
 
 #include <rmw/allocators.h>
 #include <rmw/error_handling.h>
@@ -202,12 +203,18 @@ struct OpenSpliceStaticNodeInfo
   CustomSubscriberListener * subscriber_listener;
 };
 
+typedef struct OpenSplicePublisherGID
+{
+  DDS::InstanceHandle_t publication_handle;
+} OpenSplicePublisherGID;
+
 struct OpenSpliceStaticPublisherInfo
 {
   DDS::Topic * dds_topic;
   DDS::Publisher * dds_publisher;
   DDS::DataWriter * topic_writer;
   const message_type_support_callbacks_t * callbacks;
+  rmw_gid_t publisher_gid;
 };
 
 struct OpenSpliceStaticSubscriberInfo
@@ -612,6 +619,18 @@ rmw_create_publisher(
   publisher_info->dds_publisher = dds_publisher;
   publisher_info->topic_writer = topic_writer;
   publisher_info->callbacks = callbacks;
+  static_assert(
+    sizeof(OpenSplicePublisherGID) <= RMW_GID_STORAGE_SIZE,
+    "RMW_GID_STORAGE_SIZE insufficient to store the rmw_opensplice_cpp GID implemenation."
+  );
+  // Zero the data memory.
+  memset(publisher_info->publisher_gid.data, 0, RMW_GID_STORAGE_SIZE);
+  {
+    auto publisher_gid =
+      reinterpret_cast<OpenSplicePublisherGID *>(publisher_info->publisher_gid.data);
+    publisher_gid->publication_handle = topic_writer->get_instance_handle();
+  }
+  publisher_info->publisher_gid.implementation_identifier = opensplice_cpp_identifier;
 
   publisher->implementation_identifier = opensplice_cpp_identifier;
   publisher->data = publisher_info;
@@ -1039,9 +1058,13 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
   return result;
 }
 
+RMW_LOCAL
 rmw_ret_t
-rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * taken)
+_take(
+  const rmw_subscription_t * subscription, void * ros_message, bool * taken,
+  DDS::InstanceHandle_t * sending_publication_handle)
 {
+  // Note: gid is allowed to be nullptr, if unused.
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
     return RMW_RET_ERROR;
@@ -1081,12 +1104,45 @@ rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * tak
   const char * error_string = callbacks->take(
     topic_reader,
     subscriber_info->ignore_local_publications,
-    ros_message, taken);
+    ros_message, taken, sending_publication_handle);
   // If no data was taken, that's not captured as an error here, but instead taken is set to false.
   if (error_string) {
     RMW_SET_ERROR_MSG((std::string("failed to take: ") + error_string).c_str());
     return RMW_RET_ERROR;
   }
+
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_take(const rmw_subscription_t * subscription, void * ros_message, bool * taken)
+{
+  return _take(subscription, ros_message, taken, nullptr);
+}
+
+rmw_ret_t
+rmw_take_with_info(
+  const rmw_subscription_t * subscription,
+  void * ros_message,
+  bool * taken,
+  rmw_message_info_t * message_info)
+{
+  if (!message_info) {
+    RMW_SET_ERROR_MSG("message info is null");
+    return RMW_RET_ERROR;
+  }
+  DDS::InstanceHandle_t sending_publication_handle;
+  auto ret = _take(subscription, ros_message, taken, &sending_publication_handle);
+  if (ret != RMW_RET_OK) {
+    // Error string is already set.
+    return RMW_RET_ERROR;
+  }
+
+  rmw_gid_t * sender_gid = &message_info->publisher_gid;
+  sender_gid->implementation_identifier = opensplice_cpp_identifier;
+  memset(sender_gid->data, 0, RMW_GID_STORAGE_SIZE);
+  auto detail = reinterpret_cast<OpenSplicePublisherGID *>(sender_gid->data);
+  detail->publication_handle = sending_publication_handle;
 
   return RMW_RET_OK;
 }
@@ -2099,6 +2155,71 @@ rmw_count_subscribers(
   } else {
     *count = it->second.size();
   }
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_get_gid_for_publisher(const rmw_publisher_t * publisher, rmw_gid_t * gid)
+{
+  if (!publisher) {
+    RMW_SET_ERROR_MSG("publisher is null");
+    return RMW_RET_ERROR;
+  }
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    publisher handle,
+    publisher->implementation_identifier,
+    opensplice_cpp_identifier,
+    return RMW_RET_ERROR)
+  if (!gid) {
+    RMW_SET_ERROR_MSG("gid is null");
+    return RMW_RET_ERROR;
+  }
+
+  const OpenSpliceStaticPublisherInfo * publisher_info =
+    static_cast<const OpenSpliceStaticPublisherInfo *>(publisher->data);
+  if (!publisher_info) {
+    RMW_SET_ERROR_MSG("publisher info handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  *gid = publisher_info->publisher_gid;
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * result)
+{
+  if (!gid1) {
+    RMW_SET_ERROR_MSG("gid1 is null");
+    return RMW_RET_ERROR;
+  }
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    gid1,
+    gid1->implementation_identifier, opensplice_cpp_identifier,
+    return RMW_RET_ERROR)
+  if (!gid2) {
+    RMW_SET_ERROR_MSG("gid2 is null");
+    return RMW_RET_ERROR;
+  }
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    gid2,
+    gid2->implementation_identifier, opensplice_cpp_identifier,
+    return RMW_RET_ERROR)
+  if (!result) {
+    RMW_SET_ERROR_MSG("result is null");
+    return RMW_RET_ERROR;
+  }
+  auto detail1 = reinterpret_cast<const OpenSplicePublisherGID *>(gid1->data);
+  if (!detail1) {
+    RMW_SET_ERROR_MSG("gid1 is invalid");
+    return RMW_RET_ERROR;
+  }
+  auto detail2 = reinterpret_cast<const OpenSplicePublisherGID *>(gid2->data);
+  if (!detail2) {
+    RMW_SET_ERROR_MSG("gid2 is invalid");
+    return RMW_RET_ERROR;
+  }
+  *result = detail1->publication_handle == detail2->publication_handle;
   return RMW_RET_OK;
 }
 

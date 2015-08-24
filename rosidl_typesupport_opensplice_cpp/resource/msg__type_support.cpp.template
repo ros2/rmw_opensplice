@@ -253,7 +253,8 @@ take__@(spec.base_type.type)(
   void * untyped_topic_reader,
   bool ignore_local_publications,
   void * untyped_ros_message,
-  bool * taken)
+  bool * taken,
+  void * sending_publication_handle)
 {
   if (untyped_ros_message == 0) {
     return "invalid ros message pointer";
@@ -317,14 +318,20 @@ take__@(spec.base_type.type)(
     if (!sample_info.valid_data) {
       // skip sample without data
       ignore_sample = true;
-    } else if (ignore_local_publications) {
-      // compare the system id from the sender and this receiver
-      // if they are equal the sample has been sent from this process and should be ignored
+    } else {
       DDS::InstanceHandle_t sender_handle = sample_info.publication_handle;
-      DDS::InstanceHandle_t receiver_handle = topic_reader->get_instance_handle();
       auto sender_gid = u_instanceHandleToGID(sender_handle);
-      auto receiver_gid = u_instanceHandleToGID(receiver_handle);
-      ignore_sample = sender_gid.systemId == receiver_gid.systemId;
+      if (ignore_local_publications) {
+        // compare the system id from the sender and this receiver
+        // if they are equal the sample has been sent from this process and should be ignored
+        DDS::InstanceHandle_t receiver_handle = topic_reader->get_instance_handle();
+        auto receiver_gid = u_instanceHandleToGID(receiver_handle);
+        ignore_sample = sender_gid.systemId == receiver_gid.systemId;
+      }
+      // This is nullptr when being used with plain rmw_take, so check first.
+      if (sending_publication_handle) {
+        *static_cast<DDS::InstanceHandle_t *>(sending_publication_handle) = sender_handle;
+      }
     }
   }
 
