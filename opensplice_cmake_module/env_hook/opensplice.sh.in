@@ -14,9 +14,9 @@ else
   unset _UNAME
 
   if [ $_IS_DARWIN -eq 0 ]; then
-    ament_prepend_unique_value LD_LIBRARY_PATH "@OpenSplice_HOME@/lib"
+    ament_prepend_unique_value LD_LIBRARY_PATH "$OSPL_HOME/lib"
   else
-    ament_prepend_unique_value DYLD_LIBRARY_PATH "@OpenSplice_HOME@/lib"
+    ament_prepend_unique_value DYLD_LIBRARY_PATH "$OSPL_HOME/lib"
   fi
   unset _IS_DARWIN
 fi
