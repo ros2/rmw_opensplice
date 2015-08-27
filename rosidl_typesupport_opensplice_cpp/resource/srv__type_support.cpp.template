@@ -428,7 +428,7 @@ take_request__@(spec.srv_name)(
     return error_string;
   }
 
-  if (taken) {
+  if (*taken) {
     @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_dds_message_to_ros(request.data(), *ros_request);
 
     request_header->sequence_number = request.sequence_number_;
@@ -487,7 +487,7 @@ take_response__@(spec.srv_name)(
   if (error_string) {
     return error_string;
   }
-  if (taken) {
+  if (*taken) {
     auto req_id = reinterpret_cast<rmw_request_id_t *>(untyped_ros_request_header);
 
     req_id->sequence_number = response.sequence_number_;
