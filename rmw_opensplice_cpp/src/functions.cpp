@@ -25,6 +25,10 @@
 #include <dds_dcps.h>
 #include <u_instanceHandle.h>
 
+#ifdef _WIN32
+#include <stdlib.h>  // For _putenv_s.
+#endif
+
 #include <rmw/allocators.h>
 #include <rmw/error_handling.h>
 #include <rmw/impl/cpp/macros.hpp>
@@ -287,12 +291,80 @@ rmw_create_node(const char * name, size_t domain_id)
   DDS::DomainId_t domain = static_cast<DDS::DomainId_t>(domain_id);
   DDS::DomainParticipant * participant = nullptr;
 
+  // Make sure that the OSPL_URI is set, otherwise node creation will fail.
+  char * ospl_uri = nullptr;
+  const char * ospl_uri_env = "OSPL_URI";
+#ifndef _WIN32
+  ospl_uri = getenv(ospl_uri_env);
+#else
+  size_t ospl_uri_size;
+  _dupenv_s(&ospl_uri, &ospl_uri_size, ospl_uri_env);
+#endif
+  if (!ospl_uri) {
+    RMW_SET_ERROR_MSG("OSPL_URI not set");
+    return nullptr;
+  } else {
+#ifdef _WIN32
+    free(ospl_uri);
+#endif
+  }
+
+  // Ensure the ROS_DOMAIN_ID env variable is set, otherwise parsing of the config may fail.
+  // Also make sure the it is set to the domain_id passed in, otherwise it will fail.
+  // But first backup the current ROS_DOMAIN_ID.
+  char * ros_domain_id = nullptr;
+  const char * env_var = "ROS_DOMAIN_ID";
+#ifndef _WIN32
+  ros_domain_id = getenv(env_var);
+#else
+  size_t ros_domain_id_size;
+  _dupenv_s(&ros_domain_id, &ros_domain_id_size, env_var);
+#endif
+
+  // On Windows, setting the ROS_DOMAIN_ID does not fix the problem, so error early.
+#ifdef _WIN32
+  if (!ros_domain_id) {
+    RMW_SET_ERROR_MSG("environment variable ROS_DOMAIN_ID is not set");
+    fprintf(stderr, "[rmw_opensplice_cpp]: error: %s\n", rmw_get_error_string_safe());
+    return nullptr;
+  }
+#endif
+
+  // Set the ROS_DOMAIN_ID explicitly (if not Windows).
+#ifndef _WIN32
+  auto domain_id_as_string = std::to_string(domain_id);
+  int ret = 0;
+  ret = setenv(env_var, domain_id_as_string.c_str(), 1);
+  if (0 != ret) {
+    RMW_SET_ERROR_MSG("failed to set the ROS_DOMAIN_ID");
+    return nullptr;
+  }
+#endif
+
   participant = dp_factory->create_participant(
     domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE);
   if (!participant) {
     RMW_SET_ERROR_MSG("failed to create domain participant");
     return NULL;
   }
+
+  // Restore the ROS_DOMAIN_ID if necessary (and not Windows).
+#ifndef _WIN32
+  if (ros_domain_id) {
+    ret = setenv(env_var, ros_domain_id, 1);
+    if (0 != ret) {
+      RMW_SET_ERROR_MSG("failed to reset the ROS_DOMAIN_ID");
+      return nullptr;
+    }
+  } else {
+    // Otherwise unset it again.
+    ret = unsetenv(env_var);
+    if (0 != ret) {
+      RMW_SET_ERROR_MSG("failed to unset the ROS_DOMAIN_ID");
+      return nullptr;
+    }
+  }
+#endif
 
   rmw_node_t * node = nullptr;
   OpenSpliceStaticNodeInfo * node_info = nullptr;

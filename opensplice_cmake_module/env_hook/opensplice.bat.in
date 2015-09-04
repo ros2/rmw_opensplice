@@ -2,6 +2,11 @@ set "OSPL_HOME=@OpenSplice_HOME@"
 
 call "%OSPL_HOME%\release.bat" 1> nul
 
+set "OSPL_URI=file://%AMENT_CURRENT_PREFIX%/share/opensplice_cmake_module/config/ros_ospl.xml"
 set "OSPL_INFOFILE=<stdout>"
 set "OSPL_ERRORFILE=<stderr>"
 set OSPL_VERBOSITY=2
+
+:: If ROS_DOMAIN_ID is not set, set it to the default of 0.
+:: This is required because rmw_opensplice_cpp cannot work unless it is set.
+if "%ROS_DOMAIN_ID%"=="" set ROS_DOMAIN_ID=0

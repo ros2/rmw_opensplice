@@ -30,3 +30,6 @@ ament_package(
 
 install(DIRECTORY cmake
   DESTINATION share/${PROJECT_NAME})
+
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME})
