@@ -279,6 +279,8 @@ const char *
 create_requester__@(spec.srv_name)(
   void * untyped_participant, const char * service_name,
   void **untyped_requester, void ** untyped_reader,
+  const void * untyped_datareader_qos,
+  const void * untyped_datawriter_qos,
   void * (* allocator)(size_t))
 {
   auto _allocator = allocator ? allocator : &malloc;
@@ -288,6 +290,9 @@ create_requester__@(spec.srv_name)(
 
   DDS::DomainParticipant * participant =
     static_cast<DDS::DomainParticipant *>(untyped_participant);
+
+  const DDS::DataReaderQos * datareader_qos = static_cast<const DDS::DataReaderQos *>(untyped_datareader_qos);
+  const DDS::DataWriterQos * datawriter_qos = static_cast<const DDS::DataWriterQos *>(untyped_datawriter_qos);
 
   const char * error_string = register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
@@ -316,7 +321,7 @@ create_requester__@(spec.srv_name)(
     // throw exceptions below.
     return "C++ exception caught during construction of RequesterT";
   }
-  error_string = requester->init();
+  error_string = requester->init(datareader_qos, datawriter_qos);
   if (error_string) {
     return error_string;
   }
@@ -331,6 +336,8 @@ const char *
 create_responder__@(spec.srv_name)(
   void * untyped_participant, const char * service_name,
   void **untyped_responder, void **untyped_reader,
+  const void * untyped_datareader_qos,
+  const void * untyped_datawriter_qos,
   void * (* allocator)(size_t))
 {
   auto _allocator = allocator ? allocator : &malloc;
@@ -341,7 +348,10 @@ create_responder__@(spec.srv_name)(
   DDS::DomainParticipant * participant =
     static_cast<DDS::DomainParticipant *>(untyped_participant);
 
-  const char * error_string = register_types__@(spec.srv_name)(
+  const DDS::DataReaderQos * datareader_qos = static_cast<const DDS::DataReaderQos *>(untyped_datareader_qos);
+  const DDS::DataWriterQos * datawriter_qos = static_cast<const DDS::DataWriterQos *>(untyped_datawriter_qos);
+
+   const char * error_string = register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
   if (error_string) {
     return error_string;
@@ -368,7 +378,7 @@ create_responder__@(spec.srv_name)(
     // throw exceptions below.
     return "C++ exception caught during construction of ResponderT";
   }
-  error_string = responder->init();
+  error_string = responder->init(datareader_qos, datawriter_qos);
   if (error_string) {
     return error_string;
   }

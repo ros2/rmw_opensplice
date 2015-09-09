@@ -40,7 +40,8 @@ public:
     service_type_name_(service_type_name), sequence_number_(0)
   {}
 
-  const char * init() noexcept
+  const char * init(const DDS::DataReaderQos * datareader_qos,
+    const DDS::DataWriterQos * datawriter_qos) noexcept
   {
     std::random_device rd;
     std::default_random_engine e1(rd());
@@ -61,9 +62,7 @@ public:
     DDS::ReturnCode_t status;
     DDS::TopicQos default_topic_qos;
     DDS::PublisherQos publisher_qos;
-    DDS::DataWriterQos default_datawriter_qos;
     DDS::SubscriberQos subscriber_qos;
-    DDS::DataReaderQos default_datareader_qos;
     std::string request_type_name = service_type_name_ + "_Request_";
     std::string request_topic_name = service_name_ + "_Request";
     std::string response_type_name = service_type_name_ + "_Response_";
@@ -103,13 +102,8 @@ public:
       goto fail;
     }
 
-    status = request_publisher_->get_default_datawriter_qos(default_datawriter_qos);
-    if (nullptr != (estr = impl::check_get_default_datawriter_qos(status))) {
-      goto fail;
-    }
-
     request_datawriter_ = request_publisher_->create_datawriter(
-      request_topic_, default_datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
+      request_topic_, *datawriter_qos, NULL, DDS::STATUS_MASK_NONE);
     if (!request_datawriter_) {
       estr = "Publisher::create_datawriter: failed for request";
       goto fail;
@@ -146,14 +140,9 @@ public:
       goto fail;
     }
 
-    status = response_subscriber_->get_default_datareader_qos(default_datareader_qos);
-    if (nullptr != (estr = impl::check_get_default_datareader_qos(status))) {
-      goto fail;
-    }
-
     response_datareader_ = response_subscriber_->create_datareader(
       content_filtered_response_topic_,
-      default_datareader_qos, NULL, DDS::STATUS_MASK_NONE);
+      *datareader_qos, NULL, DDS::STATUS_MASK_NONE);
     if (!response_datareader_) {
       estr = "Subscriber::create_datawriter: failed for response";
       goto fail;
