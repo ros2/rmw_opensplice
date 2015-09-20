@@ -29,7 +29,7 @@ typedef struct service_type_support_callbacks_t
   // Passing NULL to the allocator will result in malloc being used.
   const char * (*create_requester)(
     void * participant, const char * service_name, void ** requester, void ** reader,
-    void * (*allocator)(size_t));
+    const void * datareader_qos, const void * datawriter_qos, void * (*allocator)(size_t));
   // De-allocatea a requester
   // The deallocator should match the allocator passed to create_requester.
   // Returns NULL if the requester was successfully destroyed, otherwise an error string.
@@ -40,7 +40,7 @@ typedef struct service_type_support_callbacks_t
   // Passing NULL to the allocator will result in malloc being used.
   const char * (*create_responder)(
     void * participant, const char * service_name, void ** responder, void ** reader,
-    void * (*allocator)(size_t));
+    const void * datareader_qos, const void * datawriter_qos, void * (*allocator)(size_t));
   // De-allocatea a responder
   // The deallocator should match the allocator passed to create_respnder.
   // Returns NULL if the responder was successfully destroyed, otherwise an error string.
