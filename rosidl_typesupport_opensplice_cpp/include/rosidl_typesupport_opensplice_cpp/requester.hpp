@@ -54,10 +54,17 @@ public:
     writer_guid_.first = uniform_dist(e1);
     writer_guid_.second = uniform_dist(e1);
 
+    // NOTE(esteve): OpenSplice's query encoding on Windows seems to have issues with
+    // arguments that produce queries that are too long
+    // https://github.com/PrismTech/opensplice/issues/21
+    std::stringstream ss;
+    ss << "client_guid_0_ = " << writer_guid_.first << " AND client_guid_1_ = " <<
+      writer_guid_.second;
+
+    std::string query(ss.str());
+
     DDS::StringSeq args;
-    args.length(2);
-    args[0] = DDS::string_dup(std::to_string(writer_guid_.first).c_str());
-    args[1] = DDS::string_dup(std::to_string(writer_guid_.second).c_str());
+    args.length(0);
 
     DDS::ReturnCode_t status;
     DDS::TopicQos default_topic_qos;
@@ -133,7 +140,7 @@ public:
     // Let OpenSplice do any needed encoding
     content_filtered_response_topic_ = participant_->create_contentfilteredtopic(
       service_name_.c_str(), response_topic_,
-      "client_guid_0_ = %0 AND client_guid_1_ = %1",
+      query.c_str(),
       args);
     if (!content_filtered_response_topic_) {
       estr = "DomainParticipant::create_contentfilteredtopic: failed";
