@@ -26,6 +26,9 @@
             <!-- the following one is necessary only for TwinOaks CoreDX DDS compatibility -->
             <!-- <ExplicitlyPublishQosSetToDefault>true</ExplicitlyPublishQosSetToDefault> -->
         </Compatibility>
+        <Internal>
+            <FragmentSize>64000B</FragmentSize>
+        </Internal>
     </DDSI2Service>
     <DurabilityService name="durability">
         <Network>
