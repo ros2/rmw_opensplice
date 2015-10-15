@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __rosidl_typesupport_openslice_cpp__duration__type_support__h__
-#define __rosidl_typesupport_openslice_cpp__duration__type_support__h__
+#ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__DURATION__TYPE_SUPPORT_HPP_
+#define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__DURATION__TYPE_SUPPORT_HPP_
 
 #include <ccpp_dds_dcps.h>
 
@@ -42,4 +42,4 @@ extern void convert_dds_message_to_ros(
 }  // namespace msg
 }  // namespace builtin_interfaces
 
-#endif  // __rosidl_typesupport_openslice_cpp__duration__type_support__h__
+#endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__DURATION__TYPE_SUPPORT_HPP_

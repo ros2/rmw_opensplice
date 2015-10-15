@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __rosidl_typesupport_openslice_cpp__impl__error_checking__h__
-#define __rosidl_typesupport_openslice_cpp__impl__error_checking__h__
+#ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__IMPL__ERROR_CHECKING_HPP_
+#define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__IMPL__ERROR_CHECKING_HPP_
 
 #include <ccpp_dds_dcps.h>
 
@@ -266,4 +266,4 @@ check_delete_datareader(DDS::ReturnCode_t status)
 }  // namespace impl
 }  // namespace rosidl_typesupport_opensplice_cpp
 
-#endif  // __rosidl_typesupport_openslice_cpp__impl__error_checking__h__
+#endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__IMPL__ERROR_CHECKING_HPP_
