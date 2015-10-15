@@ -304,6 +304,7 @@ struct OpenSpliceStaticClientInfo
 {
   void * requester_;
   DDS::DataReader * response_datareader_;
+  DDS::ReadCondition * read_condition_;
   const service_type_support_callbacks_t * callbacks_;
 };
 
@@ -311,6 +312,7 @@ struct OpenSpliceStaticServiceInfo
 {
   void * responder_;
   DDS::DataReader * request_datareader_;
+  DDS::ReadCondition * read_condition_;
   const service_type_support_callbacks_t * callbacks_;
 };
 
@@ -1356,22 +1358,13 @@ rmw_wait(
       RMW_SET_ERROR_MSG("service info handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::DataReader * request_datareader = service_info->request_datareader_;
-    if (!request_datareader) {
-      RMW_SET_ERROR_MSG("request datareader handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::StatusCondition * condition = request_datareader->get_statuscondition();
-    if (!condition) {
-      RMW_SET_ERROR_MSG("failed to get status condition from request datareader");
-      return RMW_RET_ERROR;
-    }
-    if (condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to set enabled statuses on condition");
+    DDS::ReadCondition * read_condition = service_info->read_condition_;
+    if (!read_condition) {
+      RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
     rmw_ret_t status = check_attach_condition_error(
-      waitset.attach_condition(condition));
+      waitset.attach_condition(read_condition));
     if (status != RMW_RET_OK) {
       return status;
     }
@@ -1385,22 +1378,13 @@ rmw_wait(
       RMW_SET_ERROR_MSG("client info handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::DataReader * response_datareader = client_info->response_datareader_;
-    if (!response_datareader) {
-      RMW_SET_ERROR_MSG("response datareader handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::StatusCondition * condition = response_datareader->get_statuscondition();
-    if (!condition) {
-      RMW_SET_ERROR_MSG("failed to get status condition from response datareader");
-      return RMW_RET_ERROR;
-    }
-    if (condition->set_enabled_statuses(DDS::DATA_AVAILABLE_STATUS) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to set enabled statuses on condition");
+    DDS::ReadCondition * read_condition = client_info->read_condition_;
+    if (!read_condition) {
+      RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
     rmw_ret_t status = check_attach_condition_error(
-      waitset.attach_condition(condition));
+      waitset.attach_condition(read_condition));
     if (status != RMW_RET_OK) {
       return status;
     }
@@ -1476,21 +1460,16 @@ rmw_wait(
       RMW_SET_ERROR_MSG("service info handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::DataReader * request_datareader = service_info->request_datareader_;
-    if (!request_datareader) {
-      RMW_SET_ERROR_MSG("request datareader handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::StatusCondition * condition = request_datareader->get_statuscondition();
-    if (!condition) {
-      RMW_SET_ERROR_MSG("failed to get status condition from request datareader");
+    DDS::ReadCondition * read_condition = service_info->read_condition_;
+    if (!read_condition) {
+      RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
 
     // search for service condition in active set
     unsigned long j = 0;
     for (; j < active_conditions.length(); ++j) {
-      if (active_conditions[j] == condition) {
+      if (active_conditions[j] == read_condition) {
         break;
       }
     }
@@ -1509,21 +1488,16 @@ rmw_wait(
       RMW_SET_ERROR_MSG("client info handle is null");
       return RMW_RET_ERROR;
     }
-    DDS::DataReader * response_datareader = client_info->response_datareader_;
-    if (!response_datareader) {
-      RMW_SET_ERROR_MSG("response datareader handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::StatusCondition * condition = response_datareader->get_statuscondition();
-    if (!condition) {
-      RMW_SET_ERROR_MSG("failed to get status condition from response datareader");
+    DDS::ReadCondition * read_condition = client_info->read_condition_;
+    if (!read_condition) {
+      RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
 
     // search for service condition in active set
     unsigned long j = 0;
     for (; j < active_conditions.length(); ++j) {
-      if (active_conditions[j] == condition) {
+      if (active_conditions[j] == read_condition) {
         break;
       }
     }
@@ -1586,6 +1560,7 @@ rmw_create_client(
   rmw_client_t * client = nullptr;
   const char * error_string = nullptr;
   DDS::DataReader * response_datareader = nullptr;
+  DDS::ReadCondition * read_condition = nullptr;
   void * requester = nullptr;
   OpenSpliceStaticClientInfo * client_info = nullptr;
   // Begin initializing elements.
@@ -1623,6 +1598,13 @@ rmw_create_client(
     goto fail;
   }
 
+  read_condition = response_datareader->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (!read_condition) {
+    RMW_SET_ERROR_MSG("failed to create read condition");
+    goto fail;
+  }
+
   client_info = static_cast<OpenSpliceStaticClientInfo *>(
     rmw_allocate(sizeof(OpenSpliceStaticClientInfo)));
   if (!client_info) {
@@ -1632,11 +1614,20 @@ rmw_create_client(
   client_info->requester_ = requester;
   client_info->callbacks_ = callbacks;
   client_info->response_datareader_ = response_datareader;
+  client_info->read_condition_ = read_condition;
 
   client->implementation_identifier = opensplice_cpp_identifier;
   client->data = client_info;
   return client;
 fail:
+  if (response_datareader) {
+    if (read_condition) {
+      if (response_datareader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
+        fprintf(stderr, "leaking readcondition while handling failure\n");
+      }
+    }
+  }
+
   if (requester) {
     const char * error_string = callbacks->destroy_requester(requester, &rmw_free);
     if (error_string) {
@@ -1669,7 +1660,21 @@ rmw_destroy_client(rmw_client_t * client)
 
   OpenSpliceStaticClientInfo * client_info =
     static_cast<OpenSpliceStaticClientInfo *>(client->data);
-  if (!client_info) {
+
+  auto result = RMW_RET_OK;
+  if (client_info) {
+    auto response_datareader = client_info->response_datareader_;
+    if (response_datareader) {
+      auto read_condition = client_info->read_condition_;
+      if (read_condition) {
+        if (response_datareader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
+          RMW_SET_ERROR_MSG("failed to delete readcondition");
+          result = RMW_RET_ERROR;
+        }
+        client_info->read_condition_ = nullptr;
+      }
+    }
+  } else {
     RMW_SET_ERROR_MSG("client_info handle is null");
     return RMW_RET_ERROR;
   }
@@ -1689,7 +1694,7 @@ rmw_destroy_client(rmw_client_t * client)
 
   rmw_free(client_info);
   rmw_client_free(client);
-  return RMW_RET_OK;
+  return result;
 }
 
 rmw_ret_t
@@ -1835,6 +1840,7 @@ rmw_create_service(
   rmw_service_t * service = nullptr;
   const char * error_string = nullptr;
   DDS::DataReader * request_datareader = nullptr;
+  DDS::ReadCondition * read_condition = nullptr;
   void * responder = nullptr;
   OpenSpliceStaticServiceInfo * service_info = nullptr;
   // Begin initialization of elements.
@@ -1864,6 +1870,13 @@ rmw_create_service(
     goto fail;
   }
 
+  read_condition = request_datareader->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (!read_condition) {
+    RMW_SET_ERROR_MSG("failed to create read condition");
+    goto fail;
+  }
+
   service_info =
     static_cast<OpenSpliceStaticServiceInfo *>(rmw_allocate(sizeof(OpenSpliceStaticServiceInfo)));
   if (!service_info) {
@@ -1873,11 +1886,20 @@ rmw_create_service(
   service_info->responder_ = responder;
   service_info->callbacks_ = callbacks;
   service_info->request_datareader_ = request_datareader;
+  service_info->read_condition_ = read_condition;
 
   service->implementation_identifier = opensplice_cpp_identifier;
   service->data = service_info;
   return service;
 fail:
+  if (request_datareader) {
+    if (read_condition) {
+      if (request_datareader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
+        fprintf(stderr, "leaking readcondition while handling failure\n");
+      }
+    }
+  }
+
   if (responder) {
     const char * error_string = callbacks->destroy_responder(responder, &rmw_free);
     if (error_string) {
@@ -1910,8 +1932,22 @@ rmw_destroy_service(rmw_service_t * service)
 
   OpenSpliceStaticServiceInfo * service_info =
     static_cast<OpenSpliceStaticServiceInfo *>(service->data);
-  if (!service_info) {
-    RMW_SET_ERROR_MSG("service info handle is null");
+
+  auto result = RMW_RET_OK;
+  if (service_info) {
+    auto request_datareader = service_info->request_datareader_;
+    if (request_datareader) {
+      auto read_condition = service_info->read_condition_;
+      if (read_condition) {
+        if (request_datareader->delete_readcondition(read_condition) != DDS::RETCODE_OK) {
+          RMW_SET_ERROR_MSG("failed to delete readcondition");
+          result = RMW_RET_ERROR;
+        }
+        service_info->read_condition_ = nullptr;
+      }
+    }
+  } else {
+    RMW_SET_ERROR_MSG("service_info handle is null");
     return RMW_RET_ERROR;
   }
 
@@ -1928,7 +1964,7 @@ rmw_destroy_service(rmw_service_t * service)
 
   rmw_free(service_info);
   rmw_service_free(service);
-  return RMW_RET_OK;
+  return result;
 }
 
 rmw_ret_t
