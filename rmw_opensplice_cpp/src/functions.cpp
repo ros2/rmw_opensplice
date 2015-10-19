@@ -20,27 +20,26 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
-
-#include <ccpp_dds_dcps.h>
-#include <dds_dcps.h>
-#include <u_instanceHandle.h>
+#include <string>
 
 #ifdef _WIN32
 #include <stdlib.h>  // For _putenv_s.
 #endif
 
-#include <rmw/allocators.h>
-#include <rmw/error_handling.h>
-#include <rmw/impl/cpp/macros.hpp>
-#include <rmw/rmw.h>
-#include <rosidl_generator_c/message_type_support.h>
-#include <rosidl_generator_c/service_type_support.h>
-#include <rosidl_typesupport_opensplice_cpp/identifier.hpp>
-#include <rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp>
-#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
-#include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
+#include <ccpp_dds_dcps.h>
+#include <dds_dcps.h>
+#include <u_instanceHandle.h>
 
-#include <rmw/impl/cpp/macros.hpp>
+#include "rmw/allocators.h"
+#include "rmw/error_handling.h"
+#include "rmw/impl/cpp/macros.hpp"
+#include "rmw/rmw.h"
+#include "rosidl_generator_c/message_type_support.h"
+#include "rosidl_generator_c/service_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
+#include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
+#include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
 inline std::string
 _create_type_name(
@@ -125,7 +124,6 @@ bool set_entity_qos_from_profile(const rmw_qos_profile_t & qos_profile,
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {
-
 using rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier;
 const char * opensplice_cpp_identifier = "opensplice_static";
 
@@ -2369,5 +2367,4 @@ rmw_compare_gids_equal(const rmw_gid_t * gid1, const rmw_gid_t * gid2, bool * re
   *result = detail1->publication_handle == detail2->publication_handle;
   return RMW_RET_OK;
 }
-
 }  // extern "C"

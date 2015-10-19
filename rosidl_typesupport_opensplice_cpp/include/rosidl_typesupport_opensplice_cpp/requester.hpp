@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __rosidl_typesupport_opensplice_cpp__requester__h__
-#define __rosidl_typesupport_opensplice_cpp__requester__h__
-
-#include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
+#ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__REQUESTER_HPP_
+#define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__REQUESTER_HPP_
 
 #include <atomic>
 #include <limits>
 #include <random>
+#include <string>
+#include <utility>
 
 #include <ccpp_dds_dcps.h>
 
+#include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
@@ -240,4 +241,4 @@ private:
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 
-#endif  // __rosidl_typesupport_opensplice_cpp__requester__h__
+#endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__REQUESTER_HPP_

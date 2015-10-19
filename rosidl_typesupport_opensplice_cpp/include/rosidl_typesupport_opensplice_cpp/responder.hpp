@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef __rosidl_typesupport_opensplice_cpp__responder__h__
-#define __rosidl_typesupport_opensplice_cpp__responder__h__
+#ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__RESPONDER_HPP_
+#define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__RESPONDER_HPP_
 
-#include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
+#include <string>
 
 #include <ccpp_dds_dcps.h>
 #include <u_entity.h>
 
-#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
-#include <rosidl_typesupport_opensplice_cpp/service_type_support.h>
-#include <rmw/rmw.h>
+#include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
+
+#include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
+#include "rmw/rmw.h"
 
 namespace rosidl_typesupport_opensplice_cpp
 {
@@ -41,7 +43,6 @@ public:
   const char * init(const DDS::DataReaderQos * datareader_qos,
     const DDS::DataWriterQos * datawriter_qos)
   {
-
     DDS::ReturnCode_t status;
     DDS::TopicQos default_topic_qos;
     DDS::SubscriberQos subscriber_qos;
@@ -199,4 +200,4 @@ private:
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 
-#endif  // __rosidl_typesupport_opensplice_cpp__responder__h__
+#endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__RESPONDER_HPP_
