@@ -15,13 +15,13 @@
 #ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__REQUESTER_HPP_
 #define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__REQUESTER_HPP_
 
+#include <ccpp_dds_dcps.h>
+
 #include <atomic>
 #include <limits>
 #include <random>
 #include <string>
 #include <utility>
-
-#include <ccpp_dds_dcps.h>
 
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"

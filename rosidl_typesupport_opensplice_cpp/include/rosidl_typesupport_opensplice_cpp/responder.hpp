@@ -15,10 +15,10 @@
 #ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__RESPONDER_HPP_
 #define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__RESPONDER_HPP_
 
-#include <string>
-
 #include <ccpp_dds_dcps.h>
 #include <u_entity.h>
+
+#include <string>
 
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 
