@@ -50,7 +50,15 @@ _create_type_name(
          "::" + sep + "::dds_::" + callbacks->message_name + "_";
 }
 
-using namespace rosidl_typesupport_opensplice_cpp::impl;
+using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datareader_qos;
+using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datawriter_qos;
+using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;
+using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
+using rosidl_typesupport_opensplice_cpp::impl::check_delete_datareader;
+using rosidl_typesupport_opensplice_cpp::impl::check_delete_datawriter;
+using rosidl_typesupport_opensplice_cpp::impl::check_delete_publisher;
+using rosidl_typesupport_opensplice_cpp::impl::check_delete_subscriber;
+using rosidl_typesupport_opensplice_cpp::impl::check_delete_topic;
 
 template<typename DDSEntityQos>
 bool set_entity_qos_from_profile(const rmw_qos_profile_t & qos_profile,
