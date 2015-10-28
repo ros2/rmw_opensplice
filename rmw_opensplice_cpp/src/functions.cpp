@@ -1473,7 +1473,7 @@ rmw_wait(
     }
 
     // search for service condition in active set
-    unsigned long j = 0;
+    uint32_t j = 0;
     for (; j < active_conditions.length(); ++j) {
       if (active_conditions[j] == read_condition) {
         break;
@@ -1501,7 +1501,7 @@ rmw_wait(
     }
 
     // search for service condition in active set
-    unsigned long j = 0;
+    uint32_t j = 0;
     for (; j < active_conditions.length(); ++j) {
       if (active_conditions[j] == read_condition) {
         break;
