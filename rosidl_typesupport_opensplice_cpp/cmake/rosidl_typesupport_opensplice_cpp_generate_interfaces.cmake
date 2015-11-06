@@ -243,6 +243,7 @@ target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   "${_output_path}/msg/dds_opensplice"
   "${_output_path}/srv/dds_opensplice"
 )
+ament_target_dependencies(${rosidl_generate_interfaces_TARGET}${_target_suffix} "rmw")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   set(_msg_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/msg/dds_opensplice")
   set(_srv_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/srv/dds_opensplice")
