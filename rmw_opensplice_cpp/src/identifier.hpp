@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "identifier.hpp"
+#ifndef IDENTIFIER_HPP_
+#define IDENTIFIER_HPP_
 
-const char * opensplice_cpp_identifier = "opensplice_static";
+extern const char * opensplice_cpp_identifier;
+
+#endif  // IDENTIFIER_HPP_

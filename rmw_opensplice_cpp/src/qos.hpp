@@ -12,6 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "identifier.hpp"
+#ifndef QOS_HPP_
+#define QOS_HPP_
 
-const char * opensplice_cpp_identifier = "opensplice_static";
+#include <ccpp_dds_dcps.h>
+#include <dds_dcps.h>
+#include <u_instanceHandle.h>
+
+#include "rmw/rmw.h"
+
+RMW_LOCAL
+bool get_datareader_qos(
+  DDS::Subscriber * subscriber,
+  const rmw_qos_profile_t & qos_profile,
+  DDS::DataReaderQos & datareader_qos);
+
+RMW_LOCAL
+bool get_datawriter_qos(
+  DDS::Publisher * publisher,
+  const rmw_qos_profile_t & qos_profile,
+  DDS::DataWriterQos & datawriter_qos);
+
+#endif  // QOS_HPP_
