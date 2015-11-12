@@ -75,6 +75,8 @@ public:
     std::string request_topic_name = service_name_ + "_Request";
     std::string response_type_name = service_type_name_ + "_Response_";
     std::string response_topic_name = service_name_ + "_Response";
+    std::string content_filtered_topic_name = service_name_ +
+      std::to_string(writer_guid_.first) + "_" + std::to_string(writer_guid_.second);
     const char * estr = nullptr;
     request_topic_ = nullptr;
     request_publisher_ = nullptr;
@@ -137,10 +139,8 @@ public:
       estr = "DomainParticipant::create_topic: failed for response";
       goto fail;
     }
-
-    // Let OpenSplice do any needed encoding
     content_filtered_response_topic_ = participant_->create_contentfilteredtopic(
-      service_name_.c_str(), response_topic_,
+      content_filtered_topic_name.c_str(), response_topic_,
       query.c_str(),
       args);
     if (!content_filtered_response_topic_) {
@@ -157,12 +157,6 @@ public:
     }
     return nullptr;
 fail:
-    if (content_filtered_response_topic_) {
-      status = participant_->delete_contentfilteredtopic(content_filtered_response_topic_);
-      if (nullptr != impl::check_delete_contentfilteredtopic(status)) {
-        fprintf(stderr, "%s\n", impl::check_delete_contentfilteredtopic(status));
-      }
-    }
     if (response_datareader_) {
       // Assumption: subscriber is not null at this point.
       status = response_subscriber_->delete_datareader(response_datareader_);
@@ -174,12 +168,6 @@ fail:
       status = participant_->delete_subscriber(response_subscriber_);
       if (nullptr != impl::check_delete_subscriber(status)) {
         fprintf(stderr, "%s\n", impl::check_delete_subscriber(status));
-      }
-    }
-    if (response_topic_) {
-      status = participant_->delete_topic(response_topic_);
-      if (nullptr != impl::check_delete_topic(status)) {
-        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
       }
     }
     if (request_datawriter_) {
@@ -195,6 +183,18 @@ fail:
         fprintf(stderr, "%s\n", impl::check_delete_publisher(status));
       }
     }
+    if (content_filtered_response_topic_) {
+      status = participant_->delete_contentfilteredtopic(content_filtered_response_topic_);
+      if (nullptr != impl::check_delete_contentfilteredtopic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_contentfilteredtopic(status));
+      }
+    }
+    if (response_topic_) {
+      status = participant_->delete_topic(response_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+      }
+    }
     if (request_topic_) {
       status = participant_->delete_topic(request_topic_);
       if (nullptr != impl::check_delete_topic(status)) {
@@ -203,6 +203,85 @@ fail:
     }
     return estr;
   }
+
+  const char * teardown() noexcept
+  {
+    const char * estr = nullptr;
+    DDS::ReturnCode_t status;
+    if (response_datareader_) {
+      // Assumption: subscriber is not null at this point.
+      status = response_subscriber_->delete_datareader(response_datareader_);
+      if (nullptr != impl::check_delete_datareader(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_datareader(status));
+        estr = "Error from Subscriber::delete_datareader in requester teardown";
+      }
+    }
+    if (response_subscriber_) {
+      status = participant_->delete_subscriber(response_subscriber_);
+      if (nullptr != impl::check_delete_subscriber(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_subscriber(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Participant::delete_subscriber in requester teardown";
+      }
+    }
+    if (request_datawriter_) {
+      // Assumption: publisher is not null at this point.
+      status = request_publisher_->delete_datawriter(request_datawriter_);
+      if (nullptr != impl::check_delete_datawriter(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_datawriter(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Publisher::delete_datawriter in requester teardown";
+      }
+    }
+    if (request_publisher_) {
+      status = participant_->delete_publisher(request_publisher_);
+      if (nullptr != impl::check_delete_publisher(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_publisher(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Particpant::delete_publisher in requester teardown";
+      }
+    }
+    if (content_filtered_response_topic_) {
+      status = participant_->delete_contentfilteredtopic(content_filtered_response_topic_);
+      if (nullptr != impl::check_delete_contentfilteredtopic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_contentfilteredtopic(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Particpant::delete_contentfilteredtopic in requester teardown";
+      }
+    }
+    if (response_topic_) {
+      status = participant_->delete_topic(response_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Particpant::delete_topic in requester teardown";
+      }
+    }
+    if (request_topic_) {
+      status = participant_->delete_topic(request_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+        estr = "Error from Particpant::delete_topic in requester teardown";
+      }
+    }
+    return estr;
+  }
+
 
   const char * take_response(Sample<ResponseT> & response, bool * taken) noexcept
   {

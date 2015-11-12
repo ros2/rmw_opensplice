@@ -519,6 +519,7 @@ destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocato
   >;
 
   auto requester = static_cast<RequesterT *>(untyped_requester);
+  const char * teardown_status = requester->teardown();
   try {
     requester->~RequesterT();
   } catch(...) {
@@ -528,7 +529,9 @@ destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocato
     // throw exceptions below.
     return "C++ exception caught during destruction of RequesterT";
   }
-  // TODO(wjwwood): we need a "deinit" function on the class to undo anything done in the init().
+  if (teardown_status != nullptr) {
+    return teardown_status;
+  }
   auto _deallocator = deallocator ? deallocator : &free;
   _deallocator(requester);
   return nullptr;
@@ -542,6 +545,7 @@ destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocato
     @(__dds_msg_type_prefix)_Response_
   >;
   auto responder = static_cast<ResponderT *>(untyped_responder);
+  const char * teardown_status = responder->teardown();
   try {
     responder->~ResponderT();
   } catch(...) {
@@ -551,7 +555,9 @@ destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocato
     // throw exceptions below.
     return "C++ exception caught during destruction of ResponderT";
   }
-  // TODO(wjwwood): we need a "deinit" function on the class to undo anything done in the init().
+  if (teardown_status != nullptr) {
+    return teardown_status;
+  }
   auto _deallocator = deallocator ? deallocator : &free;
   _deallocator(responder);
   return nullptr;
