@@ -164,6 +164,77 @@ fail:
     return estr;
   }
 
+  const char * teardown() noexcept
+  {
+    const char * estr = nullptr;
+    DDS::ReturnCode_t status;
+    if (response_datawriter_) {
+      status = response_publisher_->delete_datawriter(response_datawriter_);
+      if (nullptr != impl::check_delete_datawriter(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_datawriter(status));
+        estr = "Error from Publisher::delete_datawriter in responder teardown";
+      }
+    }
+    if (response_topic_) {
+      status = participant_->delete_topic(response_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Participant::delete_topic in responder teardown";
+      }
+    }
+    if (response_publisher_) {
+      status = participant_->delete_publisher(response_publisher_);
+      if (nullptr != impl::check_delete_publisher(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_publisher(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Participant::delete_publisher in responder teardown";
+      }
+    }
+    if (request_datareader_) {
+      // Assumption: subscriber is not null at this point.
+      status = request_subscriber_->delete_datareader(request_datareader_);
+      if (nullptr != impl::check_delete_datareader(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_datareader(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Subscriber::delete_datareader in responder teardown";
+      }
+    }
+    if (request_subscriber_) {
+      status = participant_->delete_subscriber(request_subscriber_);
+      if (nullptr != impl::check_delete_subscriber(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_subscriber(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Participant::delete_subscriber in responder teardown";
+      }
+    }
+    if (request_topic_) {
+      status = participant_->delete_topic(request_topic_);
+      if (nullptr != impl::check_delete_topic(status)) {
+        fprintf(stderr, "%s\n", impl::check_delete_topic(status));
+        if (estr) {
+          // print the old error string if it needs to be overwritten
+          fprintf(stderr, "%s\n", estr);
+        }
+        estr = "Error from Participant::delete_topic in responder teardown";
+      }
+    }
+    return estr;
+  }
+
+
   DDS::DataReader * get_request_datareader()
   {
     return request_datareader_;
