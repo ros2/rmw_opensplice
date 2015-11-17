@@ -49,18 +49,20 @@ public:
     // NOTE: use extra parentheses to avoid macro expansion. On Windows,
     // max and min are defined as macros in <windows.h>
     // See http://stackoverflow.com/a/2561377/470581
-    std::uniform_int_distribution<uint64_t> uniform_dist(
-      (std::numeric_limits<uint64_t>::min)(),
-      (std::numeric_limits<uint64_t>::max)());
-    writer_guid_.first = uniform_dist(e1);
-    writer_guid_.second = uniform_dist(e1);
+    std::uniform_int_distribution<int32_t> uniform_dist(
+      (std::numeric_limits<int32_t>::min)(),
+      (std::numeric_limits<int32_t>::max)());
+    writer_guid_ = std::make_tuple(
+      uniform_dist(e1), uniform_dist(e1), uniform_dist(e1), uniform_dist(e1));
 
     // NOTE(esteve): OpenSplice's query encoding on Windows seems to have issues with
     // arguments that produce queries that are too long
     // https://github.com/PrismTech/opensplice/issues/21
     std::stringstream ss;
-    ss << "client_guid_0_ = " << writer_guid_.first << " AND client_guid_1_ = " <<
-      writer_guid_.second;
+    ss << "client_guid_0_ = " << std::get<0>(writer_guid_) <<
+      " AND client_guid_1_ = " << std::get<1>(writer_guid_) <<
+      " AND client_guid_2_ = " << std::get<2>(writer_guid_) <<
+      " AND client_guid_3_ = " << std::get<3>(writer_guid_);
 
     std::string query(ss.str());
 
@@ -292,8 +294,10 @@ fail:
   const char * send_request(Sample<RequestT> & request) noexcept
   {
     request.sequence_number_ = ++sequence_number_;
-    request.client_guid_0_ = writer_guid_.first;
-    request.client_guid_1_ = writer_guid_.second;
+    request.client_guid_0_ = std::get<0>(writer_guid_);
+    request.client_guid_1_ = std::get<1>(writer_guid_);
+    request.client_guid_2_ = std::get<2>(writer_guid_);
+    request.client_guid_3_ = std::get<3>(writer_guid_);
 
     return TemplateDataWriter<Sample<RequestT>>::write_sample(request_datawriter_, request);
   }
@@ -315,7 +319,7 @@ private:
   DDS::Subscriber * response_subscriber_;
   DDS::Publisher * request_publisher_;
   std::atomic<int64_t> sequence_number_;
-  std::pair<uint64_t, uint64_t> writer_guid_;
+  std::tuple<int32_t, int32_t, int32_t, int32_t> writer_guid_;
 };
 
 }  // namespace rosidl_typesupport_opensplice_cpp
