@@ -21,6 +21,8 @@
 
 #include "types.hpp"
 
+#include "waitset.hpp"
+
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {
@@ -47,7 +49,7 @@ rmw_wait(
   rmw_clients_t * clients,
   rmw_time_t * wait_timeout)
 {
-  DDS::WaitSet waitset;
+  //DDS::WaitSet waitset;
 
   // add a condition for each subscriber
   for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
@@ -63,7 +65,7 @@ rmw_wait(
       return RMW_RET_ERROR;
     }
     rmw_ret_t status = check_attach_condition_error(
-      waitset.attach_condition(read_condition));
+      opensplice_cpp_waitset.attach_condition(read_condition));
     if (status != RMW_RET_OK) {
       return status;
     }
@@ -78,7 +80,7 @@ rmw_wait(
       return RMW_RET_ERROR;
     }
     rmw_ret_t status = check_attach_condition_error(
-      waitset.attach_condition(guard_condition));
+      opensplice_cpp_waitset.attach_condition(guard_condition));
     if (status != RMW_RET_OK) {
       return status;
     }
@@ -98,7 +100,7 @@ rmw_wait(
       return RMW_RET_ERROR;
     }
     rmw_ret_t status = check_attach_condition_error(
-      waitset.attach_condition(read_condition));
+      opensplice_cpp_waitset.attach_condition(read_condition));
     if (status != RMW_RET_OK) {
       return status;
     }
@@ -118,7 +120,7 @@ rmw_wait(
       return RMW_RET_ERROR;
     }
     rmw_ret_t status = check_attach_condition_error(
-      waitset.attach_condition(read_condition));
+      opensplice_cpp_waitset.attach_condition(read_condition));
     if (status != RMW_RET_OK) {
       return status;
     }
@@ -133,7 +135,7 @@ rmw_wait(
     timeout.sec = static_cast<DDS::Long>(wait_timeout->sec);
     timeout.nanosec = static_cast<DDS::Long>(wait_timeout->nsec);
   }
-  DDS::ReturnCode_t status = waitset.wait(active_conditions, timeout);
+  DDS::ReturnCode_t status = opensplice_cpp_waitset.wait(active_conditions, timeout);
 
   if (status == DDS::RETCODE_TIMEOUT) {
     return RMW_RET_TIMEOUT;
@@ -153,6 +155,7 @@ rmw_wait(
       return RMW_RET_ERROR;
     }
     DDS::ReadCondition * read_condition = subscriber_info->read_condition;
+    opensplice_cpp_waitset.detach_condition(read_condition);
     if (!read_condition) {
       RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
@@ -173,6 +176,7 @@ rmw_wait(
       return RMW_RET_ERROR;
     }
 
+    opensplice_cpp_waitset.detach_condition(guard_condition);
     if (!guard_condition->get_trigger_value()) {
       // if the guard condition was not triggered
       // reset the guard condition handle
@@ -199,6 +203,7 @@ rmw_wait(
       RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
+    opensplice_cpp_waitset.detach_condition(read_condition);
 
     // search for service condition in active set
     uint32_t j = 0;
@@ -227,6 +232,7 @@ rmw_wait(
       RMW_SET_ERROR_MSG("read condition handle is null");
       return RMW_RET_ERROR;
     }
+    opensplice_cpp_waitset.detach_condition(read_condition);
 
     // search for service condition in active set
     uint32_t j = 0;
