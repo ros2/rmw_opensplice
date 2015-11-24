@@ -47,6 +47,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_trigger_guard_condition.cpp
   src/rmw_wait.cpp
   src/types.cpp
+  src/waitset.cpp
 )
 ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
