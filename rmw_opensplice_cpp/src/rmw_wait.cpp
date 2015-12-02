@@ -47,7 +47,28 @@ rmw_wait(
   rmw_clients_t * clients,
   rmw_time_t * wait_timeout)
 {
-  DDS::WaitSet waitset;
+  // TODO(gerkey)
+  // We're making this object static to avoid a race between its destructor
+  // being called on exit from this function and an interrupt guard condition
+  // that holds a pointer to it being called in parallel from somewhere else.
+  // This structure will be changed when we add to rmw the feature of supporting
+  // multiple wait sets.
+  static DDS::WaitSet waitset;
+  // To ensure that we properly clean up the now-static wait set, we declare an
+  // object whose destructor will detach what we attached (this was previously
+  // being done inside the destructor of the wait set.
+  struct atexit_t
+  {
+    ~atexit_t()
+    {
+      // Manually detach conditions, to ensure a clean wait set for next time.
+      DDS::ConditionSeq attached_conditions;
+      waitset.get_conditions(attached_conditions);
+      for (uint32_t i = 0; i < attached_conditions.length(); ++i) {
+        waitset.detach_condition(attached_conditions[i]);
+      }
+    }
+  } atexit;
 
   // add a condition for each subscriber
   for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
