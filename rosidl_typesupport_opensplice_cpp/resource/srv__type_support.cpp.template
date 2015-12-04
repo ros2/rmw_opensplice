@@ -9,6 +9,7 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
+#include <cstring>
 #include <iostream>
 #include <sstream>
 
@@ -442,9 +443,11 @@ take_request__@(spec.srv_name)(
     @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_dds_message_to_ros(request.data(), *ros_request);
 
     request_header->sequence_number = request.sequence_number_;
-    *(reinterpret_cast<uint64_t *>(&request_header->writer_guid[0])) = request.client_guid_0_;
-    *(reinterpret_cast<uint64_t *>(
-      &request_header->writer_guid[0] + sizeof(request.client_guid_0_))) = request.client_guid_1_;
+    std::memcpy(
+      &request_header->writer_guid[0], &request.client_guid_0_, sizeof(request.client_guid_0_));
+    std::memcpy(
+      &request_header->writer_guid[0] + sizeof(request.client_guid_0_),
+      &request.client_guid_1_, sizeof(request.client_guid_1_));
 
     *taken = true;
     return nullptr;
