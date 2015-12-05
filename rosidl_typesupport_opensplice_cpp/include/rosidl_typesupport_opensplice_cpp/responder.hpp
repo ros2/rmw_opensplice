@@ -18,6 +18,7 @@
 #include <ccpp_dds_dcps.h>
 #include <u_entity.h>
 
+#include <cstring>
 #include <string>
 
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
@@ -250,9 +251,11 @@ fail:
   noexcept
   {
     response.sequence_number_ = request_header.sequence_number;
-    response.client_guid_0_ = *(reinterpret_cast<const uint64_t *>(&request_header.writer_guid[0]));
-    response.client_guid_1_ = *(reinterpret_cast<const uint64_t *>(
-        &request_header.writer_guid[0] + sizeof(response.client_guid_0_)));
+    std::memcpy(
+      &response.client_guid_0_, &request_header.writer_guid[0], sizeof(response.client_guid_0_));
+    std::memcpy(
+      &response.client_guid_1_, &request_header.writer_guid[0] + sizeof(response.client_guid_0_),
+      sizeof(response.client_guid_1_));
 
     return TemplateDataWriter<Sample<ResponseT>>::write_sample(response_datawriter_, response);
   }
