@@ -16,9 +16,15 @@ if(NOT OpenSplice_FOUND)
   return()
 endif()
 
+find_package(rosidl_typesupport_opensplice_cpp)
+if(NOT rosidl_typesupport_opensplice_cpp_FOUND)
+  ament_package()
+  message(WARNING "Could not find ROSIDL TypeSupport for OpenSplice (rosidl_typesupport_opensplice_cpp) - skipping '${PROJECT_NAME}'")
+  return()
+endif()
+
 find_package(rmw REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
-find_package(rosidl_typesupport_opensplice_cpp REQUIRED)
 
 ament_export_definitions(${OpenSplice_DEFINITIONS})
 ament_export_dependencies(rmw rosidl_generator_cpp rosidl_typesupport_opensplice_cpp)
