@@ -37,7 +37,7 @@ rmw_create_client(
   const rmw_node_t * node,
   const rosidl_service_type_support_t * type_support,
   const char * service_name,
-  const rmw_qos_profile_t & qos_profile)
+  const rmw_qos_profile_t * qos_profile)
 {
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
@@ -93,11 +93,11 @@ rmw_create_client(
     goto fail;
   }
 
-  if (!get_datareader_qos(nullptr, qos_profile, datareader_qos)) {
+  if (!get_datareader_qos(nullptr, *qos_profile, datareader_qos)) {
     goto fail;
   }
 
-  if (!get_datawriter_qos(nullptr, qos_profile, datawriter_qos)) {
+  if (!get_datawriter_qos(nullptr, *qos_profile, datawriter_qos)) {
     goto fail;
   }
 

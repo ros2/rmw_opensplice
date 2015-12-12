@@ -43,7 +43,7 @@ rmw_create_subscription(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_support,
   const char * topic_name,
-  const rmw_qos_profile_t & qos_profile,
+  const rmw_qos_profile_t * qos_profile,
   bool ignore_local_publications)
 {
   if (!node) {
@@ -132,7 +132,7 @@ rmw_create_subscription(
     goto fail;
   }
 
-  if (!get_datareader_qos(dds_subscriber, qos_profile, datareader_qos)) {
+  if (!get_datareader_qos(dds_subscriber, *qos_profile, datareader_qos)) {
     goto fail;
   }
 
