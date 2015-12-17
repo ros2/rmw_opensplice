@@ -30,6 +30,10 @@ extern "C"
 rmw_node_t *
 rmw_create_node(const char * name, size_t domain_id)
 {
+  if (!name) {
+    RMW_SET_ERROR_MSG("name is null");
+    return nullptr;
+  }
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
     RMW_SET_ERROR_MSG("failed to get domain participant factory");

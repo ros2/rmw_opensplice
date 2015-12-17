@@ -57,6 +57,11 @@ rmw_create_service(
     rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier,
     return nullptr)
 
+  if (!qos_profile) {
+    RMW_SET_ERROR_MSG("qos_profile is null");
+    return nullptr;
+  }
+
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
   if (!node_info) {
     RMW_SET_ERROR_MSG("node info handle is null");
