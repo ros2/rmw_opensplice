@@ -43,7 +43,7 @@ rmw_create_subscription(
   const rmw_node_t * node,
   const rosidl_message_type_support_t * type_support,
   const char * topic_name,
-  const rmw_qos_profile_t & qos_profile,
+  const rmw_qos_profile_t * qos_profile,
   bool ignore_local_publications)
 {
   if (!node) {
@@ -64,6 +64,11 @@ rmw_create_subscription(
     type_support->typesupport_identifier,
     rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier,
     return nullptr)
+
+  if (!qos_profile) {
+    RMW_SET_ERROR_MSG("qos_profile is null");
+    return nullptr;
+  }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
   if (!node_info) {
@@ -132,7 +137,7 @@ rmw_create_subscription(
     goto fail;
   }
 
-  if (!get_datareader_qos(dds_subscriber, qos_profile, datareader_qos)) {
+  if (!get_datareader_qos(dds_subscriber, *qos_profile, datareader_qos)) {
     goto fail;
   }
 

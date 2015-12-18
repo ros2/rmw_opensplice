@@ -30,8 +30,10 @@ extern "C"
 rmw_node_t *
 rmw_create_node(const char * name, size_t domain_id)
 {
-  (void)name;
-
+  if (!name) {
+    RMW_SET_ERROR_MSG("name is null");
+    return nullptr;
+  }
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
     RMW_SET_ERROR_MSG("failed to get domain participant factory");
@@ -173,6 +175,13 @@ rmw_create_node(const char * name, size_t domain_id)
     goto fail;
   }
 
+  node->name = reinterpret_cast<const char *>(rmw_allocate(sizeof(char) * strlen(name) + 1));
+  if (!node->name) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for node name");
+    goto fail;
+  }
+  memcpy(const_cast<char *>(node->name), name, strlen(name) + 1);
+
   buf = rmw_allocate(sizeof(OpenSpliceStaticNodeInfo));
   if (!buf) {
     RMW_SET_ERROR_MSG("failed to allocate memory");
@@ -216,6 +225,9 @@ fail:
     rmw_free(buf);
   }
   if (node) {
+    if (node->name) {
+      rmw_free(const_cast<char *>(node->name));
+    }
     rmw_node_free(node);
   }
   return nullptr;
@@ -277,6 +289,8 @@ rmw_destroy_node(rmw_node_t * node)
 
   rmw_free(node_info);
   node->data = nullptr;
+  rmw_free(const_cast<char *>(node->name));
+  node->name = nullptr;
   rmw_node_free(node);
   return result;
 }
