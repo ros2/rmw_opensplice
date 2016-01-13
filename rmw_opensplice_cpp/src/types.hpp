@@ -141,6 +141,13 @@ struct OpenSpliceStaticServiceInfo
   DDS::ReadCondition * read_condition_;
   const service_type_support_callbacks_t * callbacks_;
 };
+
+struct OpenSpliceWaitSetInfo
+{
+  DDS::WaitSet * waitset;
+  DDS::ConditionSeq * active_conditions;
+  DDS::ConditionSeq * attached_conditions;
+};
 }  // extern "C"
 
 #endif  // TYPES_HPP_
