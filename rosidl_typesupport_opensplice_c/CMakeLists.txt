@@ -12,6 +12,8 @@ ament_export_dependencies(rosidl_typesupport_opensplice_cpp)
 # specific version of these functions.
 ament_export_include_directories(include include/${PROJECT_NAME}/impl)
 
+ament_package()
+
 install(
   DIRECTORY include/
   DESTINATION include
