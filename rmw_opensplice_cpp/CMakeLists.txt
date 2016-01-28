@@ -16,10 +16,11 @@ if(NOT OpenSplice_FOUND)
   return()
 endif()
 
+find_package(rosidl_typesupport_opensplice_c)
 find_package(rosidl_typesupport_opensplice_cpp)
-if(NOT rosidl_typesupport_opensplice_cpp_FOUND)
+if(NOT rosidl_typesupport_opensplice_cpp_FOUND OR NOT rosidl_typesupport_opensplice_c_FOUND)
   ament_package()
-  message(WARNING "Could not find ROSIDL TypeSupport for OpenSplice (rosidl_typesupport_opensplice_cpp) - skipping '${PROJECT_NAME}'")
+  message(WARNING "Could not find ROSIDL TypeSupport for OpenSplice (rosidl_typesupport_opensplice_cpp or rosidl_typesupport_opensplice_c) - skipping '${PROJECT_NAME}'")
   return()
 endif()
 
@@ -27,7 +28,12 @@ find_package(rmw REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
 ament_export_definitions(${OpenSplice_DEFINITIONS})
-ament_export_dependencies(rmw rosidl_generator_cpp rosidl_typesupport_opensplice_cpp)
+ament_export_dependencies(
+  rmw
+  rosidl_generator_cpp
+  rosidl_typesupport_opensplice_c
+  rosidl_typesupport_opensplice_cpp
+)
 ament_export_include_directories(${OpenSplice_INCLUDE_DIRS})
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
@@ -58,6 +64,7 @@ add_library(rmw_opensplice_cpp SHARED
 ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
   "rosidl_generator_cpp"
+  "rosidl_typesupport_opensplice_c"
   "rosidl_typesupport_opensplice_cpp"
   "OpenSplice")
 # On Windows this adds the RMW_BUILDING_DLL definition.
@@ -73,7 +80,7 @@ endif()
 
 ament_export_libraries(rmw_opensplice_cpp ${OpenSplice_LIBRARIES})
 
-register_rmw_implementation("rosidl_typesupport_opensplice_cpp")
+register_rmw_implementation("rosidl_typesupport_opensplice_c;rosidl_typesupport_opensplice_cpp")
 
 if(AMENT_ENABLE_TESTING)
   find_package(ament_lint_auto REQUIRED)
