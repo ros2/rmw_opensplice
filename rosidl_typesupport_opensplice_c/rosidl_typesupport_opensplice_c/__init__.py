@@ -26,7 +26,6 @@ from rosidl_parser import validate_field_types
 def generate_typesupport_opensplice_c(args):
     template_dir = args['template_dir']
     mapping_msgs = {
-        # os.path.join(template_dir, 'msg__type_support.hpp.template'): '%s__type_support.hpp',
         os.path.join(template_dir, 'msg__type_support_c.cpp.template'): '%s__type_support_c.cpp',
     }
 
