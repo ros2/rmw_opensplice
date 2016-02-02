@@ -149,9 +149,9 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
   }
   const __ros_msg_type * ros_message = static_cast<const __ros_msg_type *>(untyped_ros_message);
   __dds_msg_type * dds_message = static_cast<__dds_msg_type *>(untyped_dds_message);
+@[if not spec.fields]@
   (void)dds_message;
   (void)ros_message;
-@[if not spec.fields]@
   return 0;  // No fields is a no-op.
 @[end if]@
 @[for field in spec.fields]@
@@ -309,9 +309,9 @@ convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
   }
   const __dds_msg_type * dds_message = static_cast<const __dds_msg_type *>(untyped_dds_message);
   __ros_msg_type * ros_message = static_cast<__ros_msg_type *>(untyped_ros_message);
+@[if not spec.fields]@
   (void)dds_message;
   (void)ros_message;
-@[if not spec.fields]@
   return 0;  // No fields is a no-op.
 @[end if]@
 @[for field in spec.fields]@
