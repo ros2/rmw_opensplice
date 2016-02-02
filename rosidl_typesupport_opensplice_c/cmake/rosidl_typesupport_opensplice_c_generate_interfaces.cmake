@@ -161,8 +161,6 @@ add_custom_command(
   ${_generated_srv_files}
   COMMAND ${PYTHON_EXECUTABLE} ${rosidl_typesupport_opensplice_c_BIN}
   --generator-arguments-file "${generator_arguments_file}"
-  --dds-interface-base-path "${_dds_idl_base_path}"
-  --idl-pp "${OpenSplice_IDLPP}"
   DEPENDS
   ${target_dependencies}
   ${_dds_idl_files}

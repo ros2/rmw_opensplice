@@ -26,14 +26,6 @@ def main(argv=sys.argv[1:]):
         '--generator-arguments-file',
         required=True,
         help='The location of the file containing the generator arguments')
-    parser.add_argument(
-        '--dds-interface-base-path',
-        required=True,
-        help='The base location of the DDS interface files')
-    parser.add_argument(
-        '--idl-pp',
-        required=True,
-        help='The location of the IDL preprocessor')
     args = parser.parse_args(argv)
 
     generator_args = read_generator_arguments(args.generator_arguments_file)
