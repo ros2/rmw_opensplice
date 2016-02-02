@@ -1,5 +1,6 @@
 # generated from
-# rosidl_typesupport_opensplice_c/rosidl_typesupport_opensplice_c-extras.cmake.in
+# rosidl_typesupport_opensplice_c/
+#   rosidl_typesupport_opensplice_c-extras.cmake.in
 
 find_package(ament_cmake_core QUIET REQUIRED)
 ament_register_extension(

@@ -55,8 +55,7 @@ convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
 }
 
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Time)()
-{
+ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Time)() {
   static message_type_support_callbacks_t callbacks = {
     .package_name = "builtin_interfaces",
     .message_name = "Time",

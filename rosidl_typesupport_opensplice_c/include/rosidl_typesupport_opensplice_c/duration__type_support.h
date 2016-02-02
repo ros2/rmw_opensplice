@@ -28,7 +28,7 @@ extern "C"
 #include "builtin_interfaces/msg/duration__struct.h"
 
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Duration)();
+  ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Duration)();
 
 #if __cplusplus
 }
