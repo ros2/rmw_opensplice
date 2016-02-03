@@ -220,8 +220,9 @@ if(WIN32)
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_C_BUILDING_DLL")
 endif()
+# The following still uses CPP because the OpenSplice code which uses it was generated for CPP.
 target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-  PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_C_BUILDING_DLL_${PROJECT_NAME}")
+  PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL_${PROJECT_NAME}")
 target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   PUBLIC
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_c
