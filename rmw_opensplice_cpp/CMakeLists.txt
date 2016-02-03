@@ -80,8 +80,7 @@ endif()
 
 ament_export_libraries(rmw_opensplice_cpp ${OpenSplice_LIBRARIES})
 
-# register_rmw_implementation("rosidl_typesupport_opensplice_c;rosidl_typesupport_opensplice_cpp")
-register_rmw_implementation("rosidl_typesupport_opensplice_cpp")
+register_rmw_implementation("rosidl_typesupport_opensplice_c;rosidl_typesupport_opensplice_cpp")
 
 if(AMENT_ENABLE_TESTING)
   find_package(ament_lint_auto REQUIRED)
