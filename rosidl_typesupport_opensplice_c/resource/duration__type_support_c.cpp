@@ -57,17 +57,17 @@ convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
 const rosidl_message_type_support_t *
 ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Duration)() {
   static message_type_support_callbacks_t callbacks = {
-    .package_name = "builtin_interfaces",
-    .message_name = "Duration",
-    .register_type = nullptr,
-    .publish = nullptr,
-    .take = nullptr,
-    .convert_ros_to_dds = convert_ros_to_dds,
-    .convert_dds_to_ros = convert_dds_to_ros,
+    "builtin_interfaces",  // package_name
+    "Duration",  // message_name
+    nullptr,  // register_type
+    nullptr,  // publish
+    nullptr,  // take
+    convert_ros_to_dds,  // convert_ros_to_dds
+    convert_dds_to_ros,  // convert_dds_to_ros
   };
   static rosidl_message_type_support_t type_support = {
-    .typesupport_identifier = rosidl_typesupport_opensplice_c__identifier,
-    .data = &callbacks,
+    rosidl_typesupport_opensplice_c__identifier,  // typesupport_identifier
+    &callbacks,  // data
   };
   return &type_support;
 }
