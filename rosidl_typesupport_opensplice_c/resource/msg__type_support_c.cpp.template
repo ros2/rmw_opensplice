@@ -527,19 +527,19 @@ finally:
 @# // Collect the callback functions and provide a function to get the type support struct.
 
 static message_type_support_callbacks_t __callbacks = {
-  .package_name = "@(pkg)",
-  .message_name = "@(msg)",
-  .register_type = register_type,
-  .publish = publish,
-  .take = take,
-  .convert_ros_to_dds = convert_ros_to_dds,
-  .convert_dds_to_ros = convert_dds_to_ros,
+  "@(pkg)",  // package_name
+  "@(msg)",  // message_name
+  register_type,  // register_type
+  publish,  // publish
+  take,  // take
+  convert_ros_to_dds,  // convert_ros_to_dds
+  convert_dds_to_ros,  // convert_dds_to_ros
 };
 
 static rosidl_message_type_support_t __type_support = {
   // Cannot be set since it is not a constexpr, it is set in the get type support function below.
-  .typesupport_identifier = 0,
-  .data = &__callbacks,
+  0,  // typesupport_identifier
+  &__callbacks,  // data
 };
 
 const rosidl_message_type_support_t *
