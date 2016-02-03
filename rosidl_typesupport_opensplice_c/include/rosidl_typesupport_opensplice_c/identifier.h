@@ -22,7 +22,7 @@ extern "C"
 {
 #endif
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_C_PUBLIC
+ROSIDL_TYPESUPPORT_OPENSPLICE_C_IMPORT
 extern const char * rosidl_typesupport_opensplice_c__identifier;
 
 #if __cplusplus
