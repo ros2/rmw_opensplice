@@ -15,6 +15,8 @@
 #ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__MESSAGE_TYPE_SUPPORT_H_
 #define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__MESSAGE_TYPE_SUPPORT_H_
 
+#include <stdbool.h>
+
 #include "rosidl_generator_c/message_type_support_struct.h"
 
 typedef struct message_type_support_callbacks_t
@@ -23,18 +25,28 @@ typedef struct message_type_support_callbacks_t
   const char * message_name;
   // Function to register type with given dds_participant.
   // Returns NULL if the registration was successful, otherwise an error string.
-  const char * (*register_type)(
-    void * untyped_participant, const char * type_name);
+  const char *
+  (*register_type)(void * untyped_participant, const char * type_name);
   // Function to publish a ROS message with a given DDS data_writer
   // Returns NULL if the publish was successful, otherwise an error string.
-  const char * (*publish)(
-    void * dds_data_writer, const void * ros_message);
+  const char *
+  (*publish)(void * dds_data_writer, const void * ros_message);
   // Function to take a ROS message from a dds data reader
   // Returns NULL if the take was successful, otherwise an error string.
   // If no data is available to be taken, NULL is returned but taken will be set to false.
-  const char * (*take)(
-    void * dds_data_reader, bool ignore_local_publications, void * ros_message, bool * taken,
+  const char *
+  (*take)(
+    void * dds_data_reader,
+    bool ignore_local_publications,
+    void * ros_message,
+    bool * taken,
     void * sending_publication_handle);
+  // Functions for converting between DDS and ROS messages of this type.
+  // Returns NULL if successful, otherwise an error string.
+  const char *
+  (*convert_ros_to_dds)(const void * ros_message, void * dds_message);
+  const char *
+  (*convert_dds_to_ros)(const void * dds_message, void * ros_message);
 } message_type_support_callbacks_t;
 
 #endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__MESSAGE_TYPE_SUPPORT_H_
