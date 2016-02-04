@@ -30,6 +30,7 @@
 static_assert(USING_ROSIDL_TYPESUPPORT_OPENSPLICE_C, "expected OpenSplice C message type support");
 // Provides the rosidl_typesupport_opensplice_c__identifier symbol declaration.
 #include <rosidl_typesupport_opensplice_c/identifier.h>
+#include "@(spec.base_type.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 // Provides the definition of the message_type_support_callbacks_t struct.
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 
@@ -60,6 +61,7 @@ extern "C"
 #endif
 
 // Forward declare the get type support function for this type.
+ROSIDL_GENERATOR_C_EXPORT_@(spec.base_type.pkg_name)
 const rosidl_message_type_support_t *
 ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))();
 
@@ -86,14 +88,14 @@ have_not_included_string = True
 @{header_file_name = get_header_filename_from_msg_name(field.type.type)}@
 #include <@(field.type.pkg_name)/msg/@(header_file_name)__functions.h>
 // Forward declare the get type support function for @(field.type.type)
+@[if field.type.pkg_name != pkg]@
+ROSIDL_GENERATOR_C_IMPORT_@(spec.base_type.pkg_name)
+@[end if]@
 const rosidl_message_type_support_t *
 ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(field.type.pkg_name), msg, @(field.type.type))();
 
 @[end if]@
 @[end for]@
-#if defined(__cplusplus)
-}
-#endif
 @
 @# // Make callback functions specific to this message type.
 
@@ -542,6 +544,7 @@ static rosidl_message_type_support_t __type_support = {
   &__callbacks,  // data
 };
 
+ROSIDL_GENERATOR_C_EXPORT_@(spec.base_type.pkg_name)
 const rosidl_message_type_support_t *
 ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))()
 {
@@ -550,3 +553,7 @@ ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))()
   }
   return &__type_support;
 }
+
+#if defined(__cplusplus)
+}
+#endif

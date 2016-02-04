@@ -12,13 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rosidl_typesupport_opensplice_c/time__type_support.h"
-
 #include <ccpp_dds_dcps.h>
 
 #include <builtin_interfaces/msg/time__struct.h>
-#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+#include <rosidl_generator_c/message_type_support.h>
 #include <rosidl_typesupport_opensplice_c/identifier.h>
+#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+
+#include "builtin_interfaces/msg/rosidl_generator_c__visibility_control.h"
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 static const char *
 convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
@@ -54,6 +60,7 @@ convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
   return 0;
 }
 
+ROSIDL_GENERATOR_C_EXPORT_builtin_interfaces
 const rosidl_message_type_support_t *
 ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Time)() {
   static message_type_support_callbacks_t callbacks = {
@@ -71,3 +78,7 @@ ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Time)() {
   };
   return &type_support;
 }
+
+#if defined(__cplusplus)
+}
+#endif
