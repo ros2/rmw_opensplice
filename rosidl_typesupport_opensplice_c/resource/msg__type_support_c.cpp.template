@@ -69,10 +69,17 @@ ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))();
 have_not_included_primitive_arrays = True
 have_not_included_string = True
 }@
-@{
-field_types = set([field.type for field in spec.fields])
+{
+from collections import OrderedDict
+field_types = {}
+for field in spec.fields:
+    if not field.type.is_primitive_type():
+        full_field = field.type.pkg_name + '__msg__' + field.type.type
+        if full_field not in field_types:
+            field_types[full_field] = field.type
+field_types = OrderedDict(sorted(field_types.items()))
 }@
-@[for field_type in field_types]@
+@[for full_field, field_type in field_types.items()]@
 @[if field_type.is_primitive_type()]@
 @[if field_type.is_array and have_not_included_primitive_arrays]@
 @{have_not_included_primitive_arrays = False}@
