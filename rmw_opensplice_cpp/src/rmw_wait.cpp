@@ -99,6 +99,12 @@ rmw_wait(
           DDS::GuardCondition * fixed_guard_cond = static_cast<DDS::GuardCondition *>(
             waitset->fixed_guard_conditions->guard_conditions[j]);
           if (fixed_guard_cond == (*attached_conditions)[i]) {
+            // Reset the fixed guard conditions to avoid being woken up
+            // immediately next time.
+            retcode = fixed_guard_cond->set_trigger_value(false);
+            if (retcode != DDS::RETCODE_OK) {
+              fprintf(stderr, "failed to set trigger value\n");
+            }
             fixed = true;
             break;
           }
