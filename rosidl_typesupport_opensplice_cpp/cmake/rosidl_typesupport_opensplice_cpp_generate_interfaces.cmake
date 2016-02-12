@@ -228,6 +228,10 @@ add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED
   ${_generated_external_msg_files}
   ${_generated_srv_files}
   ${_generated_external_srv_files})
+if(NOT WIN32)
+  set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
+    PROPERTIES COMPILE_FLAGS "-std=c++11")
+endif()
 if(WIN32)
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PRIVATE "ROSIDL_BUILDING_DLL")
@@ -279,8 +283,7 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
   )
-endif()
-
 ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})
+endif()
 
 ament_export_include_directories(include)

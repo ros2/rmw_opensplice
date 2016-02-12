@@ -97,7 +97,7 @@ rmw_create_waitset(rmw_guard_conditions_t * fixed_guard_conditions, size_t max_c
   }
 
   waitset->fixed_guard_conditions = fixed_guard_conditions;
-  if (fixed_guard_conditions) {
+  if (fixed_guard_conditions && fixed_guard_conditions->guard_condition_count > 0) {
     if (!fixed_guard_conditions->guard_conditions) {
       RMW_SET_ERROR_MSG("Received invalid guard condition array");
       goto fail;
