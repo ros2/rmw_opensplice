@@ -240,11 +240,7 @@ rmw_wait(
   }
   DDS::ReturnCode_t status = dds_waitset->wait(*active_conditions, timeout);
 
-  if (status == DDS::RETCODE_TIMEOUT) {
-    return RMW_RET_TIMEOUT;
-  }
-
-  if (status != DDS::RETCODE_OK) {
+  if (status != DDS::RETCODE_OK && status != DDS::RETCODE_TIMEOUT) {
     RMW_SET_ERROR_MSG("failed to wait on waitset");
     return RMW_RET_ERROR;
   }
@@ -347,6 +343,10 @@ rmw_wait(
     if (!(j < active_conditions->length())) {
       clients->clients[i] = 0;
     }
+  }
+
+  if (status == DDS::RETCODE_TIMEOUT) {
+    return RMW_RET_TIMEOUT;
   }
   return RMW_RET_OK;
 }
