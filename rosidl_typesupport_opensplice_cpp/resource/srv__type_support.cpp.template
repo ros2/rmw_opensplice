@@ -88,7 +88,7 @@ public:
       1,
       DDS::ANY_SAMPLE_STATE,
       DDS::ANY_VIEW_STATE,
-      DDS::ALIVE_INSTANCE_STATE);
+      DDS::ANY_INSTANCE_STATE);
 
     switch (status) {
       case DDS::RETCODE_ERROR:
