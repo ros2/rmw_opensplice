@@ -88,6 +88,8 @@ public:
       1,
       DDS::ANY_SAMPLE_STATE,
       DDS::ANY_VIEW_STATE,
+      // See ros2/rclcpp#192 for a justification of this option:
+      // https://github.com/ros2/rclcpp/issues/192#issuecomment-183491185
       DDS::ANY_INSTANCE_STATE);
 
     switch (status) {
