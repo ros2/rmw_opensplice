@@ -193,6 +193,12 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
       DESTINATION "include/${PROJECT_NAME}/srv/dds_opensplice_c"
     )
   endif()
+  if(
+    NOT "${_generated_msg_files}${_generated_external_msg_files} " STREQUAL " " OR
+    NOT "${_generated_srv_files}${_generated_external_srv_files} " STREQUAL " "
+  )
+    ament_export_include_directories(include)
+  endif()
 endif()
 
 else()
@@ -284,9 +290,6 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
   )
-ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})
 
+  ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})
 endif()
-
-
-ament_export_include_directories(include)
