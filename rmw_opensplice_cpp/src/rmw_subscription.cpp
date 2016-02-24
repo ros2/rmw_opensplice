@@ -173,6 +173,14 @@ rmw_create_subscription(
 
   subscription->implementation_identifier = opensplice_cpp_identifier;
   subscription->data = subscriber_info;
+
+  subscription->topic_name = reinterpret_cast<const char *>(rmw_allocate(strlen(topic_name) + 1));
+  if (!subscription->topic_name) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for node name");
+    goto fail;
+  }
+  memcpy(const_cast<char *>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
+
   return subscription;
 fail:
   if (dds_subscriber) {
@@ -282,6 +290,9 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
       }
     }
     rmw_free(subscription_info);
+  }
+  if (subscription->topic_name) {
+    rmw_free(const_cast<char *>(subscription->topic_name));
   }
   rmw_subscription_free(subscription);
   return result;
