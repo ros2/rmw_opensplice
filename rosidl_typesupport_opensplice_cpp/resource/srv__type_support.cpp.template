@@ -1,4 +1,5 @@
 // generated from rosidl_typesupport_opensplice_cpp/resource/srv__type_support.cpp.template
+// generated code does not contain a copyright notice
 
 @#######################################################################
 @# EmPy template for generating <srv>__type_support.cpp files
@@ -421,7 +422,7 @@ send_request__@(spec.srv_name)(
 
 const char *
 take_request__@(spec.srv_name)(
-  void * untyped_responder, void * untyped_ros_request_header, void * untyped_ros_request,
+  void * untyped_responder, rmw_request_id_t * request_header, void * untyped_ros_request,
   bool * taken)
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
@@ -431,7 +432,6 @@ take_request__@(spec.srv_name)(
   using ROSRequestT = @(spec.pkg_name)::srv::@(spec.srv_name)_Request;
 
   auto ros_request = static_cast<ROSRequestT *>(untyped_ros_request);
-  auto request_header = static_cast<rmw_request_id_t *>(untyped_ros_request_header);
 
   auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
 
@@ -460,7 +460,7 @@ take_request__@(spec.srv_name)(
 
 const char *
 send_response__@(spec.srv_name)(
-  void * untyped_responder, const void * untyped_ros_request_header,
+  void * untyped_responder, const rmw_request_id_t * request_header,
   const void * untyped_ros_response)
 {
   using ROSResponseT = @(spec.pkg_name)::srv::@(spec.srv_name)_Response;
@@ -468,7 +468,6 @@ send_response__@(spec.srv_name)(
   auto ros_response = reinterpret_cast<const ROSResponseT *>(untyped_ros_response);
   @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_response, response.data());
 
-  auto request_header = reinterpret_cast<const rmw_request_id_t *>(untyped_ros_request_header);
 
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
     @(__dds_msg_type_prefix)_Request_,
@@ -485,7 +484,7 @@ send_response__@(spec.srv_name)(
 
 const char *
 take_response__@(spec.srv_name)(
-  void * untyped_requester, void * untyped_ros_request_header, void * untyped_ros_response,
+  void * untyped_requester, rmw_request_id_t * request_header, void * untyped_ros_response,
   bool * taken)
 {
   using ROSResponseT = @(spec.pkg_name)::srv::@(spec.srv_name)_Response;
@@ -503,9 +502,7 @@ take_response__@(spec.srv_name)(
     return error_string;
   }
   if (*taken) {
-    auto req_id = reinterpret_cast<rmw_request_id_t *>(untyped_ros_request_header);
-
-    req_id->sequence_number = response.sequence_number_;
+    request_header->sequence_number = response.sequence_number_;
 
     @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_dds_message_to_ros(
       response.data(), *ros_response);
