@@ -72,7 +72,7 @@ rmw_send_request(
 rmw_ret_t
 rmw_take_request(
   const rmw_service_t * service,
-  void * ros_request_header, void * ros_request, bool * taken)
+  rmw_request_id_t * request_header, void * ros_request, bool * taken)
 {
   if (!service) {
     RMW_SET_ERROR_MSG("service handle is null");
@@ -83,7 +83,7 @@ rmw_take_request(
     service->implementation_identifier, opensplice_cpp_identifier,
     return RMW_RET_ERROR)
 
-  if (!ros_request_header) {
+  if (!request_header) {
     RMW_SET_ERROR_MSG("ros request header handle is null");
     return RMW_RET_ERROR;
   }
@@ -113,7 +113,7 @@ rmw_take_request(
     return RMW_RET_ERROR;
   }
   const char * error_string =
-    callbacks->take_request(responder, ros_request_header, ros_request, taken);
+    callbacks->take_request(responder, request_header, ros_request, taken);
   if (error_string) {
     RMW_SET_ERROR_MSG((std::string("failed to take request: ") + error_string).c_str());
     return RMW_RET_ERROR;
