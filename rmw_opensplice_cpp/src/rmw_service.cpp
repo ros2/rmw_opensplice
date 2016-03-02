@@ -136,6 +136,12 @@ rmw_create_service(
 
   service->implementation_identifier = opensplice_cpp_identifier;
   service->data = service_info;
+  service->service_name = reinterpret_cast<const char *>(rmw_allocate(strlen(service_name) + 1));
+  if (!service->service_name) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for node name");
+    goto fail;
+  }
+  memcpy(const_cast<char *>(service->service_name), service_name, strlen(service_name) + 1);
   return service;
 fail:
   if (request_datareader) {
@@ -206,6 +212,10 @@ rmw_destroy_service(rmw_service_t * service)
   const char * error_string = callbacks->destroy_responder(service_info->responder_, &rmw_free);
   if (error_string) {
     RMW_SET_ERROR_MSG((std::string("failed to destroy responder: ") + error_string).c_str());
+  }
+
+  if (service->service_name) {
+    rmw_free(const_cast<char *>(service->service_name));
   }
 
   rmw_free(service_info);
