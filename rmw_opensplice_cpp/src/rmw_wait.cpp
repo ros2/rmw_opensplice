@@ -94,27 +94,7 @@ rmw_wait(
       }
 
       for (uint32_t i = 0; i < attached_conditions->length(); ++i) {
-        /*
-        bool is_guard_condition = false;
-        for (uint32_t j = 0; j < guard_conditions->guard_condition_count; ++j) {
-          DDS::GuardCondition * guard_cond = static_cast<DDS::GuardCondition *>(
-            guard_conditions->guard_conditions[j]);
-          if (guard_cond == (*attached_conditions)[i]) {
-            // Reset the guard conditions to avoid being woken up
-            // immediately next time.
-            retcode = guard_cond->set_trigger_value(false);
-            if (retcode != DDS::RETCODE_OK) {
-              fprintf(stderr, "failed to set trigger value\n");
-            }
-            is_guard_condition = true;
-            break;
-          }
-        }
-        if (is_guard_condition) {
-          continue;
-        }
-        */
-
+        // TODO As a small optimization, could we avoid detaching the guard conditions
         retcode = dds_waitset->detach_condition((*attached_conditions)[i]);
         if (retcode != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("Failed to get detach condition from waitset");
@@ -175,7 +155,7 @@ rmw_wait(
   }
 
   // add a condition for each guard condition
-  // TODO: locking mechanism for shared guard conditions
+  // TODO: do we need a locking mechanism for shared guard conditions
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
       DDS::GuardCondition * guard_condition =
@@ -268,8 +248,6 @@ rmw_wait(
     }
   }
 
-  // set guard condition handles to zero for all not triggered guard conditions
-  // TODO wtf
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
       DDS::GuardCondition * guard_condition =
@@ -279,12 +257,8 @@ rmw_wait(
         return RMW_RET_ERROR;
       }
 
-      if (!guard_condition->get_trigger_value()) {
-        // if the guard condition was not triggered
-        // reset the guard condition handle
-        guard_conditions->guard_conditions[i] = 0;
-      } else {
-        // reset the trigger value
+      if (guard_condition->get_trigger_value()) {
+        // reset the trigger value for triggered guard conditions
         if (guard_condition->set_trigger_value(false) != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("failed to set trigger value to false");
           return RMW_RET_ERROR;
