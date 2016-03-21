@@ -75,8 +75,6 @@ rmw_get_remote_topic_names_and_types(
     return RMW_RET_ERROR;
   }
 
-  printf("rmw_topic_names_and_types_t\n");
-
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
   if (!dp_factory) {
     RMW_SET_ERROR_MSG("failed to get domain participant factory");
@@ -104,8 +102,6 @@ rmw_get_remote_topic_names_and_types(
     return RMW_RET_ERROR;
   }
 #endif
-
-  printf("domain_id = %d\n", domain_id);
 
   participant = dp_factory->create_participant(
     domain_id, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE);
@@ -160,7 +156,6 @@ rmw_get_remote_topic_names_and_types(
               type_name = type_name.substr(0, substr_pos) + "/" +   type_name.substr(
                 substr_pos + substr.size(),  type_name.size() - substr_pos - substr.size() - 1);
               if(name.compare(std::string("ros_meta")) != 0){
-                printf("name: %s\t\ttype_name 2: %s\n", name.c_str(), type_name.c_str());
                 topics.insert ( std::pair<std::string, std::string> (name.c_str(), type_name.c_str()) );
               }
             }
@@ -208,6 +203,16 @@ rmw_get_remote_topic_names_and_types(
       topic_names_and_types->type_names[i] = type_name;
       ++topic_names_and_types->topic_count;
     }
+  }
+
+  if (participant->delete_contained_entities() != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to delete contained entities of participant");
+    return RMW_RET_ERROR;
+  }
+
+  if (dp_factory->delete_participant(participant) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to delete participant");
+    return RMW_RET_ERROR;
   }
 
   return RMW_RET_OK;
