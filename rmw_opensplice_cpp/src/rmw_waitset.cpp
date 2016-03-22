@@ -96,30 +96,6 @@ rmw_create_waitset(size_t max_conditions)
       DDS::ConditionSeq)
   }
 
-  // TODO Actually, should copy instead of assign
-  /*
-  waitset->guard_conditions = initial_guard_conditions;
-  if (initial_guard_conditions && initial_guard_conditions->guard_condition_count > 0) {
-    if (!initial_guard_conditions->guard_conditions) {
-      RMW_SET_ERROR_MSG("Received invalid guard condition array");
-      goto fail;
-    }
-    // We also need to attach the fixed guard conditions to the waitset (and detach them in destroy)
-    for (size_t i = 0; i < initial_guard_conditions->guard_condition_count; ++i) {
-      void * guard_cond = initial_guard_conditions->guard_conditions[i];
-      if (!guard_cond) {
-        RMW_SET_ERROR_MSG("Received invalid guard condition");
-        goto fail;
-      }
-      dds_guard_cond = static_cast<DDS::GuardCondition *>(guard_cond);
-      ret = waitset_info->waitset->attach_condition(dds_guard_cond);
-      if (ret != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to attach condition to waitset");
-      }
-    }
-  }
-  */
-
   return waitset;
 
 fail:

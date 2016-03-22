@@ -94,7 +94,6 @@ rmw_wait(
       }
 
       for (uint32_t i = 0; i < attached_conditions->length(); ++i) {
-        // TODO As a small optimization, could we avoid detaching the guard conditions
         retcode = dds_waitset->detach_condition((*attached_conditions)[i]);
         if (retcode != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("Failed to get detach condition from waitset");
@@ -155,7 +154,6 @@ rmw_wait(
   }
 
   // add a condition for each guard condition
-  // TODO: do we need a locking mechanism for shared guard conditions
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
       DDS::GuardCondition * guard_condition =
