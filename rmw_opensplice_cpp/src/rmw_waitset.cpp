@@ -32,8 +32,6 @@ rmw_create_waitset(size_t max_conditions)
 {
   rmw_waitset_t * waitset = rmw_waitset_allocate();
   OpenSpliceWaitSetInfo * waitset_info = nullptr;
-  DDS::GuardCondition * dds_guard_cond = nullptr;
-  DDS::ReturnCode_t ret;
 
   // From here onward, error results in unrolling in the goto fail block.
   if (!waitset) {
@@ -140,29 +138,6 @@ rmw_destroy_waitset(rmw_waitset_t * waitset)
 
   auto result = RMW_RET_OK;
   OpenSpliceWaitSetInfo * waitset_info = static_cast<OpenSpliceWaitSetInfo *>(waitset->data);
-  DDS::WaitSet * dds_waitset =
-    static_cast<DDS::WaitSet *>(waitset_info->waitset);
-
-/*
-  rmw_guard_conditions_t * fixed_guard_conditions = waitset->fixed_guard_conditions;
-  if (fixed_guard_conditions && fixed_guard_conditions->guard_conditions && dds_waitset) {
-    // We also need to attach the fixed guard conditions to the waitset (and detach them in destroy)
-    for (size_t i = 0; i < fixed_guard_conditions->guard_condition_count; ++i) {
-      void * guard_cond = fixed_guard_conditions->guard_conditions[i];
-      if (!guard_cond) {
-        continue;
-      }
-      DDS::GuardCondition * dds_guard_cond = static_cast<DDS::GuardCondition *>(guard_cond);
-      if (!dds_guard_cond) {
-        continue;
-      }
-      DDS::ReturnCode_t ret = dds_waitset->detach_condition(dds_guard_cond);
-      if (ret != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to detach condition from waitset");
-      }
-    }
-  }
-*/
 
   // Explicitly call destructor since the "placement new" was used
 
