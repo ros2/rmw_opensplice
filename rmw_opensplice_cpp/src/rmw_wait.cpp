@@ -255,7 +255,9 @@ rmw_wait(
         return RMW_RET_ERROR;
       }
 
-      if (guard_condition->get_trigger_value()) {
+      if (!guard_condition->get_trigger_value()) {
+        guard_conditions->guard_conditions[i] = 0;
+      } else {
         // reset the trigger value for triggered guard conditions
         if (guard_condition->set_trigger_value(false) != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("failed to set trigger value to false");
