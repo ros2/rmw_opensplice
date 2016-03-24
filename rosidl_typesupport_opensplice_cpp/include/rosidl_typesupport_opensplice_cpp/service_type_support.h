@@ -30,7 +30,7 @@ typedef struct service_type_support_callbacks_t
   const char * (*create_requester)(
     void * participant, const char * service_name, void ** requester, void ** reader,
     const void * datareader_qos, const void * datawriter_qos, void * (*allocator)(size_t));
-  // De-allocatea a requester
+  // De-allocate a requester
   // The deallocator should match the allocator passed to create_requester.
   // Returns NULL if the requester was successfully destroyed, otherwise an error string.
   // Passing NULL for the deallocator will result in free being used.
@@ -54,16 +54,16 @@ typedef struct service_type_support_callbacks_t
   // Returns NULL if the request was successfully taken, otherwise an error string.
   // If no data is available to be taken, NULL is returned but taken will be set to false.
   const char * (*take_request)(
-    void * responder, void * ros_request_header, void * ros_request, bool * taken);
+    void * responder, rmw_request_id_t * request_header, void * ros_request, bool * taken);
   // Function to send ROS responses
   // Returns NULL if the response was successfully sent, otherwise an error string.
   const char * (*send_response)(
-    void * responder, const void * ros_request_header, const void * ros_response);
+    void * responder, const rmw_request_id_t * request_header, const void * ros_response);
   // Function to read a ROS response from the wire
   // Returns NULL if the response was successfully taken, otherwise an error string.
   // If no data is available to be taken, NULL is returned but taken will be set to false.
   const char * (*take_response)(
-    void * requester, void * ros_request_header, void * ros_response, bool * taken);
+    void * requester, rmw_request_id_t * request_header, void * ros_response, bool * taken);
 } service_type_support_callbacks_t;
 
 #endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__SERVICE_TYPE_SUPPORT_H_

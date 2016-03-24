@@ -61,7 +61,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
     list(APPEND _generated_msg_files
       "${_output_path}/${_parent_folder}/dds_opensplice_c/${_header_name}__type_support_c.cpp")
   elseif("${_extension} " STREQUAL ".srv ")
-    # list(APPEND _generated_srv_files "${_output_path}/srv/dds_opensplice_c/${_header_name}__type_support_c.cpp")
+    list(APPEND _generated_srv_files "${_output_path}/srv/dds_opensplice_c/${_header_name}__type_support_c.cpp")
 
     foreach(_suffix "_Request" "_Response")
       list(APPEND _generated_external_srv_files
@@ -135,7 +135,7 @@ set(target_dependencies
   "${rosidl_typesupport_opensplice_c_BIN}"
   ${rosidl_typesupport_opensplice_c_GENERATOR_FILES}
   "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/msg__type_support_c.cpp.template"
-  # "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/srv__type_support_c.cpp.template"
+  "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/srv__type_support_c.cpp.template"
   ${_dependency_files})
 foreach(dep ${target_dependencies})
   if(NOT EXISTS "${dep}")
@@ -248,6 +248,7 @@ ament_target_dependencies(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   "rosidl_generator_c"
 )
 target_link_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix}
+  ${rosidl_generate_interfaces_TARGET}__rosidl_typesupport_opensplice_cpp
   ${rosidl_generate_interfaces_TARGET}__rosidl_generator_c)
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   set(_msg_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/msg/dds_opensplice_c")
