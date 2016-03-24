@@ -27,14 +27,12 @@ endif()
 find_package(rmw REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
-ament_export_definitions(${OpenSplice_DEFINITIONS})
 ament_export_dependencies(
   rmw
   rosidl_generator_cpp
   rosidl_typesupport_opensplice_c
   rosidl_typesupport_opensplice_cpp
 )
-ament_export_include_directories(${OpenSplice_INCLUDE_DIRS})
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(rmw_opensplice_cpp SHARED
@@ -78,7 +76,7 @@ if(WIN32)
     PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
 endif()
 
-ament_export_libraries(rmw_opensplice_cpp ${OpenSplice_LIBRARIES})
+ament_export_libraries(rmw_opensplice_cpp)
 
 # register_rmw_implementation("rosidl_typesupport_opensplice_c;rosidl_typesupport_opensplice_cpp")
 register_rmw_implementation("rosidl_typesupport_opensplice_cpp")
@@ -88,7 +86,7 @@ if(AMENT_ENABLE_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
+ament_package(CONFIG_EXTRAS "${PROJECT_NAME}-extras.cmake")
 
 install(
   TARGETS rmw_opensplice_cpp
