@@ -133,6 +133,13 @@ rmw_wait(
     return RMW_RET_ERROR;
   }
 
+  DDS::ConditionSeq * attached_conditions =
+    static_cast<DDS::ConditionSeq *>(waitset_info->attached_conditions);
+  if (!attached_conditions) {
+    RMW_SET_ERROR_MSG("DDS condition sequence handle is null");
+    return RMW_RET_ERROR;
+  }
+
   // add a condition for each subscriber
   for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
     OpenSpliceStaticSubscriberInfo * subscriber_info =
@@ -244,6 +251,10 @@ rmw_wait(
       // reset the subscriber handle
       subscriptions->subscribers[i] = 0;
     }
+    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("failed to detach guard condition");
+      return RMW_RET_ERROR;
+    }
   }
 
   if (guard_conditions) {
@@ -263,6 +274,10 @@ rmw_wait(
           RMW_SET_ERROR_MSG("failed to set trigger value to false");
           return RMW_RET_ERROR;
         }
+      }
+      if (dds_waitset->detach_condition(guard_condition) != DDS::RETCODE_OK) {
+        RMW_SET_ERROR_MSG("failed to detach guard condition");
+        return RMW_RET_ERROR;
       }
     }
   }
@@ -293,6 +308,10 @@ rmw_wait(
     if (!(j < active_conditions->length())) {
       services->services[i] = 0;
     }
+    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("failed to detach guard condition");
+      return RMW_RET_ERROR;
+    }
   }
 
   // set client handles to zero for all not triggered conditions
@@ -320,6 +339,10 @@ rmw_wait(
     // reset the client handle
     if (!(j < active_conditions->length())) {
       clients->clients[i] = 0;
+    }
+    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("failed to detach guard condition");
+      return RMW_RET_ERROR;
     }
   }
 
