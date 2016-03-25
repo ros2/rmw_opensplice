@@ -76,19 +76,33 @@ def generate_dds_opensplice_cpp(
         dcps_impl_h_filename = os.path.join(output_path, '%sDcps_impl.h' % msg_name)
         _modify(dcps_impl_h_filename, msg_name, _copy_constructor_and_assignment_operator)
 
+        # modify generated code to
+        # remove path information of the building machine as well as timestamps
+        idl_path = os.path.join(
+            pkg_name, os.path.basename(parent_folder), os.path.basename(folder),
+            os.path.basename(idl_file))
+        h_filename = os.path.join(output_path, '%s.h' % msg_name)
+        _modify(h_filename, msg_name, _replace_path_and_timestamp, idl_path=idl_path)
+        cpp_filename = os.path.join(output_path, '%s.cpp' % msg_name)
+        _modify(cpp_filename, msg_name, _replace_path_and_timestamp, idl_path=idl_path)
+        dcps_h_filename = os.path.join(output_path, '%sDcps.h' % msg_name)
+        _modify(dcps_h_filename, msg_name, _replace_path_and_timestamp, idl_path=idl_path)
+        dcps_cpp_filename = os.path.join(output_path, '%sDcps.cpp' % msg_name)
+        _modify(dcps_cpp_filename, msg_name, _replace_path_and_timestamp, idl_path=idl_path)
+
     return 0
 
 
-def _modify(filename, msg_name, callback):
+def _modify(filename, msg_name, callback, idl_path=None):
     with open(filename, 'r') as h:
         lines = h.read().split('\n')
-    modified = callback(lines, msg_name)
+    modified = callback(lines, msg_name, idl_path=idl_path)
     if modified:
         with open(filename, 'w') as h:
             h.write('\n'.join(lines))
 
 
-def _copy_constructor_and_assignment_operator(lines, msg_name):
+def _copy_constructor_and_assignment_operator(lines, msg_name, idl_path=None):
     for i, line in enumerate(lines):
         if line.strip() == 'public:':
             new_lines = [
@@ -100,6 +114,23 @@ def _copy_constructor_and_assignment_operator(lines, msg_name):
             lines[i + 1:i + 1] = [' ' * 16 + l for l in new_lines]
             return lines
     assert False, 'Failed to find insertion point'
+
+
+def _replace_path_and_timestamp(lines, msg_name, idl_path):
+    found_source = False
+    for i, line in enumerate(lines):
+        if line.startswith('//  Source: '):
+            assert not found_source, "More than one '// Source: ' line was found"
+            found_source = True
+            lines[i] = '//  Source: ' + idl_path
+            continue
+        if line.startswith('//  Generated: '):
+            assert found_source, "No '// Source: ' line was found before"
+            lines[i] = '//  Generated: timestamp removed to make the build reproducible'
+            break
+    else:
+        assert False, "Failed to find '// Generated: ' line"
+    return lines
 
 
 def generate_typesupport_opensplice_cpp(args):
