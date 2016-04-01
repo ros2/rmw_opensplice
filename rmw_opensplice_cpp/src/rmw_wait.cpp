@@ -94,25 +94,6 @@ rmw_wait(
       }
 
       for (uint32_t i = 0; i < attached_conditions->length(); ++i) {
-        bool fixed = false;
-        for (uint32_t j = 0; j < waitset->fixed_guard_conditions->guard_condition_count; ++j) {
-          DDS::GuardCondition * fixed_guard_cond = static_cast<DDS::GuardCondition *>(
-            waitset->fixed_guard_conditions->guard_conditions[j]);
-          if (fixed_guard_cond == (*attached_conditions)[i]) {
-            // Reset the fixed guard conditions to avoid being woken up
-            // immediately next time.
-            retcode = fixed_guard_cond->set_trigger_value(false);
-            if (retcode != DDS::RETCODE_OK) {
-              fprintf(stderr, "failed to set trigger value\n");
-            }
-            fixed = true;
-            break;
-          }
-        }
-        if (fixed) {
-          continue;
-        }
-
         retcode = dds_waitset->detach_condition((*attached_conditions)[i]);
         if (retcode != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("Failed to get detach condition from waitset");
@@ -148,6 +129,13 @@ rmw_wait(
   DDS::ConditionSeq * active_conditions =
     static_cast<DDS::ConditionSeq *>(waitset_info->active_conditions);
   if (!active_conditions) {
+    RMW_SET_ERROR_MSG("DDS condition sequence handle is null");
+    return RMW_RET_ERROR;
+  }
+
+  DDS::ConditionSeq * attached_conditions =
+    static_cast<DDS::ConditionSeq *>(waitset_info->attached_conditions);
+  if (!attached_conditions) {
     RMW_SET_ERROR_MSG("DDS condition sequence handle is null");
     return RMW_RET_ERROR;
   }
@@ -263,9 +251,12 @@ rmw_wait(
       // reset the subscriber handle
       subscriptions->subscribers[i] = 0;
     }
+    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("failed to detach guard condition");
+      return RMW_RET_ERROR;
+    }
   }
 
-  // set guard condition handles to zero for all not triggered guard conditions
   if (guard_conditions) {
     for (size_t i = 0; i < guard_conditions->guard_condition_count; ++i) {
       DDS::GuardCondition * guard_condition =
@@ -276,15 +267,17 @@ rmw_wait(
       }
 
       if (!guard_condition->get_trigger_value()) {
-        // if the guard condition was not triggered
-        // reset the guard condition handle
         guard_conditions->guard_conditions[i] = 0;
       } else {
-        // reset the trigger value
+        // reset the trigger value for triggered guard conditions
         if (guard_condition->set_trigger_value(false) != DDS::RETCODE_OK) {
           RMW_SET_ERROR_MSG("failed to set trigger value to false");
           return RMW_RET_ERROR;
         }
+      }
+      if (dds_waitset->detach_condition(guard_condition) != DDS::RETCODE_OK) {
+        RMW_SET_ERROR_MSG("failed to detach guard condition");
+        return RMW_RET_ERROR;
       }
     }
   }
@@ -315,6 +308,10 @@ rmw_wait(
     if (!(j < active_conditions->length())) {
       services->services[i] = 0;
     }
+    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("failed to detach guard condition");
+      return RMW_RET_ERROR;
+    }
   }
 
   // set client handles to zero for all not triggered conditions
@@ -342,6 +339,10 @@ rmw_wait(
     // reset the client handle
     if (!(j < active_conditions->length())) {
       clients->clients[i] = 0;
+    }
+    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      RMW_SET_ERROR_MSG("failed to detach guard condition");
+      return RMW_RET_ERROR;
     }
   }
 
