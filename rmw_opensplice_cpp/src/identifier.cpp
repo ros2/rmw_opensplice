@@ -14,4 +14,4 @@
 
 #include "identifier.hpp"
 
-const char * opensplice_cpp_identifier = "opensplice_static";
+const char * opensplice_cpp_identifier = "rmw_opensplice_cpp";
