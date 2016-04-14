@@ -79,8 +79,8 @@ endif()
 ament_export_libraries(rmw_opensplice_cpp)
 
 register_rmw_implementation(
-  C "rosidl_typesupport_opensplice_c"
-  CPP "rosidl_typesupport_opensplice_cpp")
+  c "rosidl_typesupport_opensplice_c"
+  cpp "rosidl_typesupport_opensplice_cpp")
 
 if(AMENT_ENABLE_TESTING)
   find_package(ament_lint_auto REQUIRED)
