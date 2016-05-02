@@ -90,7 +90,8 @@ if(NOT "${_ospl_home} " STREQUAL " ")
   set(OpenSplice_FOUND TRUE)
 else()
   # try to find_package() it
-  find_package(opensplice NO_MODULE COMPONENTS CXX PATHS /usr /usr/local)
+  find_package(opensplice NO_MODULE COMPONENTS CXX
+    PATHS $ENV{AMENT_PREFIX_PATH} /usr /usr/local)
   if(OPENSPLICE_FOUND)
     message(STATUS "Found PrismTech OpenSplice: ${opensplice_DIR}")
     set(OpenSplice_HOME "${OPENSPLICE_PREFIX}")
