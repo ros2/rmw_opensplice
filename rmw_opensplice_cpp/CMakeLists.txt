@@ -82,7 +82,7 @@ register_rmw_implementation(
   "c:rosidl_typesupport_opensplice_c"
   "cpp:rosidl_typesupport_opensplice_cpp")
 
-if(AMENT_ENABLE_TESTING)
+if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
