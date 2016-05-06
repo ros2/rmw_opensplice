@@ -193,7 +193,7 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
       if (!str->data) {
         return "string data was not allocated";
       }
-      if (str->data[str->size - 1] == '\0') {
+      if (str->data[str->size] != '\0') {
         return "string not null-terminated";
       }
       // dds_message->@(field.name)_[i] = strndup(str->data, str->size);
@@ -221,7 +221,7 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
     if (!str->data) {
       return "string data was not allocated";
     }
-    if (str->data[str->size - 1] == '\0') {
+    if (str->data[str->size] != '\0') {
       return "string not null-terminated";
     }
     // dds_message->@(field.name)_ = strndup(str->data, str->size);
