@@ -24,9 +24,97 @@
 #include "identifier.hpp"
 #include "types.hpp"
 
+#include "introspection_msgs/msg/ros_meta.h"
+#include "rosidl_generator_c/string_functions.h"
+#include "rosidl_generator_c/primitives_array_functions.h"
+
+#include <sys/time.h>
+
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {
+
+rmw_ret_t
+create_publisher_ros_meta(rmw_node_t * node)
+{
+  //publish node name  
+  rmw_qos_profile_t qos_profile;
+  qos_profile.depth = 10;
+  qos_profile.reliability = RMW_QOS_POLICY_RELIABLE;
+  qos_profile.history = RMW_QOS_POLICY_KEEP_LAST_HISTORY;
+  qos_profile.durability = RMW_QOS_POLICY_TRANSIENT_LOCAL_DURABILITY;
+
+  const rosidl_message_type_support_t * ts_rosmeta = ROSIDL_GET_MSG_TYPE_SUPPORT(introspection_msgs, ROSMeta);
+  rmw_publisher_t * pub_rosmeta = rmw_create_publisher(node,
+                                               ts_rosmeta,
+                                               "ros_meta",
+                                               &qos_profile);
+  if(!pub_rosmeta)
+  {
+    RMW_SET_ERROR_MSG("create_publisher_ros_meta() could not create publisher");
+    goto fail_introspection;
+  }
+  
+  // reserve memory
+  introspection_msgs__msg__ROSMeta rosmeta_msg;
+  if(!introspection_msgs__msg__ROSMeta__init(&rosmeta_msg)){
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail_introspection;
+  }  
+  if(!rosidl_generator_c__String__assign(&rosmeta_msg.node_name, node->name)){
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail_introspection;
+  }
+  if(!rosidl_generator_c__uint8__Array__init(&rosmeta_msg.id, RMW_GID_STORAGE_SIZE)){
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail_introspection;
+  }
+
+  rmw_gid_t * gid ;
+  {gid = (rmw_gid_t*)rmw_allocate(sizeof(rmw_gid_t));}
+  if (!gid) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail_introspection;
+  }
+  // we don't sent the implementation identifier 
+  // char* data_aux2 = (char*) rmw_allocate(sizeof(char)*strlen("OpenSplice")+1);
+  // memcpy(data_aux2, "OpenSplice\0",strlen("OpenSplice")+1);
+  // gid->implementation_identifier = data_aux2;
+  if(rmw_get_gid_for_publisher(pub_rosmeta, gid) != RMW_RET_OK){
+    RMW_SET_ERROR_MSG("unable to to get gid");
+    goto fail_introspection;
+  }
+  
+  for(unsigned i = 0; i < rosmeta_msg.id.size; i++){
+    rosmeta_msg.id.data[i] = gid->data[i];
+  }
+  if (rmw_publish(pub_rosmeta, &rosmeta_msg) != RMW_RET_OK) {
+    RMW_SET_ERROR_MSG("Error publishing message");
+    goto fail_introspection;
+  }
+
+  //free memory
+  rmw_free((rmw_gid_t*)gid);
+  rosidl_generator_c__String__fini(&rosmeta_msg.node_name);
+  rosidl_generator_c__uint8__Array__fini(&rosmeta_msg.id);
+  introspection_msgs__msg__ROSMeta__fini(&rosmeta_msg);
+
+  return RMW_RET_OK;
+fail_introspection:
+  if(pub_rosmeta){
+    if (rmw_destroy_publisher(node, pub_rosmeta)){
+      RMW_SET_ERROR_MSG("failed to delete subscriber");  
+    }
+  }
+  if(gid){
+    rmw_free((rmw_gid_t*)gid);
+  }
+  rosidl_generator_c__String__fini(&rosmeta_msg.node_name);
+  rosidl_generator_c__uint8__Array__fini(&rosmeta_msg.id);
+  introspection_msgs__msg__ROSMeta__fini(&rosmeta_msg);
+  return RMW_RET_ERROR;
+}
+
 rmw_node_t *
 rmw_create_node(const char * name, size_t domain_id)
 {
@@ -196,6 +284,11 @@ rmw_create_node(const char * name, size_t domain_id)
   node->implementation_identifier = opensplice_cpp_identifier;
   node->data = node_info;
 
+  if(create_publisher_ros_meta(node) != RMW_RET_OK){
+    RMW_SET_ERROR_MSG("Error creating publisher");
+    goto fail;
+  }
+  
   return node;
 fail:
   if (participant) {
@@ -293,5 +386,181 @@ rmw_destroy_node(rmw_node_t * node)
   node->name = nullptr;
   rmw_node_free(node);
   return result;
+}
+
+rmw_ros_meta_t * 
+rmw_get_node_names(void)
+{  
+  // Use the current ROS_DOMAIN_ID.
+  char * ros_domain_id = nullptr;
+  const char * env_var = "ROS_DOMAIN_ID";
+#ifndef _WIN32
+  ros_domain_id = getenv(env_var);
+#else
+  size_t ros_domain_id_size;
+  _dupenv_s(&ros_domain_id, &ros_domain_id_size, env_var);
+#endif  
+  size_t domain_id = std::stoi(ros_domain_id);
+
+  // On Windows, setting the ROS_DOMAIN_ID does not fix the problem, so error early.
+#ifdef _WIN32
+  if (!ros_domain_id) {
+    RMW_SET_ERROR_MSG("environment variable ROS_DOMAIN_ID is not set");
+    fprintf(stderr, "[rmw_opensplice_cpp]: error: %s\n", rmw_get_error_string_safe());
+    return nullptr;
+  }
+#endif
+
+  // Create a ROS middleware node that will be used to 
+  // fetch other participant's data from the "ros_meta" topic
+  rmw_node_t * rmw_node;
+  rmw_node = rmw_create_node("get_node_names", domain_id);
+
+  // Do not use builtin topics but instead, make use of the "ros_meta"
+  //  topic create for this purpose.
+  rmw_qos_profile_t qos_profile;
+  // TODO comment each one of these qos_profile options
+  qos_profile.depth = 10;
+  qos_profile.reliability = RMW_QOS_POLICY_RELIABLE;
+  qos_profile.history = RMW_QOS_POLICY_KEEP_LAST_HISTORY;
+  qos_profile.durability = RMW_QOS_POLICY_TRANSIENT_LOCAL_DURABILITY;
+  const rosidl_message_type_support_t * ts_rosmeta = ROSIDL_GET_MSG_TYPE_SUPPORT(introspection_msgs, ROSMeta);
+  rmw_subscription_t * subs = rmw_create_subscription(rmw_node,
+                                                      ts_rosmeta,
+                                                      "ros_meta", 
+                                                      &qos_profile,
+                                                      false);
+
+  rmw_ros_meta_t* ros_meta_data = (rmw_ros_meta_t*)rmw_allocate(sizeof(rmw_ros_meta_t));
+  ros_meta_data->count = 0;
+  ros_meta_data->node_names = NULL;
+  ros_meta_data->ids = NULL;
+  if (!ros_meta_data) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    return NULL;
+  }
+
+  // FIXME change this message for one that contains also the gid
+  introspection_msgs__msg__ROSMeta ros_message;
+  introspection_msgs__msg__ROSMeta__init(&ros_message);
+  bool taken = true;
+  int count = 0;
+
+  //timer variables
+  struct timeval a, b;
+  long totalb, totala;
+  long diff;
+
+  //get initial time
+  gettimeofday(&a, NULL);
+  totala = a.tv_sec + a.tv_usec/1000000;
+  bool timeout = false;
+
+  while(!timeout || taken){
+    rmw_ret_t ret = rmw_take(subs, &ros_message, &taken); 
+    if (ret != RMW_RET_OK) {
+      RMW_SET_ERROR_MSG("failed to take message");    
+    }else{
+      if(ret == RMW_RET_OK && taken){
+        count++;
+
+        // Based on count, allocate new structures for ros_meta_data, adding the new
+        //  one and freeing previous allocated memory
+        rmw_string_t* node_names_aux = (rmw_string_t*) rmw_allocate(sizeof(rmw_string_t)*count);
+        rmw_gid_t* ids_aux = (rmw_gid_t*) rmw_allocate(sizeof(rmw_gid_t)*count);
+        for (int i=0;i < count-1; i++){
+
+          char* data_aux = (char*) rmw_allocate(sizeof(char)*strlen(ros_meta_data->node_names[i].data)+1);
+          memcpy(data_aux, ros_meta_data->node_names[i].data, strlen(ros_meta_data->node_names[i].data)+1);
+          node_names_aux[i].data = data_aux;
+          rmw_free((char*)ros_meta_data->node_names[i].data);
+
+          char* implementation_identifier_aux = (char*) rmw_allocate(sizeof(char)*strlen(
+              ros_meta_data->ids[i].implementation_identifier)+1);
+          strcpy(implementation_identifier_aux, ros_meta_data->ids[i].implementation_identifier);
+          ids_aux[i].implementation_identifier = implementation_identifier_aux;
+          rmw_free((char*)ros_meta_data->ids[i].implementation_identifier);         
+          
+          memcpy(ids_aux[i].data, ros_meta_data->ids[i].data, sizeof(uint8_t) * RMW_GID_STORAGE_SIZE);
+        }
+        rmw_free((rmw_string_t *)ros_meta_data->node_names);
+        rmw_free((rmw_gid_t *)ros_meta_data->ids);
+
+        ros_meta_data->node_names = node_names_aux;
+        ros_meta_data->ids = ids_aux;        
+
+        // Now copy the new data
+        char* data_aux = (char*) rmw_allocate(sizeof(char)*strlen(ros_message.node_name.data)+1);
+        memcpy(data_aux, ros_message.node_name.data, ros_message.node_name.size+1);
+        ros_meta_data->node_names[count-1].data = data_aux;
+
+        char* data_aux2 = (char*) rmw_allocate(sizeof(char)*strlen(opensplice_cpp_identifier)+1);
+        memcpy(data_aux2, opensplice_cpp_identifier,strlen(opensplice_cpp_identifier)+1);
+        ros_meta_data->ids[count-1].implementation_identifier = data_aux2;
+
+        memcpy(ros_meta_data->ids[count-1].data, ros_message.id.data, ros_message.id.size);
+
+        // Assign the final count
+        ros_meta_data->count = count;
+      }      
+    }
+    gettimeofday(&b, NULL);
+    totalb = b.tv_sec + b.tv_usec/1000000;
+    diff = (totalb - totala);
+    // wait for 1 millisecond
+    if(diff > 0.001){
+      timeout = true;
+    }
+  }
+
+  introspection_msgs__msg__ROSMeta__fini(&ros_message);
+
+  if (rmw_destroy_subscription(rmw_node, subs)){
+    RMW_SET_ERROR_MSG("failed to delete subscriber");  
+  }
+
+  if (rmw_destroy_node(rmw_node) != RMW_RET_OK) {
+    RMW_SET_ERROR_MSG("failed to delete participant");
+  }
+  return ros_meta_data;
+}
+
+rmw_ret_t 
+rmw_destroy_ros_meta(rmw_ros_meta_t * rosmeta)
+{
+  if (!rosmeta) {
+    RMW_SET_ERROR_MSG("received null pointer");
+    return RMW_RET_ERROR;
+  }
+
+  for (int i=0;i < rosmeta->count; i++){
+    if (!rosmeta->node_names[i].data) {
+      RMW_SET_ERROR_MSG("received null pointer");
+      return RMW_RET_ERROR;
+    }
+    rmw_free((char*)rosmeta->node_names[i].data);
+    
+    if (!rosmeta->ids[i].implementation_identifier) {
+      RMW_SET_ERROR_MSG("received null pointer");
+      return RMW_RET_ERROR;
+    }
+    rmw_free((char*)rosmeta->ids[i].implementation_identifier);
+  }
+
+  if (!rosmeta->node_names) {
+    RMW_SET_ERROR_MSG("received null pointer");
+    return RMW_RET_ERROR;
+  }
+  rmw_free((rmw_string_t *)rosmeta->node_names);
+
+  if (!rosmeta->ids) {
+    RMW_SET_ERROR_MSG("received null pointer");
+    return RMW_RET_ERROR;
+  }
+  rmw_free((rmw_gid_t *)rosmeta->ids);
+
+  rmw_free((rmw_ros_meta_t *)rosmeta);
+
+  return RMW_RET_OK;
 }
 }  // extern "C"
