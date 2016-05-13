@@ -69,30 +69,34 @@ ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))();
 have_not_included_primitive_arrays = True
 have_not_included_string = True
 }@
-@[for field in spec.fields]@
-@[if field.type.is_primitive_type()]@
-@[if field.type.is_array and have_not_included_primitive_arrays]@
+{
+from collections import OrderedSet
+field_types = OrderedSet(sorted([field.type for field in spec.fields]))
+}@
+@[for field_type in field_types]@
+@[if field_type.is_primitive_type()]@
+@[if field_type.is_array and have_not_included_primitive_arrays]@
 @{have_not_included_primitive_arrays = False}@
 #include <rosidl_generator_c/primitives_array.h>
 #include <rosidl_generator_c/primitives_array_functions.h>
 
 @[end if]@
-@[if field.type.type == 'string' and have_not_included_string]@
+@[if field_type.type == 'string' and have_not_included_string]@
 @{have_not_included_string = False}@
 #include <rosidl_generator_c/string.h>
 #include <rosidl_generator_c/string_functions.h>
 
 @[end if]@
 @[else]@
-// Include helper functions for type @(field.type.type)
-@{header_file_name = get_header_filename_from_msg_name(field.type.type)}@
-#include <@(field.type.pkg_name)/msg/@(header_file_name)__functions.h>
-// Forward declare the get type support function for @(field.type.type)
-@[if field.type.pkg_name != pkg]@
+// Include helper functions for type @(field_type.type)
+@{header_file_name = get_header_filename_from_msg_name(field_type.type)}@
+#include <@(field_type.pkg_name)/msg/@(header_file_name)__functions.h>
+// Forward declare the get type support function for @(field_type.type)
+@[if field_type.pkg_name != pkg]@
 ROSIDL_GENERATOR_C_IMPORT_@(spec.base_type.pkg_name)
 @[end if]@
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(field.type.pkg_name), msg, @(field.type.type))();
+ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(field_type.pkg_name), msg, @(field_type.type))();
 
 @[end if]@
 @[end for]@
