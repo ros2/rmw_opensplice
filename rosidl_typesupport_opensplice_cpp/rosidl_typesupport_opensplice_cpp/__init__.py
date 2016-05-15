@@ -136,12 +136,12 @@ def _replace_path_and_timestamp(lines, msg_name, idl_path):
 def generate_typesupport_opensplice_cpp(args):
     template_dir = args['template_dir']
     mapping_msgs = {
-        os.path.join(template_dir, 'msg__type_support.hpp.template'): '%s__type_support.hpp',
-        os.path.join(template_dir, 'msg__type_support.cpp.template'): '%s__type_support.cpp',
+        os.path.join(template_dir, 'msg__type_support.hpp.em'): '%s__type_support.hpp',
+        os.path.join(template_dir, 'msg__type_support.cpp.em'): '%s__type_support.cpp',
     }
 
     mapping_srvs = {
-        os.path.join(template_dir, 'srv__type_support.cpp.template'):
+        os.path.join(template_dir, 'srv__type_support.cpp.em'):
         '%s__type_support.cpp',
     }
 

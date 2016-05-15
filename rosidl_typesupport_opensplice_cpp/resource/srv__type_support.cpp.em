@@ -1,4 +1,4 @@
-// generated from rosidl_typesupport_opensplice_cpp/resource/srv__type_support.cpp.template
+// generated from rosidl_typesupport_opensplice_cpp/resource/srv__type_support.cpp.em
 // generated code does not contain a copyright notice
 
 @#######################################################################
@@ -47,7 +47,7 @@ __dds_sample_type_prefix = "{spec.pkg_name}::srv::dds_::Sample_{spec.srv_name}".
 namespace rosidl_typesupport_opensplice_cpp
 {
 
-@[for suffix in ['_Request', '_Response']]
+@[for suffix in ['_Request', '_Response']]@
 template <>
 class Sample<@(__dds_msg_type_prefix)@(suffix)_> :
 public @(__dds_sample_type_prefix)@(suffix)_
@@ -55,11 +55,11 @@ public @(__dds_sample_type_prefix)@(suffix)_
 public:
 
   @(__dds_msg_type_prefix)@(suffix)_ & data() {
-    @[if suffix == '_Request']
+@[  if suffix == '_Request']@
     return request_;
-    @[else]
+@[  else]@
     return response_;
-    @[end if]
+@[  end if]@
   }
 
   operator @(__dds_msg_type_prefix)@(suffix)_() {
@@ -214,10 +214,7 @@ class TemplateDataWriter<Sample<@(__dds_msg_type_prefix)@(suffix)_>>
 : public TemplateDataWriter<@(__dds_sample_type_prefix)@(suffix)_>
 {};
 
-
-@[end for]
-
-
+@[end for]@
 } // namespace rosidl_typesupport_opensplice_cpp
 
 namespace @(spec.pkg_name)

@@ -1,4 +1,4 @@
-// generated from rosidl_typesupport_opensplice_cpp/resource/msg__type_support.cpp.template
+// generated from rosidl_typesupport_opensplice_cpp/resource/msg__type_support.cpp.em
 
 @#######################################################################
 @# EmPy template for generating <msg>__type_support.cpp files
@@ -32,11 +32,11 @@
 
 // forward declaration of message dependencies and their conversion functions
 @[for field in spec.fields]@
-@[if not field.type.is_primitive_type()]@
-@[if field.type.pkg_name == 'builtin_interfaces']@
+@[  if not field.type.is_primitive_type()]@
+@[    if field.type.pkg_name == 'builtin_interfaces']@
 #include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/time__type_support.hpp"
-@[else]@
+@[    else]@
 namespace @(field.type.pkg_name)
 {
 namespace msg
@@ -56,9 +56,9 @@ void convert_dds_message_to_ros(
 }  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace @(field.type.pkg_name)
-@[end if]@
+@[    end if]@
 
-@[end if]@
+@[  end if]@
 @[end for]@
 
 namespace @(spec.base_type.pkg_name)
@@ -124,39 +124,39 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
 @[end if]@
 @[for field in spec.fields]@
   // field.name @(field.name)
-@[if field.type.is_array]@
+@[  if field.type.is_array]@
   {
-@[if field.type.array_size and not field.type.is_upper_bound]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
-@[else]@
+@[    else]@
     size_t size = ros_message.@(field.name).size();
     if (size > (std::numeric_limits<DDS::Long>::max)()) {
       throw std::runtime_error("array size exceeds maximum DDS sequence size");
     }
     DDS::Long length = static_cast<DDS::Long>(size);
     dds_message.@(field.name)_.length(length);
-@[end if]@
+@[    end if]@
     for (DDS::ULong i = 0; i < size; i++) {
-@[if field.type.type == 'string']@
+@[    if field.type.type == 'string']@
       dds_message.@(field.name)_[i] = ros_message.@(field.name)[i].c_str();
-@[elif field.type.type == 'bool']@
+@[    elif field.type.type == 'bool']@
       dds_message.@(field.name)_[i] = 1 ? ros_message.@(field.name)[i] : 0;
-@[elif field.type.is_primitive_type()]@
+@[    elif field.type.is_primitive_type()]@
       dds_message.@(field.name)_[i] = ros_message.@(field.name)[i];
-@[else]@
+@[    else]@
       @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_ros_message_to_dds(
         ros_message.@(field.name)[i], dds_message.@(field.name)_[i]);
-@[end if]@
+@[    end if]@
     }
   }
-@[elif field.type.type == 'string']@
+@[  elif field.type.type == 'string']@
   dds_message.@(field.name)_ = ros_message.@(field.name).c_str();
-@[elif field.type.is_primitive_type()]@
+@[  elif field.type.is_primitive_type()]@
   dds_message.@(field.name)_ = ros_message.@(field.name);
-@[else]@
+@[  else]@
   @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_ros_message_to_dds(
     ros_message.@(field.name), dds_message.@(field.name)_);
-@[end if]@
+@[  end if]@
 
 @[end for]@
 }
@@ -216,33 +216,33 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
 @[end if]@
 @[for field in spec.fields]@
   // field.name @(field.name)
-@[if field.type.is_array]@
+@[  if field.type.is_array]@
   {
-@[if field.type.array_size and not field.type.is_upper_bound]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
-@[else]@
+@[    else]@
     size_t size = dds_message.@(field.name)_.length();
     ros_message.@(field.name).resize(size);
-@[end if]@
+@[    end if]@
     for (DDS::ULong i = 0; i < size; i++) {
-@[if field.type.type == 'bool']@
+@[    if field.type.type == 'bool']@
       ros_message.@(field.name)[i] = (dds_message.@(field.name)_[i] != 0);
-@[elif field.type.is_primitive_type()]@
+@[    elif field.type.is_primitive_type()]@
       ros_message.@(field.name)[i] =
         dds_message.@(field.name)_[i]@(' == TRUE' if field.type.type == 'bool' else '');
-@[else]@
+@[    else]@
       @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
         dds_message.@(field.name)_[i], ros_message.@(field.name)[i]);
-@[end if]@
+@[    end if]@
     }
   }
-@[elif field.type.is_primitive_type()]@
+@[  elif field.type.is_primitive_type()]@
   ros_message.@(field.name) =
     dds_message.@(field.name)_@(' == TRUE' if field.type.type == 'bool' else '');
-@[else]@
+@[  else]@
   @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
     dds_message.@(field.name)_, ros_message.@(field.name));
-@[end if]@
+@[  end if]@
 
 @[end for]@
 }
