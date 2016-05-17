@@ -1,4 +1,5 @@
 // generated from rosidl_typesupport_opensplice_cpp/resource/msg__type_support.cpp.em
+// generated code does not contain a copyright notice
 
 @#######################################################################
 @# EmPy template for generating <msg>__type_support.cpp files
@@ -17,26 +18,37 @@
 
 #include <u_instanceHandle.h>
 
-#include <rosidl_generator_c/message_type_support_struct.h>
+#include "rosidl_generator_c/message_type_support_struct.h"
 // this is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder
-#include <rosidl_generator_cpp/message_type_support.hpp>
-#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
+#include "rosidl_generator_cpp/message_type_support.hpp"
+#include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 
 @{header_file_name = get_header_filename_from_msg_name(spec.base_type.type)}@
 #include "@(spec.base_type.pkg_name)/@(subfolder)/@(header_file_name)__struct.hpp"
 #include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/@(header_file_name)__type_support.hpp"
 #include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
-#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+#include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
+
+// include type support for builtin interfaces
+@{
+includes = {}
+for field in spec.fields:
+    if not field.type.is_primitive_type() and field.type.pkg_name == 'builtin_interfaces':
+        key = 'rosidl_typesupport_opensplice_cpp/%s__type_support.hpp' % field.type.type.lower()
+        if key not in includes:
+            includes[key] = set([])
+        includes[key].add(field.name)
+}@
+@[for key in sorted(includes.keys())]@
+#include "@(key)"  // @(', '.join(includes[key]))
+@[end for]@
 
 // forward declaration of message dependencies and their conversion functions
 @[for field in spec.fields]@
 @[  if not field.type.is_primitive_type()]@
-@[    if field.type.pkg_name == 'builtin_interfaces']@
-#include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
-#include "rosidl_typesupport_opensplice_cpp/time__type_support.hpp"
-@[    else]@
+@[    if field.type.pkg_name != 'builtin_interfaces']@
 namespace @(field.type.pkg_name)
 {
 namespace msg
@@ -56,8 +68,8 @@ void convert_dds_message_to_ros(
 }  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace @(field.type.pkg_name)
-@[    end if]@
 
+@[    end if]@
 @[  end if]@
 @[end for]@
 
@@ -157,7 +169,6 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
   @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_ros_message_to_dds(
     ros_message.@(field.name), dds_message.@(field.name)_);
 @[  end if]@
-
 @[end for]@
 }
 
@@ -169,7 +180,7 @@ publish__@(spec.base_type.type)(
 {
   DDS::DataWriter * topic_writer = static_cast<DDS::DataWriter *>(untyped_topic_writer);
 
-  const __ros_msg_type & ros_message = *(const __ros_msg_type *)untyped_ros_message;
+  const __ros_msg_type & ros_message = *static_cast<const __ros_msg_type *>(untyped_ros_message);
   __dds_msg_type dds_message;
   convert_ros_message_to_dds(ros_message, dds_message);
 
@@ -243,7 +254,6 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
   @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
     dds_message.@(field.name)_, ros_message.@(field.name));
 @[  end if]@
-
 @[end for]@
 }
 
@@ -258,9 +268,9 @@ take__@(spec.base_type.type)(
 {
   if (untyped_ros_message == 0) {
     return "invalid ros message pointer";
-  };
+  }
 
-  DDS::DataReader * topic_reader = static_cast<DDS::DataReader*>(untyped_topic_reader);
+  DDS::DataReader * topic_reader = static_cast<DDS::DataReader *>(untyped_topic_reader);
 
   @(__dds_msg_type_prefix)DataReader * data_reader =
     @(__dds_msg_type_prefix)DataReader::_narrow(topic_reader);
@@ -281,26 +291,26 @@ take__@(spec.base_type.type)(
   switch (status) {
     case DDS::RETCODE_ERROR:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "an internal error has occurred";
+        "an internal error has occurred";
       goto finally;
     case DDS::RETCODE_ALREADY_DELETED:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "this @(__dds_msg_type_prefix)DataReader has already been deleted";
+        "this @(__dds_msg_type_prefix)DataReader has already been deleted";
       goto finally;
     case DDS::RETCODE_OUT_OF_RESOURCES:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "out of resources";
+        "out of resources";
       goto finally;
     case DDS::RETCODE_NOT_ENABLED:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "this @(__dds_msg_type_prefix)DataReader is not enabled";
+        "this @(__dds_msg_type_prefix)DataReader is not enabled";
       goto finally;
     case DDS::RETCODE_PRECONDITION_NOT_MET:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "a precondition is not met, one of: "
-             "max_samples > maximum and max_samples != LENGTH_UNLIMITED, or "
-             "the two sequences do not have matching parameters (length, maximum, release), or "
-             "maximum > 0 and release is false.";
+        "a precondition is not met, one of: "
+        "max_samples > maximum and max_samples != LENGTH_UNLIMITED, or "
+        "the two sequences do not have matching parameters (length, maximum, release), or "
+        "maximum > 0 and release is false.";
       goto finally;
     case DDS::RETCODE_NO_DATA:
       *taken = false;
@@ -336,7 +346,7 @@ take__@(spec.base_type.type)(
   }
 
   if (!ignore_sample) {
-    __ros_msg_type & ros_message = *(__ros_msg_type *)untyped_ros_message;
+    __ros_msg_type & ros_message = *static_cast<__ros_msg_type *>(untyped_ros_message);
     convert_dds_message_to_ros(dds_messages[0], ros_message);
     *taken = true;
   } else {

@@ -16,9 +16,9 @@
 
 // This is defined in the rosidl_typesupport_opensplice_c package and
 // is in the include/rosidl_typesupport_opensplice_c/impl folder.
-#include <rosidl_generator_c/message_type_support.h>
-#include <rosidl_typesupport_opensplice_c/visibility_control.h>
-#include <rmw/rmw.h>
+#include "rosidl_generator_c/message_type_support.h"
+#include "rosidl_typesupport_opensplice_c/visibility_control.h"
+#include "rmw/rmw.h"
 
 @{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
 @{req_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '__request')}@
@@ -32,14 +32,12 @@
 #include "@(spec.pkg_name)/srv/dds_opensplice/@(get_header_filename_from_msg_name(spec.srv_name))__type_support.cpp"
 #include "@(spec.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 
-
 @{
 # Same as @(spec.pkg_name)::srv::dds_::@(spec.srv_name)
 __dds_msg_type_prefix = "{spec.pkg_name}::srv::dds_::{spec.srv_name}".format(spec=spec)
 # Same as @(spec.pkg_name)::srv::dds_::Sample_@(spec.srv_name)
 __dds_sample_type_prefix = "{spec.pkg_name}::srv::dds_::Sample_{spec.srv_name}".format(spec=spec)
 }@
-
 #if defined(__cplusplus)
 extern "C"
 {
@@ -56,10 +54,10 @@ register_types__@(spec.srv_name)(
 const char *
 create_requester__@(spec.srv_name)(
   void * untyped_participant, const char * service_name,
-  void **untyped_requester, void ** untyped_reader,
+  void ** untyped_requester, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
-  void * (* allocator)(size_t))
+  void * (*allocator)(size_t))
 {
   return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::create_requester__@(spec.srv_name)(
     untyped_participant, service_name,
@@ -72,10 +70,10 @@ create_requester__@(spec.srv_name)(
 const char *
 create_responder__@(spec.srv_name)(
   void * untyped_participant, const char * service_name,
-  void **untyped_responder, void **untyped_reader,
+  void ** untyped_responder, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
-  void * (* allocator)(size_t))
+  void * (*allocator)(size_t))
 {
   return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::create_responder__@(spec.srv_name)(
     untyped_participant, service_name,
@@ -156,8 +154,7 @@ static rosidl_service_type_support_t __type_support = {
 
 ROSIDL_GENERATOR_C_EXPORT_@(spec.pkg_name)
 const rosidl_service_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(spec.pkg_name), srv, @(spec.srv_name))()
-{
+ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(spec.pkg_name), srv, @(spec.srv_name))() {
   if (!__type_support.typesupport_identifier) {
     __type_support.typesupport_identifier = rosidl_typesupport_opensplice_c__identifier;
   }
