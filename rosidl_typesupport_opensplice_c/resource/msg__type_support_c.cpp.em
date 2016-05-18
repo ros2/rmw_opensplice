@@ -1,7 +1,7 @@
 // generated from rosidl_typesupport_opensplice_c/resource/msg__type_support_c.cpp.em
 
 @##########################################################################
-@# EmPy template for generating <msg>__type_support.c files for OpenSplice
+@# EmPy template for generating <msg>__type_support_c.cpp files for OpenSplice
 @#
 @# Context:
 @#  - spec (rosidl_parser.MessageSpecification)
@@ -106,8 +106,8 @@ __dds_msg_type_prefix = "{0}::{1}::dds_::{2}_".format(
 using __dds_msg_type = @(__dds_msg_type_prefix);
 using __ros_msg_type = @(pkg)__@(subfolder)__@(type);
 
-static const char *
-register_type(void * untyped_participant, const char * type_name)
+const char *
+@(pkg)__@(subfolder)__@(msg)__register_type(void * untyped_participant, const char * type_name)
 {
   if (!untyped_participant) {
     return "untyped participant handle is null";
@@ -140,8 +140,9 @@ register_type(void * untyped_participant, const char * type_name)
   }
 }
 
-static const char *
-convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
+const char *
+@(pkg)__@(subfolder)__@(msg)__convert_ros_to_dds(
+  const void * untyped_ros_message, void * untyped_dds_message)
 {
   if (!untyped_ros_message) {
     return "ros message handle is null";
@@ -241,8 +242,8 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
   return 0;
 }
 
-static const char *
-publish(void * dds_data_writer, const void * ros_message)
+const char *
+@(pkg)__@(subfolder)__@(msg)__publish(void * dds_data_writer, const void * ros_message)
 {
   if (!dds_data_writer) {
     return "data writer handle is null";
@@ -254,7 +255,7 @@ publish(void * dds_data_writer, const void * ros_message)
   DDS::DataWriter * topic_writer = static_cast<DDS::DataWriter *>(dds_data_writer);
 
   __dds_msg_type dds_message;
-  const char * err_msg = convert_ros_to_dds(ros_message, &dds_message);
+  const char * err_msg = @(pkg)__@(subfolder)__@(msg)__convert_ros_to_dds(ros_message, &dds_message);
   if (err_msg != 0) {
     return err_msg;
   }
@@ -312,8 +313,8 @@ publish(void * dds_data_writer, const void * ros_message)
   }
 }
 
-static const char *
-convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
+const char *
+@(pkg)__@(subfolder)__@(msg)__convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
 {
   if (!untyped_ros_message) {
     return "ros message handle is null";
@@ -409,8 +410,8 @@ else:
   return 0;
 }
 
-static const char *
-take(
+const char *
+@(pkg)__@(subfolder)__@(msg)__take(
   void * dds_data_reader,
   bool ignore_local_publications,
   void * untyped_ros_message,
@@ -497,7 +498,7 @@ take(
   }
 
   if (!ignore_sample) {
-    errs = convert_dds_to_ros(&dds_messages[0], untyped_ros_message);
+    errs = @(pkg)__@(subfolder)__@(msg)__convert_dds_to_ros(&dds_messages[0], untyped_ros_message);
     if (errs != 0) {
       goto finally;
     }
@@ -543,11 +544,11 @@ finally:
 static message_type_support_callbacks_t __callbacks = {
   "@(pkg)",  // package_name
   "@(msg)",  // message_name
-  register_type,  // register_type
-  publish,  // publish
-  take,  // take
-  convert_ros_to_dds,  // convert_ros_to_dds
-  convert_dds_to_ros,  // convert_dds_to_ros
+  @(pkg)__@(subfolder)__@(msg)__register_type,  // register_type
+  @(pkg)__@(subfolder)__@(msg)__publish,  // publish
+  @(pkg)__@(subfolder)__@(msg)__take,  // take
+  @(pkg)__@(subfolder)__@(msg)__convert_ros_to_dds,  // convert_ros_to_dds
+  @(pkg)__@(subfolder)__@(msg)__convert_dds_to_ros,  // convert_dds_to_ros
 };
 
 static rosidl_message_type_support_t __type_support = {

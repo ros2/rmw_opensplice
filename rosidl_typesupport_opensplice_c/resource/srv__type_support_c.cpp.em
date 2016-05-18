@@ -29,6 +29,8 @@
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_Sample_@(spec.srv_name)_Response_.h"
 #include "rosidl_typesupport_opensplice_c/identifier.h"
 
+#include "@(spec.pkg_name)/srv/dds_opensplice_c/@(get_header_filename_from_msg_name(spec.srv_name))__request__type_support.h"
+#include "@(spec.pkg_name)/srv/dds_opensplice_c/@(get_header_filename_from_msg_name(spec.srv_name))__response__type_support.h"
 #include "@(spec.pkg_name)/srv/dds_opensplice/@(get_header_filename_from_msg_name(spec.srv_name))__type_support.cpp"
 #include "@(spec.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 
@@ -89,8 +91,26 @@ const char *
 send_request__@(spec.srv_name)(
   void * untyped_requester, const void * untyped_ros_request, int64_t * sequence_number)
 {
-  return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::send_request__@(spec.srv_name)(
-    untyped_requester, untyped_ros_request, sequence_number);
+  using SampleT = rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Request_>;
+
+  SampleT request;
+  @(spec.pkg_name)__srv__@(spec.srv_name)_Request__convert_ros_to_dds(
+    untyped_ros_request, static_cast<void *>(&request.data()));
+
+  using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_
+  >;
+
+  auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
+
+  const char * error_string = requester->send_request(request);
+  if (error_string) {
+    return error_string;
+  }
+  *sequence_number = request.sequence_number_;
+
+  return nullptr;
 }
 
 const char *
