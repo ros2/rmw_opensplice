@@ -118,8 +118,35 @@ take_request__@(spec.srv_name)(
   void * untyped_responder, rmw_request_id_t * request_header, void * untyped_ros_request,
   bool * taken)
 {
-  return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::take_request__@(spec.srv_name)(
-    untyped_responder, request_header, untyped_ros_request, taken);
+  using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_
+  >;
+
+  auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
+
+  rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Request_> request;
+  const char * error_string = responder->take_request(request, taken);
+  if (error_string) {
+    return error_string;
+  }
+
+  if (*taken) {
+    @(spec.pkg_name)__srv__@(spec.srv_name)_Request__convert_dds_to_ros(
+      static_cast<void *>(&request.data()), untyped_ros_request);
+
+    request_header->sequence_number = request.sequence_number_;
+    std::memcpy(
+      &request_header->writer_guid[0], &request.client_guid_0_, sizeof(request.client_guid_0_));
+    std::memcpy(
+      &request_header->writer_guid[0] + sizeof(request.client_guid_0_),
+      &request.client_guid_1_, sizeof(request.client_guid_1_));
+
+    *taken = true;
+    return nullptr;
+  }
+  *taken = false;
+  return nullptr;
 }
 
 const char *
@@ -127,8 +154,22 @@ send_response__@(spec.srv_name)(
   void * untyped_responder, const rmw_request_id_t * request_header,
   const void * untyped_ros_response)
 {
-  return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::send_response__@(spec.srv_name)(
-    untyped_responder, request_header, untyped_ros_response);
+  rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
+  @(spec.pkg_name)__srv__@(spec.srv_name)_Response__convert_ros_to_dds(
+    untyped_ros_response, static_cast<void *>(&response.data()));
+
+
+  using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_
+  >;
+  auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
+
+  const char * error_string = responder->send_response(*request_header, response);
+  if (error_string) {
+    return error_string;
+  }
+  return nullptr;
 }
 
 const char *
@@ -136,9 +177,26 @@ take_response__@(spec.srv_name)(
   void * untyped_requester, rmw_request_id_t * request_header, void * untyped_ros_response,
   bool * taken)
 {
-  return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::take_response__@(spec.srv_name)(
-    untyped_requester, request_header, untyped_ros_response,
-    taken);
+  using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_
+  >;
+  auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
+
+  rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
+  const char * error_string = requester->take_response(response, taken);
+  if (error_string) {
+    return error_string;
+  }
+  if (*taken) {
+    request_header->sequence_number = response.sequence_number_;
+
+    @(spec.pkg_name)__srv__@(spec.srv_name)_Response__convert_dds_to_ros(
+      static_cast<void *>(&response.data()), untyped_ros_response);
+    return nullptr;
+  }
+
+  return nullptr;
 }
 
 const char *
