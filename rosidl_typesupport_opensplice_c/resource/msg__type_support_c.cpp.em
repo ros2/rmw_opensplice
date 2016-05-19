@@ -197,8 +197,8 @@ const char *
       if (str->data[str->size] != '\0') {
         return "string not null-terminated";
       }
-      // dds_message->@(field.name)_[i] = strndup(str->data, str->size);
-      dds_message->@(field.name)_[i] = str->data;
+
+      dds_message->@(field.name)_[i] = DDS::string_dup(str->data);
 @[    elif field.type.type == 'bool']@
       dds_message->@(field.name)_[i] = 1 ? ros_i : 0;
 @[    elif field.type.is_primitive_type()]@
@@ -225,8 +225,8 @@ const char *
     if (str->data[str->size] != '\0') {
       return "string not null-terminated";
     }
-    // dds_message->@(field.name)_ = strndup(str->data, str->size);
-    dds_message->@(field.name)_ = str->data;
+
+    dds_message->@(field.name)_ = DDS::string_dup(str->data);
 @[  elif field.type.is_primitive_type()]@
     dds_message->@(field.name)_ = ros_message->@(field.name);
 @[  else]@
