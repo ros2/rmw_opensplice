@@ -18,6 +18,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "rmw/rmw.h"
+
 #include "rosidl_generator_c/service_type_support.h"
 
 typedef struct service_type_support_callbacks_t
@@ -41,7 +43,7 @@ typedef struct service_type_support_callbacks_t
   const char * (*create_responder)(
     void * participant, const char * service_name, void ** responder, void ** reader,
     const void * datareader_qos, const void * datawriter_qos, void * (*allocator)(size_t));
-  // De-allocatea a responder
+  // De-allocate a responder
   // The deallocator should match the allocator passed to create_respnder.
   // Returns NULL if the responder was successfully destroyed, otherwise an error string.
   // Passing NULL for the deallocator will result in free being used.
@@ -64,6 +66,13 @@ typedef struct service_type_support_callbacks_t
   // If no data is available to be taken, NULL is returned but taken will be set to false.
   const char * (*take_response)(
     void * requester, rmw_request_id_t * request_header, void * ros_response, bool * taken);
+  // Function to check if a service server is available for a given client
+  // Returns NULL if the check was successfully, otherwise an error string.
+  // If no server is available, NULL is returned but is_available will be set to false.
+  const char * (*server_is_available)(
+    void * requester, const rmw_node_t * node, bool * is_available,
+    rmw_ret_t (*count_publishers)(const rmw_node_t *, const char *, size_t *),
+    rmw_ret_t (*count_subscribers)(const rmw_node_t *, const char *, size_t *));
 } service_type_support_callbacks_t;
 
 #endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__SERVICE_TYPE_SUPPORT_H_

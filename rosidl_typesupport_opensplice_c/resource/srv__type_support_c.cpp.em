@@ -135,6 +135,16 @@ destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocato
     untyped_responder, deallocator);
 }
 
+const char *
+server_is_available__@(spec.srv_name)(
+  void * requester, const rmw_node_t * node, bool * is_available,
+  rmw_ret_t (*count_publishers)(const rmw_node_t *, const char *, size_t *),
+  rmw_ret_t (*count_subscribers)(const rmw_node_t *, const char *, size_t *))
+{
+  return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::server_is_available__@(spec.srv_name)(
+    requester, node, is_available, count_publishers, count_subscribers);
+}
+
 static service_type_support_callbacks_t __callbacks = {
   "@(spec.pkg_name)",
   "@(spec.srv_name)",
@@ -146,6 +156,7 @@ static service_type_support_callbacks_t __callbacks = {
   &take_request__@(spec.srv_name),
   &send_response__@(spec.srv_name),
   &take_response__@(spec.srv_name),
+  &server_is_available__@(spec.srv_name),
 };
 
 static rosidl_service_type_support_t __type_support = {

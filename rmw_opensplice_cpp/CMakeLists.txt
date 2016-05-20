@@ -51,6 +51,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_request.cpp
   src/rmw_response.cpp
   src/rmw_service.cpp
+  src/rmw_service_server_is_available.cpp
   src/rmw_subscription.cpp
   src/rmw_take.cpp
   src/rmw_topic_names_and_types.cpp
