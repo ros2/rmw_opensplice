@@ -87,6 +87,7 @@ class CustomPublisherListener
 public:
   explicit CustomPublisherListener(rmw_guard_condition_t * graph_guard_condition);
   virtual void on_data_available(DDS::DataReader * reader);
+
 private:
   rmw_guard_condition_t * graph_guard_condition_;
 };
@@ -97,6 +98,7 @@ class CustomSubscriberListener
 public:
   explicit CustomSubscriberListener(rmw_guard_condition_t * graph_guard_condition);
   virtual void on_data_available(DDS::DataReader * reader);
+
 private:
   rmw_guard_condition_t * graph_guard_condition_;
 };

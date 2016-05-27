@@ -289,8 +289,8 @@ fail:
   const char *
   server_is_available(
     const rmw_node_t * node, bool * is_available,
-    rmw_ret_t (*count_publishers)(const rmw_node_t *, const char *, size_t *),
-    rmw_ret_t (*count_subscribers)(const rmw_node_t *, const char *, size_t *)
+    rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
+    rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *)
   ) noexcept
   {
     if (!is_available) {

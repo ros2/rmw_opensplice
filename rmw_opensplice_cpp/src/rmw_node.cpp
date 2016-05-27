@@ -336,5 +336,4 @@ rmw_node_get_graph_guard_condition(const rmw_node_t * node)
   }
   return node_info->graph_guard_condition;
 }
-
 }  // extern "C"

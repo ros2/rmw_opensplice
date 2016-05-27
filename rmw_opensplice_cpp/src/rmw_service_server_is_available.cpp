@@ -26,7 +26,6 @@
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {
-
 rmw_ret_t
 rmw_service_server_is_available(
   const rmw_node_t * node,
@@ -72,5 +71,4 @@ rmw_service_server_is_available(
 
   return RMW_RET_OK;
 }
-
 }  // extern "C"
