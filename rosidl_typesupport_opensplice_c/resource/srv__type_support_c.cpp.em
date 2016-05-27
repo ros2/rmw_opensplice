@@ -23,6 +23,8 @@
 @{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
 @{req_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '__request')}@
 @{res_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '__response')}@
+#include "@(spec.pkg_name)/srv/@(req_header_file_name).h"
+#include "@(spec.pkg_name)/srv/@(res_header_file_name).h"
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_@(spec.srv_name)_Request_.h"
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_@(spec.srv_name)_Response_.h"
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_Sample_@(spec.srv_name)_Request_.h"
