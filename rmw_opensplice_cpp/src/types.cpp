@@ -89,7 +89,11 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data) {
-      add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      } else {
+        remove_information(info_seq[i]);
+      }
     } else {
       remove_information(info_seq[i]);
     }
@@ -132,7 +136,11 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data) {
-      add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      } else {
+        remove_information(info_seq[i]);
+      }
     } else {
       remove_information(info_seq[i]);
     }
