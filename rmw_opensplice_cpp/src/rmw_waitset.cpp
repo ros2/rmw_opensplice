@@ -141,14 +141,15 @@ rmw_destroy_waitset(rmw_waitset_t * waitset)
 
   // Explicitly call destructor since the "placement new" was used
 
+  using DDS::ConditionSeq;
   if (waitset_info->active_conditions) {
     RMW_TRY_DESTRUCTOR(
-      waitset_info->active_conditions->~DDS_DCPSUObjSeq(), ConditionSeq, result = RMW_RET_ERROR)
+      waitset_info->active_conditions->~ConditionSeq(), ConditionSeq, result = RMW_RET_ERROR)
     rmw_free(waitset_info->active_conditions);
   }
   if (waitset_info->attached_conditions) {
     RMW_TRY_DESTRUCTOR(
-      waitset_info->attached_conditions->~DDS_DCPSUObjSeq(), ConditionSeq, result = RMW_RET_ERROR)
+      waitset_info->attached_conditions->~ConditionSeq(), ConditionSeq, result = RMW_RET_ERROR)
     rmw_free(waitset_info->attached_conditions);
   }
   if (waitset_info->waitset) {
