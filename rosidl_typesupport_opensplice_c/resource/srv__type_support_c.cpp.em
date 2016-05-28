@@ -162,7 +162,7 @@ send_response__@(spec.srv_name)(
 {
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
   const rosidl_message_type_support_t * ts =
-    ROSIDL_GET_TYPE_SUPPORT(@(spec.pkg_name), srv, @(spec.srv_name)_Request);
+    ROSIDL_GET_TYPE_SUPPORT(@(spec.pkg_name), srv, @(spec.srv_name)_Response);
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(ts->data);
   callbacks->convert_ros_to_dds(untyped_ros_response, static_cast<void *>(&response.data()));
