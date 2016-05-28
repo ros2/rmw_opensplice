@@ -20,8 +20,11 @@
 #include <atomic>
 #include <limits>
 #include <random>
+#include <sstream>
 #include <string>
 #include <utility>
+
+#include "rmw/error_handling.h"
 
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
@@ -282,6 +285,46 @@ fail:
     return estr;
   }
 
+  /// Return NULL on success, otherwise an error string.
+  const char *
+  server_is_available(
+    const rmw_node_t * node, bool * is_available,
+    rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
+    rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *)
+  ) noexcept
+  {
+    if (!is_available) {
+      return "argument is_available is null";
+    }
+    *is_available = false;
+    // In the OpenSplice RPC implementation, a server is ready when:
+    //   - At least one server is subscribed to the request topic.
+    //   - At least one server is publishing to the reponse topic.
+    size_t number_of_request_subscriptions = 0;
+    rmw_ret_t ret = count_subscribers(
+      node,
+      request_topic_->get_name(),
+      &number_of_request_subscriptions);
+    if (ret != RMW_RET_OK) {
+      return rmw_get_error_string_safe();
+    }
+    if (number_of_request_subscriptions == 0) {
+      return nullptr;
+    }
+    size_t number_of_response_publishers = 0;
+    ret = count_publishers(
+      node,
+      response_topic_->get_name(),
+      &number_of_response_publishers);
+    if (ret != RMW_RET_OK) {
+      return rmw_get_error_string_safe();
+    }
+    if (number_of_response_publishers == 0) {
+      return nullptr;
+    }
+    *is_available = true;
+    return nullptr;
+  }
 
   const char * take_response(Sample<ResponseT> & response, bool * taken) noexcept
   {

@@ -85,19 +85,28 @@ class CustomPublisherListener
   : public CustomDataReaderListener
 {
 public:
+  explicit CustomPublisherListener(rmw_guard_condition_t * graph_guard_condition);
   virtual void on_data_available(DDS::DataReader * reader);
+
+private:
+  rmw_guard_condition_t * graph_guard_condition_;
 };
 
 class CustomSubscriberListener
   : public CustomDataReaderListener
 {
 public:
+  explicit CustomSubscriberListener(rmw_guard_condition_t * graph_guard_condition);
   virtual void on_data_available(DDS::DataReader * reader);
+
+private:
+  rmw_guard_condition_t * graph_guard_condition_;
 };
 
 struct OpenSpliceStaticNodeInfo
 {
   DDS::DomainParticipant * participant;
+  rmw_guard_condition_t * graph_guard_condition;
   CustomPublisherListener * publisher_listener;
   CustomSubscriberListener * subscriber_listener;
 };

@@ -16,6 +16,8 @@
 
 #include <string>
 
+#include "rmw/error_handling.h"
+
 std::string
 create_type_name(
   const message_type_support_callbacks_t * callbacks,
@@ -60,6 +62,11 @@ CustomDataReaderListener::remove_information(const DDS::SampleInfo & sample_info
   }
 }
 
+CustomPublisherListener::CustomPublisherListener(rmw_guard_condition_t * graph_guard_condition)
+: graph_guard_condition_(graph_guard_condition)
+{
+}
+
 void
 CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 {
@@ -82,13 +89,29 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data) {
-      add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      } else {
+        remove_information(info_seq[i]);
+      }
     } else {
       remove_information(info_seq[i]);
     }
   }
 
+  if (data_seq.length() > 0) {
+    rmw_ret_t ret = rmw_trigger_guard_condition(graph_guard_condition_);
+    if (ret != RMW_RET_OK) {
+      fprintf(stderr, "failed to trigger graph guard condition: %s\n", rmw_get_error_string_safe());
+    }
+  }
+
   builtin_reader->return_loan(data_seq, info_seq);
+}
+
+CustomSubscriberListener::CustomSubscriberListener(rmw_guard_condition_t * graph_guard_condition)
+: graph_guard_condition_(graph_guard_condition)
+{
 }
 
 void
@@ -113,9 +136,20 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data) {
-      add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+      } else {
+        remove_information(info_seq[i]);
+      }
     } else {
       remove_information(info_seq[i]);
+    }
+  }
+
+  if (data_seq.length() > 0) {
+    rmw_ret_t ret = rmw_trigger_guard_condition(graph_guard_condition_);
+    if (ret != RMW_RET_OK) {
+      fprintf(stderr, "failed to trigger graph guard condition: %s\n", rmw_get_error_string_safe());
     }
   }
 

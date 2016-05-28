@@ -99,6 +99,26 @@ rmw_wait(
           RMW_SET_ERROR_MSG("Failed to get detach condition from waitset");
         }
       }
+
+      DDS::ConditionSeq * active_conditions =
+        static_cast<DDS::ConditionSeq *>(waitset_info->active_conditions);
+      if (!active_conditions) {
+        RMW_SET_ERROR_MSG("DDS condition sequence handle is null");
+        return;
+      }
+
+      // Disassociate conditions left in active_conditions so that when the
+      // waitset (and therefore the active_conditions sequence) are destroyed
+      // they do not try to free the entities to which they point.
+      // These entities are already being deleted (are owned) by other entities
+      // like rmw_guard_conditions_t and rmw_node_t.
+      // Without this step, sporadic bad memory accesses could occur when the
+      // items added to the waitset were destroyed before the waitset.
+      // The items in active_conditions are not being leaked though because
+      // other entities own them and are responsible for removing them.
+      for (uint32_t i = 0; i < active_conditions->length(); ++i) {
+        active_conditions->get_buffer()[i] = nullptr;
+      }
     }
     rmw_waitset_t * waitset = NULL;
   } atexit;

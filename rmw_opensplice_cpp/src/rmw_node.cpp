@@ -120,6 +120,7 @@ rmw_create_node(const char * name, size_t domain_id)
 
   rmw_node_t * node = nullptr;
   OpenSpliceStaticNodeInfo * node_info = nullptr;
+  rmw_guard_condition_t * graph_guard_condition = nullptr;
   CustomPublisherListener * publisher_listener = nullptr;
   CustomSubscriberListener * subscriber_listener = nullptr;
   void * buf = nullptr;
@@ -130,6 +131,12 @@ rmw_create_node(const char * name, size_t domain_id)
   DDS::Subscriber * builtin_subscriber = participant->get_builtin_subscriber();
   if (!builtin_subscriber) {
     RMW_SET_ERROR_MSG("builtin subscriber handle is null");
+    goto fail;
+  }
+
+  graph_guard_condition = rmw_create_guard_condition();
+  if (!graph_guard_condition) {
+    // error message already set
     goto fail;
   }
 
@@ -147,7 +154,8 @@ rmw_create_node(const char * name, size_t domain_id)
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
-  RMW_TRY_PLACEMENT_NEW(publisher_listener, buf, goto fail, CustomPublisherListener)
+  RMW_TRY_PLACEMENT_NEW(
+    publisher_listener, buf, goto fail, CustomPublisherListener, graph_guard_condition)
   buf = nullptr;
   builtin_publication_datareader->set_listener(publisher_listener, DDS::DATA_AVAILABLE_STATUS);
 
@@ -165,7 +173,8 @@ rmw_create_node(const char * name, size_t domain_id)
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
-  RMW_TRY_PLACEMENT_NEW(subscriber_listener, buf, goto fail, CustomSubscriberListener)
+  RMW_TRY_PLACEMENT_NEW(
+    subscriber_listener, buf, goto fail, CustomSubscriberListener, graph_guard_condition)
   buf = nullptr;
   builtin_subscription_datareader->set_listener(subscriber_listener, DDS::DATA_AVAILABLE_STATUS);
 
@@ -190,6 +199,7 @@ rmw_create_node(const char * name, size_t domain_id)
   RMW_TRY_PLACEMENT_NEW(node_info, buf, goto fail, OpenSpliceStaticNodeInfo)
   buf = nullptr;
   node_info->participant = participant;
+  node_info->graph_guard_condition = graph_guard_condition;
   node_info->publisher_listener = publisher_listener;
   node_info->subscriber_listener = subscriber_listener;
 
@@ -215,6 +225,12 @@ fail:
     RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
       subscriber_listener->~CustomSubscriberListener(), CustomSubscriberListener)
     rmw_free(subscriber_listener);
+  }
+  if (graph_guard_condition) {
+    rmw_ret_t ret = rmw_destroy_guard_condition(graph_guard_condition);
+    if (ret != RMW_RET_OK) {
+      fprintf(stderr, "failed to destroy guard condition: %s\n", rmw_get_error_string_safe());
+    }
   }
   if (node_info) {
     RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
@@ -287,11 +303,37 @@ rmw_destroy_node(rmw_node_t * node)
     node_info->subscriber_listener = nullptr;
   }
 
+  if (node_info->graph_guard_condition) {
+    rmw_ret_t ret = rmw_destroy_guard_condition(node_info->graph_guard_condition);
+    if (ret != RMW_RET_OK) {
+      fprintf(stderr, "failed to destroy guard condition: %s\n", rmw_get_error_string_safe());
+    }
+  }
+
   rmw_free(node_info);
   node->data = nullptr;
   rmw_free(const_cast<char *>(node->name));
   node->name = nullptr;
   rmw_node_free(node);
   return result;
+}
+
+const rmw_guard_condition_t *
+rmw_node_get_graph_guard_condition(const rmw_node_t * node)
+{
+  if (!node) {
+    RMW_SET_ERROR_MSG("received null pointer");
+    return NULL;
+  }
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node handle,
+    node->implementation_identifier, opensplice_cpp_identifier,
+    return NULL)
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (!node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return NULL;
+  }
+  return node_info->graph_guard_condition;
 }
 }  // extern "C"
