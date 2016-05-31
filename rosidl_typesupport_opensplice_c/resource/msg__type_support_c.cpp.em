@@ -1,4 +1,5 @@
 // generated from rosidl_typesupport_opensplice_c/resource/msg__type_support_c.cpp.em
+// generated code does not contain a copyright notice
 
 @##########################################################################
 @# EmPy template for generating <msg>__type_support_c.cpp files for OpenSplice
@@ -25,14 +26,14 @@
 
 // Provides the definition of the rosidl_message_type_support_t struct as well
 // as the OpenSplice specific macros, e.g. ROSIDL_GET_TYPE_SUPPORT_FUNCTION.
-#include <rosidl_generator_c/message_type_support.h>
+#include "rosidl_generator_c/message_type_support.h"
 // Ensure the correct version of the above header was included.
 static_assert(USING_ROSIDL_TYPESUPPORT_OPENSPLICE_C, "expected OpenSplice C message type support");
 // Provides the rosidl_typesupport_opensplice_c__identifier symbol declaration.
-#include <rosidl_typesupport_opensplice_c/identifier.h>
+#include "rosidl_typesupport_opensplice_c/identifier.h"
 #include "@(spec.base_type.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 // Provides the definition of the message_type_support_callbacks_t struct.
-#include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
+#include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 
 @{header_file_name = get_header_filename_from_msg_name(type)}@
 #include "@(pkg)/@(subfolder)/@(header_file_name)__struct.h"
@@ -63,42 +64,51 @@ extern "C"
 // Forward declare the get type support function for this type.
 ROSIDL_GENERATOR_C_EXPORT_@(spec.base_type.pkg_name)
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))();
+  ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))();
 
+// include message dependencies
 @{
-have_not_included_primitive_arrays = True
-have_not_included_string = True
+includes = {}
+for field in spec.fields:
+    keys = set([])
+    if field.type.is_primitive_type():
+        if field.type.is_array:
+            keys.add('rosidl_generator_c/primitives_array.h')
+            keys.add('rosidl_generator_c/primitives_array_functions.h')
+        if field.type.type == 'string':
+            keys.add('rosidl_generator_c/string.h')
+            keys.add('rosidl_generator_c/string_functions.h')
+    else:
+        header_file_name = get_header_filename_from_msg_name(field.type.type)
+        keys.add('%s/msg/%s__functions.h' % (field.type.pkg_name, header_file_name))
+    for key in keys:
+        if key not in includes:
+            includes[key] = set([])
+        includes[key].add(field.name)
 }@
-@[for field in spec.fields]@
-@[  if field.type.is_primitive_type()]@
-@[    if field.type.is_array and have_not_included_primitive_arrays]@
-@{have_not_included_primitive_arrays = False}@
-#include <rosidl_generator_c/primitives_array.h>
-#include <rosidl_generator_c/primitives_array_functions.h>
-
-@[    end if]@
-@[    if field.type.type == 'string' and have_not_included_string]@
-@{have_not_included_string = False}@
-#include <rosidl_generator_c/string.h>
-#include <rosidl_generator_c/string_functions.h>
-
-@[    end if]@
-@[  else]@
-// Include helper functions for type @(field.type.type)
-@{header_file_name = get_header_filename_from_msg_name(field.type.type)}@
-#include <@(field.type.pkg_name)/msg/@(header_file_name)__functions.h>
-// Forward declare the get type support function for @(field.type.type)
-@[    if field.type.pkg_name != pkg]@
-ROSIDL_GENERATOR_C_IMPORT_@(spec.base_type.pkg_name)
-@[    end if]@
-const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(field.type.pkg_name), msg, @(field.type.type))();
-
-@[  end if]@
+@[for key in sorted(includes.keys())]@
+#include "@(key)"  // @(', '.join(includes[key]))
 @[end for]@
-@
-@# // Make callback functions specific to this message type.
 
+// forward declare type support functions
+@{
+forward_declares = {}
+for field in spec.fields:
+    if not field.type.is_primitive_type():
+        key = (field.type.pkg_name, field.type.type)
+        if key not in includes:
+            forward_declares[key] = set([])
+        forward_declares[key].add(field.name)
+}@
+@[for key in sorted(forward_declares.keys())]@
+@[  if key[0] != pkg]@
+ROSIDL_GENERATOR_C_IMPORT_@(pkg)
+@[  end if]@
+const rosidl_message_type_support_t *
+  ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(key[0]), msg, @(key[1]))();  // @(', '.join(forward_declares[key]))
+@[end for]@
+
+@# // Make callback functions specific to this message type.
 @{
 __dds_msg_type_prefix = "{0}::{1}::dds_::{2}_".format(
   spec.base_type.pkg_name, subfolder, spec.base_type.type)
@@ -368,8 +378,7 @@ else:
       }
       bool succeeded = rosidl_generator_c__String__assign(
         &ros_i,
-        dds_message->@(field.name)_[i]
-      );
+        dds_message->@(field.name)_[i]);
       if (!succeeded) {
         return "failed to assign string into field '@(field.name)'";
       }
@@ -389,8 +398,7 @@ else:
     }
     bool succeeded = rosidl_generator_c__String__assign(
       &ros_message->@(field.name),
-      dds_message->@(field.name)_
-    );
+      dds_message->@(field.name)_);
     if (!succeeded) {
       return "failed to assign string into field '@(field.name)'";
     }
@@ -419,9 +427,9 @@ take(
 {
   if (untyped_ros_message == 0) {
     return "invalid ros message pointer";
-  };
+  }
 
-  DDS::DataReader * topic_reader = static_cast<DDS::DataReader*>(dds_data_reader);
+  DDS::DataReader * topic_reader = static_cast<DDS::DataReader *>(dds_data_reader);
 
   @(__dds_msg_type_prefix)DataReader * data_reader =
     @(__dds_msg_type_prefix)DataReader::_narrow(topic_reader);
@@ -442,26 +450,26 @@ take(
   switch (status) {
     case DDS::RETCODE_ERROR:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "an internal error has occurred";
+        "an internal error has occurred";
       goto finally;
     case DDS::RETCODE_ALREADY_DELETED:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "this @(__dds_msg_type_prefix)DataReader has already been deleted";
+        "this @(__dds_msg_type_prefix)DataReader has already been deleted";
       goto finally;
     case DDS::RETCODE_OUT_OF_RESOURCES:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "out of resources";
+        "out of resources";
       goto finally;
     case DDS::RETCODE_NOT_ENABLED:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "this @(__dds_msg_type_prefix)DataReader is not enabled";
+        "this @(__dds_msg_type_prefix)DataReader is not enabled";
       goto finally;
     case DDS::RETCODE_PRECONDITION_NOT_MET:
       errs = "@(__dds_msg_type_prefix)DataReader.take: "
-             "a precondition is not met, one of: "
-             "max_samples > maximum and max_samples != LENGTH_UNLIMITED, or "
-             "the two sequences do not have matching parameters (length, maximum, release), or "
-             "maximum > 0 and release is false.";
+        "a precondition is not met, one of: "
+        "max_samples > maximum and max_samples != LENGTH_UNLIMITED, or "
+        "the two sequences do not have matching parameters (length, maximum, release), or "
+        "maximum > 0 and release is false.";
       goto finally;
     case DDS::RETCODE_NO_DATA:
       *taken = false;
@@ -558,8 +566,7 @@ static rosidl_message_type_support_t __type_support = {
 
 ROSIDL_GENERATOR_C_EXPORT_@(spec.base_type.pkg_name)
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))()
-{
+ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))() {
   if (!__type_support.typesupport_identifier) {
     __type_support.typesupport_identifier = rosidl_typesupport_opensplice_c__identifier;
   }

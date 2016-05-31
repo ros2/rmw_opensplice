@@ -13,14 +13,15 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <string>
 
-#include <rosidl_generator_c/service_type_support.h>
+#include "rosidl_generator_c/service_type_support.h"
 // This is defined in the rosidl_typesupport_opensplice_cpp package and
 // is in the include/rosidl_typesupport_opensplice_cpp/impl folder.
-#include <rosidl_generator_cpp/message_type_support.hpp>
-#include <rosidl_generator_cpp/service_type_support.hpp>
-#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
-#include <rmw/rmw.h>
+#include "rosidl_generator_cpp/message_type_support.hpp"
+#include "rosidl_generator_cpp/service_type_support.hpp"
+#include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
+#include "rmw/rmw.h"
 
 @{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
 #include "@(spec.pkg_name)/srv/@(header_file_name)__struct.hpp"
@@ -48,13 +49,13 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 @[for suffix in ['_Request', '_Response']]@
-template <>
-class Sample<@(__dds_msg_type_prefix)@(suffix)_> :
-public @(__dds_sample_type_prefix)@(suffix)_
+template<>
+class Sample<@(__dds_msg_type_prefix)@(suffix)_>
+  : public @(__dds_sample_type_prefix)@(suffix)_
 {
 public:
-
-  @(__dds_msg_type_prefix)@(suffix)_ & data() {
+  @(__dds_msg_type_prefix)@(suffix)_ & data()
+  {
 @[  if suffix == '_Request']@
     return request_;
 @[  else]@
@@ -67,14 +68,13 @@ public:
   }
 };
 
-template <>
+template<>
 class TemplateDataReader<@(__dds_sample_type_prefix)@(suffix)_>
-: public @(__dds_sample_type_prefix)@(suffix)_DataReader
+  : public @(__dds_sample_type_prefix)@(suffix)_DataReader
 {
 public:
-
   static const char * take_sample(
-    DDS::DataReader* datareader,
+    DDS::DataReader * datareader,
     Sample<@(__dds_msg_type_prefix)@(suffix)_> & sample,
     bool * taken)
   noexcept
@@ -158,23 +158,23 @@ public:
   }
 };
 
-template <>
+template<>
 class TemplateDataReader<Sample<@(__dds_msg_type_prefix)@(suffix)_>>
-: public TemplateDataReader<@(__dds_sample_type_prefix)@(suffix)_>
-{};
+  : public TemplateDataReader<@(__dds_sample_type_prefix)@(suffix)_>
+{
+};
 
-template <>
+template<>
 class TemplateDataWriter<@(__dds_sample_type_prefix)@(suffix)_>
-: public @(__dds_sample_type_prefix)@(suffix)_DataWriter
+  : public @(__dds_sample_type_prefix)@(suffix)_DataWriter
 {
 public:
-
   static const char * write_sample(
-    DDS::DataWriter* datawriter,
-    Sample<@(__dds_msg_type_prefix)@(suffix)_>& sample)
+    DDS::DataWriter * datawriter,
+    Sample<@(__dds_msg_type_prefix)@(suffix)_> & sample)
   noexcept
   {
-    @(__dds_sample_type_prefix)@(suffix)_DataWriter* typed_datawriter = _narrow(datawriter);
+    @(__dds_sample_type_prefix)@(suffix)_DataWriter * typed_datawriter = _narrow(datawriter);
 
     DDS::ReturnCode_t status = typed_datawriter->write(sample, DDS::HANDLE_NIL);
     switch (status) {
@@ -209,13 +209,14 @@ public:
   }
 };
 
-template <>
+template<>
 class TemplateDataWriter<Sample<@(__dds_msg_type_prefix)@(suffix)_>>
-: public TemplateDataWriter<@(__dds_sample_type_prefix)@(suffix)_>
-{};
+  : public TemplateDataWriter<@(__dds_sample_type_prefix)@(suffix)_>
+{
+};
 
 @[end for]@
-} // namespace rosidl_typesupport_opensplice_cpp
+}  // namespace rosidl_typesupport_opensplice_cpp
 
 namespace @(spec.pkg_name)
 {
@@ -230,7 +231,7 @@ const char *
 register_types__@(spec.srv_name)(
   void * untyped_participant, const char * request_type_name, const char * response_type_name)
 {
-  DDS::DomainParticipant* participant = static_cast<DDS::DomainParticipant*>(untyped_participant);
+  DDS::DomainParticipant * participant = static_cast<DDS::DomainParticipant *>(untyped_participant);
 
   @(__dds_sample_type_prefix)_Request_TypeSupport ros_request_ts;
   DDS::ReturnCode_t status = ros_request_ts.register_type(participant, request_type_name);
@@ -279,10 +280,10 @@ register_types__@(spec.srv_name)(
 const char *
 create_requester__@(spec.srv_name)(
   void * untyped_participant, const char * service_name,
-  void **untyped_requester, void ** untyped_reader,
+  void ** untyped_requester, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
-  void * (* allocator)(size_t))
+  void * (*allocator)(size_t))
 {
   auto _allocator = allocator ? allocator : &malloc;
   const std::string service_type_name("@(__dds_sample_type_prefix)");
@@ -302,9 +303,8 @@ create_requester__@(spec.srv_name)(
   }
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
 
   RequesterT * requester = static_cast<RequesterT *>(_allocator(sizeof(RequesterT)));
   if (!requester) {
@@ -315,7 +315,7 @@ create_requester__@(spec.srv_name)(
   // However, it could still throw a bad_alloc or something like that.
   try {
     new (requester) RequesterT(participant, service_name, service_type_name);
-  } catch(...) {
+  } catch (...) {
     // TODO(wjwwood): catch errors and add their type and what() to the error.
     // This cannot be done when we just return const char *, so a more complex
     // error reporting will be required for this function if we continue to
@@ -336,10 +336,10 @@ create_requester__@(spec.srv_name)(
 const char *
 create_responder__@(spec.srv_name)(
   void * untyped_participant, const char * service_name,
-  void **untyped_responder, void **untyped_reader,
+  void ** untyped_responder, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
-  void * (* allocator)(size_t))
+  void * (*allocator)(size_t))
 {
   auto _allocator = allocator ? allocator : &malloc;
   const std::string service_type_name("@(__dds_sample_type_prefix)");
@@ -352,16 +352,15 @@ create_responder__@(spec.srv_name)(
   const DDS::DataReaderQos * datareader_qos = static_cast<const DDS::DataReaderQos *>(untyped_datareader_qos);
   const DDS::DataWriterQos * datawriter_qos = static_cast<const DDS::DataWriterQos *>(untyped_datawriter_qos);
 
-   const char * error_string = register_types__@(spec.srv_name)(
+  const char * error_string = register_types__@(spec.srv_name)(
     participant, request_type_name.c_str(), response_type_name.c_str());
   if (error_string) {
     return error_string;
   }
 
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
 
   ResponderT * responder = static_cast<ResponderT *>(_allocator(sizeof(ResponderT)));
   if (!responder) {
@@ -372,7 +371,7 @@ create_responder__@(spec.srv_name)(
   // However, it could still throw a bad_alloc or something like that.
   try {
     new (responder) ResponderT(participant, service_name, service_type_name);
-  } catch(...) {
+  } catch (...) {
     // TODO(wjwwood): catch errors and add their type and what() to the error.
     // This cannot be done when we just return const char *, so a more complex
     // error reporting will be required for this function if we continue to
@@ -402,9 +401,8 @@ send_request__@(spec.srv_name)(
   @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_request, request.data());
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
 
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
@@ -423,9 +421,8 @@ take_request__@(spec.srv_name)(
   bool * taken)
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
   using ROSRequestT = @(spec.pkg_name)::srv::@(spec.srv_name)_Request;
 
   auto ros_request = static_cast<ROSRequestT *>(untyped_ros_request);
@@ -467,9 +464,8 @@ send_response__@(spec.srv_name)(
 
 
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
   auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
 
   const char * error_string = responder->send_response(*request_header, response);
@@ -488,9 +484,8 @@ take_response__@(spec.srv_name)(
   auto ros_response = static_cast<ROSResponseT *>(untyped_ros_response);
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
@@ -513,15 +508,14 @@ const char *
 destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocator)(void *))
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
 
   auto requester = static_cast<RequesterT *>(untyped_requester);
   const char * teardown_status = requester->teardown();
   try {
     requester->~RequesterT();
-  } catch(...) {
+  } catch (...) {
     // TODO(wjwwood): catch errors and add their type and what() to the error.
     // This cannot be done when we just return const char *, so a more complex
     // error reporting will be required for this function if we continue to
@@ -540,14 +534,13 @@ const char *
 destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocator)(void *))
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_>;
   auto responder = static_cast<ResponderT *>(untyped_responder);
   const char * teardown_status = responder->teardown();
   try {
     responder->~ResponderT();
-  } catch(...) {
+  } catch (...) {
     // TODO(wjwwood): catch errors and add their type and what() to the error.
     // This cannot be done when we just return const char *, so a more complex
     // error reporting will be required for this function if we continue to

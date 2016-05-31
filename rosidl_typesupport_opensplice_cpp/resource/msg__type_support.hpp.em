@@ -1,4 +1,5 @@
 // generated from rosidl_typesupport_opensplice_cpp/resource/msg__type_support.hpp.em
+// generated code does not contain a copyright notice
 
 @#######################################################################
 @# EmPy template for generating <msg>__type_support.hpp files
@@ -12,8 +13,14 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
-#ifndef __@(spec.base_type.pkg_name)__@(subfolder)__dds_opensplice__@(get_header_filename_from_msg_name(spec.base_type.type))__type_support__hpp__
-#define __@(spec.base_type.pkg_name)__@(subfolder)__dds_opensplice__@(get_header_filename_from_msg_name(spec.base_type.type))__type_support__hpp__
+@{
+header_guard_parts = [
+    spec.base_type.pkg_name, subfolder, 'dds_opensplice',
+    get_header_filename_from_msg_name(spec.base_type.type) + '__type_support_hpp']
+header_guard_variable = '__'.join([x.upper() for x in header_guard_parts]) + '_'
+}@
+#ifndef @(header_guard_variable)
+#define @(header_guard_variable)
 
 #include "@(spec.base_type.pkg_name)/@(subfolder)/@(get_header_filename_from_msg_name(spec.base_type.type))__struct.hpp"
 #include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
@@ -42,8 +49,8 @@ extern void register_type__@(spec.base_type.type)(
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_@(spec.base_type.pkg_name)
 extern void convert_ros_message_to_dds(
-  const @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type)& ros_message,
-  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_& dds_message);
+  const @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message,
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ & dds_message);
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_@(spec.base_type.pkg_name)
 extern void publish__@(spec.base_type.type)(
@@ -52,8 +59,8 @@ extern void publish__@(spec.base_type.type)(
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_@(spec.base_type.pkg_name)
 extern void convert_dds_message_to_ros(
-  const @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_& dds_message,
-  @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type)& ros_message);
+  const @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ & dds_message,
+  @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type) & ros_message);
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_@(spec.base_type.pkg_name)
 extern bool take__@(spec.base_type.type)(
@@ -68,4 +75,4 @@ extern bool take__@(spec.base_type.type)(
 
 }  // namespace @(spec.base_type.pkg_name)
 
-#endif  // __@(spec.base_type.pkg_name)__@(subfolder)__dds_opensplice__@(get_header_filename_from_msg_name(spec.base_type.type))__type_support__hpp__
+#endif  // @(header_guard_variable)
