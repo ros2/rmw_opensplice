@@ -1,7 +1,7 @@
 // generated from rosidl_typesupport_opensplice_c/resource/msg__type_support_c.cpp.em
 
 @##########################################################################
-@# EmPy template for generating <msg>__type_support.c files for OpenSplice
+@# EmPy template for generating <msg>__type_support_c.cpp files for OpenSplice
 @#
 @# Context:
 @#  - spec (rosidl_parser.MessageSpecification)
@@ -196,8 +196,8 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
       if (str->data[str->size] != '\0') {
         return "string not null-terminated";
       }
-      // dds_message->@(field.name)_[i] = strndup(str->data, str->size);
-      dds_message->@(field.name)_[i] = str->data;
+
+      dds_message->@(field.name)_[i] = DDS::string_dup(str->data);
 @[    elif field.type.type == 'bool']@
       dds_message->@(field.name)_[i] = 1 ? ros_i : 0;
 @[    elif field.type.is_primitive_type()]@
@@ -224,8 +224,8 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
     if (str->data[str->size] != '\0') {
       return "string not null-terminated";
     }
-    // dds_message->@(field.name)_ = strndup(str->data, str->size);
-    dds_message->@(field.name)_ = str->data;
+
+    dds_message->@(field.name)_ = DDS::string_dup(str->data);
 @[  elif field.type.is_primitive_type()]@
     dds_message->@(field.name)_ = ros_message->@(field.name);
 @[  else]@
