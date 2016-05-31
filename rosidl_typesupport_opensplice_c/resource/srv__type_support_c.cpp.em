@@ -17,7 +17,6 @@
 // This is defined in the rosidl_typesupport_opensplice_c package and
 // is in the include/rosidl_typesupport_opensplice_c/impl folder.
 #include "rosidl_generator_c/message_type_support.h"
-#include "rosidl_typesupport_opensplice_c/visibility_control.h"
 #include "rmw/rmw.h"
 
 @{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
