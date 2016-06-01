@@ -182,7 +182,7 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
     dds_message->@(field.name)_.length(length);
 @[    end if]@
     for (DDS::ULong i = 0; i < size; ++i) {
-@[    if field.type.array_size]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
       auto & ros_i = ros_message->@(field.name)[i];
 @[    else]@
       auto & ros_i = ros_message->@(field.name).data[i];
@@ -360,7 +360,7 @@ else:
     }
 @[    end if]@
     for (DDS::ULong i = 0; i < size; i++) {
-@[    if field.type.array_size]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
       auto & ros_i = ros_message->@(field.name)[i];
 @[    else]@
       auto & ros_i = ros_message->@(field.name).data[i];
