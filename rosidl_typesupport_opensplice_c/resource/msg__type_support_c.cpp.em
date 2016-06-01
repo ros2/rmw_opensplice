@@ -61,11 +61,6 @@ extern "C"
 {
 #endif
 
-// Forward declare the get type support function for this type.
-ROSIDL_GENERATOR_C_EXPORT_@(spec.base_type.pkg_name)
-const rosidl_message_type_support_t *
-  ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))();
-
 // include message dependencies
 @{
 includes = {}
