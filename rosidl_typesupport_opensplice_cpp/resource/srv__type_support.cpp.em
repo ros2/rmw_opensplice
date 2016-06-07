@@ -124,33 +124,33 @@ public:
 
     if (sample_infos.length() > 0 && sample_infos[0].valid_data) {
       sample = reinterpret_cast<Sample<@(__dds_msg_type_prefix)@(suffix)_> &>(dds_messages[0]);
-      status = typed_datareader->return_loan(dds_messages, sample_infos);
-      switch (status) {
-        case DDS::RETCODE_ERROR:
-          return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
-                 "an internal error has occurred";
-        case DDS::RETCODE_ALREADY_DELETED:
-          return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
-                 "this @(__dds_sample_type_prefix)@(suffix)_DataReader has already been deleted";
-        case DDS::RETCODE_OUT_OF_RESOURCES:
-          return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
-                 "out of resources";
-        case DDS::RETCODE_NOT_ENABLED:
-          return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
-                 "this @(__dds_sample_type_prefix)@(suffix)_DataReader is not enabled";
-        case DDS::RETCODE_PRECONDITION_NOT_MET:
-          return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
-                 "a precondition is not met, one of: "
-                 "the data_values and info_seq do not belong to a single related pair, or "
-                 "the data_values and info_seq were not obtained from this "
-                 "@(__dds_sample_type_prefix)@(suffix)_DataReader";
-        case DDS::RETCODE_OK:
-          *taken = true;
-          return nullptr;
-        default:
-          return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with "
-                 "unknown return code";
-      }
+    }
+    status = typed_datareader->return_loan(dds_messages, sample_infos);
+    switch (status) {
+      case DDS::RETCODE_ERROR:
+        return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
+               "an internal error has occurred";
+      case DDS::RETCODE_ALREADY_DELETED:
+        return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
+               "this @(__dds_sample_type_prefix)@(suffix)_DataReader has already been deleted";
+      case DDS::RETCODE_OUT_OF_RESOURCES:
+        return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
+               "out of resources";
+      case DDS::RETCODE_NOT_ENABLED:
+        return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
+               "this @(__dds_sample_type_prefix)@(suffix)_DataReader is not enabled";
+      case DDS::RETCODE_PRECONDITION_NOT_MET:
+        return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with: "
+               "a precondition is not met, one of: "
+               "the data_values and info_seq do not belong to a single related pair, or "
+               "the data_values and info_seq were not obtained from this "
+               "@(__dds_sample_type_prefix)@(suffix)_DataReader";
+      case DDS::RETCODE_OK:
+        *taken = true;
+        return nullptr;
+      default:
+        return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with "
+               "unknown return code";
     }
 
     *taken = false;
