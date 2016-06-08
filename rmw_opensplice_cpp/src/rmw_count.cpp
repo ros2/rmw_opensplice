@@ -55,13 +55,7 @@ rmw_count_publishers(
     return RMW_RET_ERROR;
   }
 
-  const auto & topic_names_and_types = node_info->publisher_listener->topic_names_and_types;
-  auto it = topic_names_and_types.find(topic_name);
-  if (it == topic_names_and_types.end()) {
-    *count = 0;
-  } else {
-    *count = it->second.size();
-  }
+  *count = node_info->publisher_listener->count_topic(topic_name);
   return RMW_RET_OK;
 }
 
@@ -98,13 +92,7 @@ rmw_count_subscribers(
     return RMW_RET_ERROR;
   }
 
-  const auto & topic_names_and_types = node_info->subscriber_listener->topic_names_and_types;
-  auto it = topic_names_and_types.find(topic_name);
-  if (it == topic_names_and_types.end()) {
-    *count = 0;
-  } else {
-    *count = it->second.size();
-  }
+  *count = node_info->subscriber_listener->count_topic(topic_name);
   return RMW_RET_OK;
 }
 }  // extern "C"

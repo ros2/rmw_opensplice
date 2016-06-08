@@ -27,6 +27,30 @@ create_type_name(
          "::" + sep + "::dds_::" + callbacks->message_name + "_";
 }
 
+size_t
+CustomDataReaderListener::count_topic(const char * topic_name)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto it = topic_names_and_types_.find(topic_name);
+  if (it == topic_names_and_types_.end()) {
+    return 0;
+  } else {
+    return it->second.size();
+  }
+}
+
+void
+CustomDataReaderListener::fill_topic_names_and_types(
+  std::map<std::string, std::set<std::string>> & tnat)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  for (auto it : topic_names_and_types_) {
+    for (auto & jt : it.second) {
+      tnat[it.first].insert(jt);
+    }
+  }
+}
+
 void
 CustomDataReaderListener::add_information(
   const DDS::SampleInfo & sample_info,
@@ -34,29 +58,29 @@ CustomDataReaderListener::add_information(
   const std::string & type_name)
 {
   // store topic name and type name
-  auto & topic_types = topic_names_and_types[topic_name];
+  auto & topic_types = topic_names_and_types_[topic_name];
   topic_types.insert(type_name);
   // store mapping to instance handle
   TopicDescriptor topic_descriptor;
   topic_descriptor.instance_handle = sample_info.instance_handle;
   topic_descriptor.name = topic_name;
   topic_descriptor.type = type_name;
-  topic_descriptors.push_back(topic_descriptor);
+  topic_descriptors_.push_back(topic_descriptor);
 }
 
 void
 CustomDataReaderListener::remove_information(const DDS::SampleInfo & sample_info)
 {
   // find entry by instance handle
-  for (auto it = topic_descriptors.begin(); it != topic_descriptors.end(); ++it) {
+  for (auto it = topic_descriptors_.begin(); it != topic_descriptors_.end(); ++it) {
     if (it->instance_handle == sample_info.instance_handle) {
       // remove entries
-      auto & topic_types = topic_names_and_types[it->name];
+      auto & topic_types = topic_names_and_types_[it->name];
       topic_types.erase(topic_types.find(it->type));
       if (topic_types.empty()) {
-        topic_names_and_types.erase(it->name);
+        topic_names_and_types_.erase(it->name);
       }
-      topic_descriptors.erase(it);
+      topic_descriptors_.erase(it);
       break;
     }
   }
@@ -70,6 +94,7 @@ CustomPublisherListener::CustomPublisherListener(rmw_guard_condition_t * graph_g
 void
 CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 {
+  std::lock_guard<std::mutex> lock(mutex_);
   DDS::PublicationBuiltinTopicDataDataReader * builtin_reader =
     DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
 
@@ -117,6 +142,7 @@ CustomSubscriberListener::CustomSubscriberListener(rmw_guard_condition_t * graph
 void
 CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 {
+  std::lock_guard<std::mutex> lock(mutex_);
   DDS::SubscriptionBuiltinTopicDataDataReader * builtin_reader =
     DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
 

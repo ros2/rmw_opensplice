@@ -20,6 +20,7 @@
 
 #include <list>
 #include <map>
+#include <mutex>
 #include <set>
 #include <string>
 
@@ -62,7 +63,9 @@ public:
   void on_sample_lost(
     DDS::DataReader_ptr, const DDS::SampleLostStatus &)
   {}
-  std::map<std::string, std::multiset<std::string>> topic_names_and_types;
+
+  void fill_topic_names_and_types(std::map<std::string, std::set<std::string>> & tnat);
+  size_t count_topic(const char * topic_name);
 
 protected:
   virtual void add_information(
@@ -71,6 +74,8 @@ protected:
     const std::string & type_name);
   virtual void remove_information(const DDS::SampleInfo & sample_info);
 
+  std::mutex mutex_;
+
 private:
   struct TopicDescriptor
   {
@@ -78,7 +83,8 @@ private:
     std::string name;
     std::string type;
   };
-  std::list<TopicDescriptor> topic_descriptors;
+  std::map<std::string, std::multiset<std::string>> topic_names_and_types_;
+  std::list<TopicDescriptor> topic_descriptors_;
 };
 
 class CustomPublisherListener
