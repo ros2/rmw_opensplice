@@ -42,6 +42,8 @@ class CustomDataReaderListener
   : public DDS::DataReaderListener
 {
 public:
+  CustomDataReaderListener();
+
   void on_requested_deadline_missed(
     DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus &)
   {}
@@ -67,12 +69,21 @@ public:
   void fill_topic_names_and_types(std::map<std::string, std::set<std::string>> & tnat);
   size_t count_topic(const char * topic_name);
 
+  enum EndPointType
+  {
+    PublisherEP,
+    SubscriberEP,
+  };
+
 protected:
   virtual void add_information(
     const DDS::SampleInfo & sample_info,
     const std::string & topic_name,
-    const std::string & type_name);
-  virtual void remove_information(const DDS::SampleInfo & sample_info);
+    const std::string & type_name,
+    EndPointType end_point_type);
+  virtual void remove_information(
+    const DDS::SampleInfo & sample_info,
+    EndPointType end_point_type);
 
   std::mutex mutex_;
 
@@ -85,6 +96,7 @@ private:
   };
   std::map<std::string, std::multiset<std::string>> topic_names_and_types_;
   std::list<TopicDescriptor> topic_descriptors_;
+  bool print_discovery_logging_;
 };
 
 class CustomPublisherListener

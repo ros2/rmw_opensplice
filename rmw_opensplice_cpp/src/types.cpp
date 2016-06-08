@@ -14,6 +14,9 @@
 
 #include "types.hpp"
 
+#include <algorithm>
+#include <map>
+#include <set>
 #include <string>
 
 #include "rmw/error_handling.h"
@@ -25,6 +28,34 @@ create_type_name(
 {
   return std::string(callbacks->package_name) +
          "::" + sep + "::dds_::" + callbacks->message_name + "_";
+}
+
+CustomDataReaderListener::CustomDataReaderListener()
+: print_discovery_logging_(false)
+{
+  // TODO(wjwwood): replace this with actual console logging when we have that
+  char * discovery_logging_value = nullptr;
+  const char * discovery_logging_env = "RMW_PRINT_DISCOVERY_LOGGING";
+  size_t discovery_logging_size;
+#ifndef _WIN32
+  discovery_logging_value = getenv(discovery_logging_env);
+  if (discovery_logging_value) {
+    discovery_logging_size = strlen(discovery_logging_value);
+  }
+#else
+  _dupenv_s(&discovery_logging_value, &discovery_logging_size, discovery_logging_env);
+#endif
+  if (discovery_logging_value) {
+    std::string str(discovery_logging_value, discovery_logging_size);
+    std::string str_lower(str);
+    std::transform(str_lower.begin(), str_lower.end(), str_lower.begin(), std::tolower);
+    if (str != "0" && str_lower != "false" && str_lower != "off") {
+      print_discovery_logging_ = true;
+    }
+#ifdef _WIN32
+    free(ospl_uri);
+#endif
+  }
 }
 
 size_t
@@ -52,10 +83,32 @@ CustomDataReaderListener::fill_topic_names_and_types(
 }
 
 void
+print_discovery_logging(
+  const std::string & prefix,
+  const std::string & name,
+  const std::string & type,
+  CustomDataReaderListener::EndPointType end_point_type)
+{
+  // filter builtin OpenSplice topics
+  if (
+    name.compare(0, 4, "DCPS") != 0 &&
+    name.compare(0, 2, "d_") != 0 &&
+    name.compare(0, 2, "q_") != 0 &&
+    name.compare("CMParticipant") != 0)
+  {
+    std::string msg = prefix +
+      ((end_point_type == CustomDataReaderListener::PublisherEP) ? "P" : "S") +
+      ": " + name + " <" + type + ">";
+    printf("%s\n", msg.c_str());
+  }
+}
+
+void
 CustomDataReaderListener::add_information(
   const DDS::SampleInfo & sample_info,
   const std::string & topic_name,
-  const std::string & type_name)
+  const std::string & type_name,
+  EndPointType end_point_type)
 {
   // store topic name and type name
   auto & topic_types = topic_names_and_types_[topic_name];
@@ -66,14 +119,22 @@ CustomDataReaderListener::add_information(
   topic_descriptor.name = topic_name;
   topic_descriptor.type = type_name;
   topic_descriptors_.push_back(topic_descriptor);
+  if (print_discovery_logging_) {
+    print_discovery_logging("+", topic_name, type_name, end_point_type);
+  }
 }
 
 void
-CustomDataReaderListener::remove_information(const DDS::SampleInfo & sample_info)
+CustomDataReaderListener::remove_information(
+  const DDS::SampleInfo & sample_info,
+  EndPointType end_point_type)
 {
   // find entry by instance handle
   for (auto it = topic_descriptors_.begin(); it != topic_descriptors_.end(); ++it) {
     if (it->instance_handle == sample_info.instance_handle) {
+      if (print_discovery_logging_) {
+        print_discovery_logging("-", it->name, it->type, end_point_type);
+      }
       // remove entries
       auto & topic_types = topic_names_and_types_[it->name];
       topic_types.erase(topic_types.find(it->type));
@@ -115,12 +176,13 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data) {
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-        add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+        add_information(
+          info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in(), PublisherEP);
       } else {
-        remove_information(info_seq[i]);
+        remove_information(info_seq[i], PublisherEP);
       }
     } else {
-      remove_information(info_seq[i]);
+      remove_information(info_seq[i], PublisherEP);
     }
   }
 
@@ -163,12 +225,13 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     if (info_seq[i].valid_data) {
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-        add_information(info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in());
+        add_information(
+          info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in(), SubscriberEP);
       } else {
-        remove_information(info_seq[i]);
+        remove_information(info_seq[i], SubscriberEP);
       }
     } else {
-      remove_information(info_seq[i]);
+      remove_information(info_seq[i], SubscriberEP);
     }
   }
 
