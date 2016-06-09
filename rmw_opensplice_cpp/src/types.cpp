@@ -56,7 +56,7 @@ CustomDataReaderListener::CustomDataReaderListener()
       print_discovery_logging_ = true;
     }
 #ifdef _WIN32
-    free(ospl_uri);
+    free(discovery_logging_value);
 #endif
   }
 }
