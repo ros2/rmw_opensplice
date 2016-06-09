@@ -15,6 +15,7 @@
 #include "types.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <map>
 #include <set>
 #include <string>
@@ -48,7 +49,9 @@ CustomDataReaderListener::CustomDataReaderListener()
   if (discovery_logging_value) {
     std::string str(discovery_logging_value, discovery_logging_size);
     std::string str_lower(str);
-    std::transform(str_lower.begin(), str_lower.end(), str_lower.begin(), std::tolower);
+    std::transform(str_lower.begin(), str_lower.end(), str_lower.begin(), [](unsigned char c) {
+      return std::tolower(c);
+    });
     if (str != "0" && str_lower != "false" && str_lower != "off") {
       print_discovery_logging_ = true;
     }
