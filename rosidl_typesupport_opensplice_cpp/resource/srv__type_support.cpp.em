@@ -124,6 +124,9 @@ public:
 
     if (sample_infos.length() > 0 && sample_infos[0].valid_data) {
       sample = reinterpret_cast<Sample<@(__dds_msg_type_prefix)@(suffix)_> &>(dds_messages[0]);
+      *taken = true;
+    } else {
+      *taken = false;
     }
     status = typed_datareader->return_loan(dds_messages, sample_infos);
     switch (status) {
@@ -146,14 +149,12 @@ public:
                "the data_values and info_seq were not obtained from this "
                "@(__dds_sample_type_prefix)@(suffix)_DataReader";
       case DDS::RETCODE_OK:
-        *taken = true;
-        return nullptr;
+        break;
       default:
         return "@(__dds_sample_type_prefix)@(suffix)_DataReader.return_loan failed with "
                "unknown return code";
     }
 
-    *taken = false;
     return nullptr;
   }
 };
