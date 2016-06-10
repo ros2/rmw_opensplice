@@ -278,14 +278,9 @@ rmw_destroy_node(rmw_node_t * node)
   }
 
   auto result = RMW_RET_OK;
-  // This unregisters types and destroys topics which were shared between
-  // publishers and subscribers and could not be cleaned up in the delete functions.
-  if (participant->delete_contained_entities() != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to delete contained entities of participant");
-    result = RMW_RET_ERROR;
-  }
-
-  // The builtin subscriber is not cleaned up by the above.
+  
+  // Explicitly delete the builtin_subscriber, which is
+  // apparently required because we accessed it in rmw_create_node().
   DDS::Subscriber * builtin_subscriber = participant->get_builtin_subscriber();
   if (builtin_subscriber) {
     if (participant->delete_subscriber(builtin_subscriber)!= DDS::RETCODE_OK) {
@@ -293,6 +288,14 @@ rmw_destroy_node(rmw_node_t * node)
       result = RMW_RET_ERROR;
     }
   }
+
+  // This unregisters types and destroys topics which were shared between
+  // publishers and subscribers and could not be cleaned up in the delete functions.
+  if (participant->delete_contained_entities() != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to delete contained entities of participant");
+    result = RMW_RET_ERROR;
+  }
+
 
   if (dp_factory->delete_participant(participant) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to delete participant");
