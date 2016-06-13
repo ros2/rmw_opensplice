@@ -296,7 +296,6 @@ rmw_destroy_node(rmw_node_t * node)
     result = RMW_RET_ERROR;
   }
 
-
   if (dp_factory->delete_participant(participant) != DDS::RETCODE_OK) {
     RMW_SET_ERROR_MSG("failed to delete participant");
     result = RMW_RET_ERROR;
