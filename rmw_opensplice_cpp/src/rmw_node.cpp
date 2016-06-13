@@ -278,12 +278,12 @@ rmw_destroy_node(rmw_node_t * node)
   }
 
   auto result = RMW_RET_OK;
-  
+
   // Explicitly delete the builtin_subscriber, which is
   // apparently required because we accessed it in rmw_create_node().
   DDS::Subscriber * builtin_subscriber = participant->get_builtin_subscriber();
   if (builtin_subscriber) {
-    if (participant->delete_subscriber(builtin_subscriber)!= DDS::RETCODE_OK) {
+    if (participant->delete_subscriber(builtin_subscriber) != DDS::RETCODE_OK) {
       RMW_SET_ERROR_MSG("builtin subscriber handle failed to delete");
       result = RMW_RET_ERROR;
     }
