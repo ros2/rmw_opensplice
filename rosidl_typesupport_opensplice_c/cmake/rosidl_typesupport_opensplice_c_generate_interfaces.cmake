@@ -260,12 +260,6 @@ ament_target_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
   "OpenSplice"
   "rosidl_typesupport_opensplice_c")
-add_dependencies(
-  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
-  # Add a dependency on the .idl -> OpenSplice code which is created in the C++
-  # version of this file, in the rosidl_typesupport_opensplice_cpp package.
-  ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
-)
 
 add_dependencies(
   ${rosidl_generate_interfaces_TARGET}
