@@ -9,7 +9,7 @@ find_package(OpenSplice MODULE)
 if(OpenSplice_HOME)
   normalize_path(OpenSplice_HOME "${OpenSplice_HOME}")
   # if the home is in the install space make the environment hook relocatable
-  if("${OpenSplice_HOME} " STREQUAL "${CMAKE_INSTALL_PREFIX} ")
+  if(OpenSplice_HOME STREQUAL CMAKE_INSTALL_PREFIX)
     set(OpenSplice_HOME "$AMENT_CURRENT_PREFIX")
   endif()
   if(WIN32)

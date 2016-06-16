@@ -15,19 +15,19 @@
 set(_target_suffix "__rosidl_typesupport_opensplice_c")
 
 # avoid generating any opensplice specific stuff for builtin_interfaces
-if(NOT "${PROJECT_NAME} " STREQUAL "builtin_interfaces ")
+if(NOT PROJECT_NAME STREQUAL "builtin_interfaces")
 
 set(_dds_idl_files "")
 set(_dds_idl_base_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_dds_idl")
 foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(_extension "${_idl_file}" EXT)
   get_filename_component(_name "${_idl_file}" NAME_WE)
-  if("${_extension} " STREQUAL ".msg ")
+  if(_extension STREQUAL ".msg")
     get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
     get_filename_component(_parent_folder "${_parent_folder}" NAME)
     list(APPEND _dds_idl_files
       "${_dds_idl_base_path}/${PROJECT_NAME}/${_parent_folder}/dds_opensplice/${_name}_.idl")
-  elseif("${_extension} " STREQUAL ".srv ")
+  elseif(_extension STREQUAL ".srv")
     list(APPEND _dds_idl_files
       "${_dds_idl_base_path}/${PROJECT_NAME}/srv/dds_opensplice/Sample_${_name}_Request_.idl")
     list(APPEND _dds_idl_files
@@ -45,7 +45,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(_extension "${_idl_file}" EXT)
   get_filename_component(_msg_name "${_idl_file}" NAME_WE)
   string_camel_case_to_lower_case_underscore("${_msg_name}" _header_name)
-  if("${_extension} " STREQUAL ".msg ")
+  if(_extension STREQUAL ".msg")
     get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
     get_filename_component(_parent_folder "${_parent_folder}" NAME)
     list(APPEND _generated_external_msg_files
@@ -60,7 +60,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
       "${_dds_output_path}/${_parent_folder}/dds_opensplice/ccpp_${_msg_name}_.h")
     list(APPEND _generated_msg_files
       "${_output_path}/${_parent_folder}/dds_opensplice_c/${_header_name}__type_support_c.cpp")
-  elseif("${_extension} " STREQUAL ".srv ")
+  elseif(_extension STREQUAL ".srv")
     list(APPEND _generated_srv_files "${_output_path}/srv/dds_opensplice_c/${_header_name}__type_support_c.cpp")
 
     foreach(_suffix "_Request" "_Response")
@@ -83,16 +83,16 @@ endforeach()
 # If not on Windows, disable some warnings with OpenSplice's generated code
 if(NOT WIN32)
   set(_opensplice_compile_flags)
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(_opensplice_compile_flags
       "-Wno-unused-but-set-variable"
     )
   endif()
-  if(NOT "${_opensplice_compile_flags} " STREQUAL " ")
+  if(NOT _opensplice_compile_flags STREQUAL "")
     string(REPLACE ";" " " _opensplice_compile_flags "${_opensplice_compile_flags}")
     foreach(_gen_file ${_generated_external_msg_files} ${_generated_external_srv_files})
       set_source_files_properties("${_gen_file}"
-        PROPERTIES COMPILE_FLAGS ${_opensplice_compile_flags})
+        PROPERTIES COMPILE_FLAGS "${_opensplice_compile_flags}")
     endforeach()
   endif()
 endif()
@@ -102,11 +102,11 @@ set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   foreach(_idl_file ${${_pkg_name}_INTERFACE_FILES})
     get_filename_component(_extension "${_idl_file}" EXT)
-    if("${_extension} " STREQUAL ".msg ")
+    if(_extension STREQUAL ".msg")
       get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
       get_filename_component(_parent_folder "${_parent_folder}" NAME)
       # ignore builtin_interfaces since it does not have any idl files
-      if(NOT "${_pkg_name} " STREQUAL "builtin_interfaces ")
+      if(NOT _pkg_name STREQUAL "builtin_interfaces")
         get_filename_component(_name "${_idl_file}" NAME_WE)
         set(_abs_idl_file "${${_pkg_name}_DIR}/../${_parent_folder}/dds_opensplice/${_name}_.idl")
         normalize_path(_abs_idl_file "${_abs_idl_file}")
@@ -115,7 +115,7 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
       set(_abs_idl_file "${${_pkg_name}_DIR}/../${_idl_file}")
       normalize_path(_abs_idl_file "${_abs_idl_file}")
       list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
-    elseif("${_extension} " STREQUAL ".srv ")
+    elseif(_extension STREQUAL ".srv")
       get_filename_component(_name "${_idl_file}" NAME_WE)
 
       set(_abs_idl_file "${${_pkg_name}_DIR}/../srv/dds_opensplice/Sample_${_name}_Request_.idl")
@@ -171,21 +171,23 @@ add_custom_command(
 )
 
 if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
-  if(NOT "${_generated_msg_files}${_generated_external_msg_files} " STREQUAL " ")
+  if(NOT _generated_msg_files STREQUAL "" OR NOT _generated_external_msg_files STREQUAL "")
     install(
       FILES ${_generated_msg_files} ${_generated_external_msg_files}
       DESTINATION "include/${PROJECT_NAME}/msg/dds_opensplice_c"
     )
   endif()
-  if(NOT "${_generated_srv_files}${_generated_external_srv_files} " STREQUAL " ")
+  if(NOT _generated_srv_files STREQUAL "" OR NOT _generated_external_srv_files STREQUAL "")
     install(
       FILES ${_generated_srv_files} ${_generated_external_srv_files}
       DESTINATION "include/${PROJECT_NAME}/srv/dds_opensplice_c"
     )
   endif()
   if(
-    NOT "${_generated_msg_files}${_generated_external_msg_files} " STREQUAL " " OR
-    NOT "${_generated_srv_files}${_generated_external_srv_files} " STREQUAL " "
+    NOT _generated_msg_files STREQUAL "" OR
+    NOT _generated_external_msg_files STREQUAL "" OR
+    NOT _generated_srv_files STREQUAL "" OR
+    NOT _generated_external_srv_files STREQUAL ""
   )
     ament_export_include_directories(include)
   endif()
@@ -282,7 +284,7 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
 endif()
 
 if(BUILD_TESTING AND rosidl_generate_interfaces_ADD_LINTER_TESTS)
-  if(NOT "${_generated_msg_files}${_generated_srv_files} " STREQUAL " ")
+  if(NOT _generated_msg_files STREQUAL "" OR NOT _generated_srv_files STREQUAL "")
     find_package(ament_cmake_cppcheck REQUIRED)
     ament_cppcheck(
       TESTNAME "cppcheck_rosidl_typesupport_opensplice_c"
