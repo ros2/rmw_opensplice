@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 
 project(opensplice_cmake_module NONE)
 
@@ -9,7 +9,7 @@ find_package(OpenSplice MODULE)
 if(OpenSplice_HOME)
   normalize_path(OpenSplice_HOME "${OpenSplice_HOME}")
   # if the home is in the install space make the environment hook relocatable
-  if("${OpenSplice_HOME} " STREQUAL "${CMAKE_INSTALL_PREFIX} ")
+  if(OpenSplice_HOME STREQUAL CMAKE_INSTALL_PREFIX)
     set(OpenSplice_HOME "$AMENT_CURRENT_PREFIX")
   endif()
   if(WIN32)
