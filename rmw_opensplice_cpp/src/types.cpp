@@ -68,9 +68,8 @@ CustomDataReaderListener::count_topic(const char * topic_name)
   auto it = topic_names_and_types_.find(topic_name);
   if (it == topic_names_and_types_.end()) {
     return 0;
-  } else {
-    return it->second.size();
   }
+  return it->second.size();
 }
 
 void
