@@ -122,11 +122,9 @@ public:
                "unknown return code";
     }
 
-    if (sample_infos.length() > 0 && sample_infos[0].valid_data) {
+    *taken = (sample_infos.length() > 0 && sample_infos[0].valid_data);
+    if (*taken) {
       sample = reinterpret_cast<Sample<@(__dds_msg_type_prefix)@(suffix)_> &>(dds_messages[0]);
-      *taken = true;
-    } else {
-      *taken = false;
     }
     status = typed_datareader->return_loan(dds_messages, sample_infos);
     switch (status) {
