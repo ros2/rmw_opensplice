@@ -171,7 +171,7 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
       )()->data);
 @[  end if]@
 @[  if field.type.is_array]@
-@[    if field.type.array_size]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
 @[    else]@
     size_t size = ros_message->@(field.name).size;
@@ -271,7 +271,7 @@ publish(void * dds_data_writer, const void * ros_message)
 @[  if field.type.type == 'string']@
 @[    if field.type.is_array]@
   {
-@[      if field.type.array_size]@
+@[      if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
 @[      else]@
     size_t size = dds_message.@(field.name)_.length();
@@ -337,7 +337,7 @@ convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
   // Field name: @(field.name)
   {
 @[  if field.type.is_array]@
-@[    if field.type.array_size]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
 @[    else]@
 @{
