@@ -97,16 +97,8 @@ rmw_get_topic_names_and_types(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics_with_multiple_types;
-  for (auto it : node_info->publisher_listener->topic_names_and_types) {
-    for (auto & jt : it.second) {
-      topics_with_multiple_types[it.first].insert(jt);
-    }
-  }
-  for (auto it : node_info->subscriber_listener->topic_names_and_types) {
-    for (auto & jt : it.second) {
-      topics_with_multiple_types[it.first].insert(jt);
-    }
-  }
+  node_info->publisher_listener->fill_topic_names_and_types(topics_with_multiple_types);
+  node_info->subscriber_listener->fill_topic_names_and_types(topics_with_multiple_types);
 
   // ignore inconsistent types
   std::map<std::string, std::string> topics;

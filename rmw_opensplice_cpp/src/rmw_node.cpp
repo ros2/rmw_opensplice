@@ -39,6 +39,17 @@ rmw_create_node(const char * name, size_t domain_id)
     RMW_SET_ERROR_MSG("failed to get domain participant factory");
     return nullptr;
   }
+  DDS::DomainParticipantFactoryQos qos;
+  if (dp_factory->get_qos(qos) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to get domain participant factory qos");
+    return nullptr;
+  }
+  // Create entities in the disabled state.
+  qos.entity_factory.autoenable_created_entities = false;
+  if (dp_factory->set_qos(qos) != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to set domain participant factory qos");
+    return nullptr;
+  }
 
   DDS::DomainId_t domain = static_cast<DDS::DomainId_t>(domain_id);
   DDS::DomainParticipant * participant = nullptr;
@@ -205,6 +216,12 @@ rmw_create_node(const char * name, size_t domain_id)
 
   node->implementation_identifier = opensplice_cpp_identifier;
   node->data = node_info;
+
+  // finally enable the participant
+  if (participant->enable() != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to enable domain participant");
+    goto fail;
+  }
 
   return node;
 fail:

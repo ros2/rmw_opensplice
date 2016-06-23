@@ -376,7 +376,7 @@ finally:
              "the data_values and info_seq were not obtained from this "
              "@(__dds_msg_type_prefix)DataReader";
     case DDS::RETCODE_OK:
-      return nullptr;
+      break;
     default:
       return "@(__dds_msg_type_prefix)DataReader.return_loan failed with "
              "unknown return code";
