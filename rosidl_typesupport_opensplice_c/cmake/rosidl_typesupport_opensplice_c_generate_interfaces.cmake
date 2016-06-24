@@ -244,6 +244,10 @@ ament_target_dependencies(${rosidl_generate_interfaces_TARGET}${_target_suffix}
 target_link_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   ${rosidl_generate_interfaces_TARGET}__rosidl_typesupport_opensplice_cpp
   ${rosidl_generate_interfaces_TARGET}__rosidl_generator_c)
+ament_target_dependencies(
+  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
+  "OpenSplice"
+  "rosidl_typesupport_opensplice_c")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   set(_msg_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/msg/dds_opensplice_c")
   set(_srv_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/srv/dds_opensplice_c")
@@ -258,10 +262,6 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
     ${rosidl_generate_interfaces_TARGET}${_target_suffix}
     ${_pkg_name})
 endforeach()
-ament_target_dependencies(
-  ${rosidl_generate_interfaces_TARGET}${_target_suffix}
-  "OpenSplice"
-  "rosidl_typesupport_opensplice_c")
 
 add_dependencies(
   ${rosidl_generate_interfaces_TARGET}

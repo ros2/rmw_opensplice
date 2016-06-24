@@ -138,7 +138,7 @@ convert_ros_message_to_dds(const __ros_msg_type & ros_message, __dds_msg_type & 
   // field.name @(field.name)
 @[  if field.type.is_array]@
   {
-@[    if field.type.array_size]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
 @[    else]@
     size_t size = ros_message.@(field.name).size();
@@ -229,7 +229,7 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
   // field.name @(field.name)
 @[  if field.type.is_array]@
   {
-@[    if field.type.array_size]@
+@[    if field.type.array_size and not field.type.is_upper_bound]@
     size_t size = @(field.type.array_size);
 @[    else]@
     size_t size = dds_message.@(field.name)_.length();
