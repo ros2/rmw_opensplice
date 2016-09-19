@@ -55,7 +55,16 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   if(_extension STREQUAL ".msg")
     get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
     get_filename_component(_parent_folder "${_parent_folder}" NAME)
-    list(APPEND _generated_external_msg_files
+    if(_parent_folder STREQUAL "msg")
+      set(_var1 "_generated_external_msg_files")
+      set(_var2 "_generated_msg_files")
+    elseif(_parent_folder STREQUAL "srv")
+      set(_var1 "_generated_external_srv_files")
+      set(_var2 "_generated_srv_files")
+    else()
+      message(FATAL_ERROR "Interface file with unknown parent folder: ${_idl_file}")
+    endif()
+    list(APPEND ${_var1}
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_.h"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_.cpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_Dcps.h"
@@ -65,7 +74,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_SplDcps.h"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_SplDcps.cpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/ccpp_${_msg_name}_.h")
-    list(APPEND _generated_msg_files
+    list(APPEND ${_var2}
       "${_output_path}/${_parent_folder}/dds_opensplice/${_header_name}__type_support.hpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_header_name}__type_support.cpp")
   elseif(_extension STREQUAL ".srv")
