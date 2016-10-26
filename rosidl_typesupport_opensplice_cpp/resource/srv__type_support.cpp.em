@@ -557,13 +557,13 @@ destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocato
 const char *
 server_is_available__@(spec.srv_name)(
   void * requester, const rmw_node_t * node, bool * is_available,
-  rmw_ret_t (*count_publishers)(const rmw_node_t *, const char *, size_t *),
-  rmw_ret_t (*count_subscribers)(const rmw_node_t *, const char *, size_t *))
+  rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
+  rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *))
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_
+      >;
 
   auto typed_requester = reinterpret_cast<RequesterT *>(requester);
 
