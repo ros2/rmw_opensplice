@@ -64,22 +64,6 @@ rmw_get_topic_names_and_types(
     RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
     return RMW_RET_ERROR;
   }
-  if (!topic_names_and_types) {
-    RMW_SET_ERROR_MSG("topics handle is null");
-    return RMW_RET_ERROR;
-  }
-  if (topic_names_and_types->topic_count) {
-    RMW_SET_ERROR_MSG("topic count is not zero");
-    return RMW_RET_ERROR;
-  }
-  if (topic_names_and_types->topic_names) {
-    RMW_SET_ERROR_MSG("topic names is not null");
-    return RMW_RET_ERROR;
-  }
-  if (topic_names_and_types->type_names) {
-    RMW_SET_ERROR_MSG("type names is not null");
-    return RMW_RET_ERROR;
-  }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
   if (!node_info) {
