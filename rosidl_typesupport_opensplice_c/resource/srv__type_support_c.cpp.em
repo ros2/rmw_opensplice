@@ -98,9 +98,9 @@ send_request__@(spec.srv_name)(
   callbacks->convert_ros_to_dds(untyped_ros_request, static_cast<void *>(&request.data()));
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_
+      >;
 
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
@@ -119,9 +119,9 @@ take_request__@(spec.srv_name)(
   bool * taken)
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_
+      >;
 
   auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
 
@@ -165,9 +165,9 @@ send_response__@(spec.srv_name)(
   callbacks->convert_ros_to_dds(untyped_ros_response, static_cast<void *>(&response.data()));
 
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_
+      >;
   auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
 
   const char * error_string = responder->send_response(*request_header, response);
@@ -183,9 +183,9 @@ take_response__@(spec.srv_name)(
   bool * taken)
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-    @(__dds_msg_type_prefix)_Request_,
-    @(__dds_msg_type_prefix)_Response_
-  >;
+      @(__dds_msg_type_prefix)_Request_,
+      @(__dds_msg_type_prefix)_Response_
+      >;
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
@@ -225,8 +225,8 @@ destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocato
 const char *
 server_is_available__@(spec.srv_name)(
   void * requester, const rmw_node_t * node, bool * is_available,
-  rmw_ret_t (*count_publishers)(const rmw_node_t *, const char *, size_t *),
-  rmw_ret_t (*count_subscribers)(const rmw_node_t *, const char *, size_t *))
+  rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
+  rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *))
 {
   return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::server_is_available__@(spec.srv_name)(
     requester, node, is_available, count_publishers, count_subscribers);
