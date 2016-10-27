@@ -18,6 +18,7 @@
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
+#include "rmw/sanity_checks.h"
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
@@ -62,6 +63,9 @@ rmw_get_topic_names_and_types(
   }
   if (node->implementation_identifier != opensplice_cpp_identifier) {
     RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
+    return RMW_RET_ERROR;
+  }
+  if(rmw_check_zero_rmw_topic_names_and_types(topic_names_and_types) != RMW_RET_OK) {
     return RMW_RET_ERROR;
   }
 
