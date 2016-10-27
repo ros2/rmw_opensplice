@@ -65,7 +65,7 @@ rmw_get_topic_names_and_types(
     RMW_SET_ERROR_MSG("node handle is not from this rmw implementation");
     return RMW_RET_ERROR;
   }
-  if(rmw_check_zero_rmw_topic_names_and_types(topic_names_and_types) != RMW_RET_OK) {
+  if (rmw_check_zero_rmw_topic_names_and_types(topic_names_and_types) != RMW_RET_OK) {
     return RMW_RET_ERROR;
   }
 
