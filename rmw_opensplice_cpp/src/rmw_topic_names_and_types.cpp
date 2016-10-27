@@ -18,8 +18,8 @@
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
-#include "rmw/sanity_checks.h"
 #include "rmw/rmw.h"
+#include "rmw/sanity_checks.h"
 #include "rmw/types.h"
 
 #include "identifier.hpp"
