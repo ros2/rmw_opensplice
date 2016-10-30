@@ -171,7 +171,7 @@ fail:
 }
 
 rmw_ret_t
-rmw_destroy_service(rmw_service_t * service)
+rmw_destroy_service(rmw_node_t * node, rmw_service_t * service)
 {
   if (!service) {
     RMW_SET_ERROR_MSG("service handle is null");
