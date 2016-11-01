@@ -173,6 +173,7 @@ fail:
 rmw_ret_t
 rmw_destroy_service(rmw_node_t * node, rmw_service_t * service)
 {
+  (void)node;
   if (!service) {
     RMW_SET_ERROR_MSG("service handle is null");
     return RMW_RET_ERROR;
