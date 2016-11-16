@@ -23,8 +23,10 @@
 // Provides the declaration of the function
 // rosidl_generator_cpp::get_service_type_support_handle.
 #include <rosidl_generator_cpp/service_type_support_decl.hpp>
+// Provides the declaration of the function template
+#include "rosidl_typesupport_opensplice_cpp/service_type_support_decl.hpp"
 // Provides visibility macros like ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC.
-#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
+#include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 
 namespace rosidl_typesupport_opensplice_cpp
 {
@@ -37,11 +39,6 @@ class TemplateDataReader;
 
 template<typename T>
 class TemplateDataWriter;
-
-// This is implemented in the shared library provided by this package.
-template<typename T>
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
-const rosidl_service_type_support_t * get_service_type_support_handle_opensplice();
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 
@@ -58,7 +55,7 @@ const rosidl_service_type_support_t * get_service_type_support_handle()
   // service library. This is intentional to allow the linker to pick the
   // correct implementation specific service library when being over linked
   // with multiple implementation options.
-  return rosidl_typesupport_opensplice_cpp::get_service_type_support_handle_opensplice<T>();
+  return rosidl_typesupport_opensplice_cpp::get_service_type_support_handle<T>();
 }
 
 }  // namespace rosidl_generator_cpp
