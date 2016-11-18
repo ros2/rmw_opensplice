@@ -28,6 +28,7 @@
 #include "identifier.hpp"
 #include "qos.hpp"
 #include "types.hpp"
+#include "typesupport_macros.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
@@ -41,7 +42,7 @@ extern "C"
 rmw_publisher_t *
 rmw_create_publisher(
   const rmw_node_t * node,
-  const rosidl_message_type_support_t * type_support,
+  const rosidl_message_type_support_t * type_supports,
   const char * topic_name,
   const rmw_qos_profile_t * qos_profile)
 {
@@ -54,15 +55,8 @@ rmw_create_publisher(
     node->implementation_identifier, opensplice_cpp_identifier,
     return nullptr)
 
-  if (!type_support) {
-    RMW_SET_ERROR_MSG("type support handle is null");
-    return nullptr;
-  }
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    type support,
-    type_support->typesupport_identifier,
-    rosidl_typesupport_opensplice_cpp::typesupport_identifier,
-    return nullptr)
+  RMW_OPENSPLICE_EXTRACT_MESSAGE_TYPESUPPORT(
+    type_supports, type_support)
 
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
