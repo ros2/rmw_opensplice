@@ -55,7 +55,7 @@ rmw_create_client(
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     type support,
     type_support->typesupport_identifier,
-    rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier,
+    rosidl_typesupport_opensplice_cpp::typesupport_identifier,
     return nullptr)
 
   if (!qos_profile) {

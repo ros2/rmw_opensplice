@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rosidl_generator_cpp/message_type_support.hpp"
+
 #include "rosidl_typesupport_opensplice_cpp/time__type_support.hpp"
 
 namespace builtin_interfaces
@@ -40,3 +42,16 @@ void convert_dds_message_to_ros(
 }  // namespace typesupport_opensplice_cpp
 }  // namespace msg
 }  // namespace builtin_interfaces
+
+namespace rosidl_typesupport_opensplice_cpp
+{
+
+template<>
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
+const rosidl_message_type_support_t *
+get_message_type_support_handle<builtin_interfaces::msg::Time>()
+{
+  return 0;
+}
+
+}  // namespace rosidl_typesupport_opensplice_cpp

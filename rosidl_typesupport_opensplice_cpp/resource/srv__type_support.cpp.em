@@ -586,7 +586,7 @@ static service_type_support_callbacks_t callbacks = {
 };
 
 static rosidl_service_type_support_t handle = {
-  rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier,
+  rosidl_typesupport_opensplice_cpp::typesupport_identifier,
   &callbacks
 };
 
@@ -603,7 +603,7 @@ namespace rosidl_typesupport_opensplice_cpp
 template<>
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_service_type_support_t *
-get_service_type_support_handle_opensplice<@(spec.pkg_name)::srv::@(spec.srv_name)>()
+get_service_type_support_handle<@(spec.pkg_name)::srv::@(spec.srv_name)>()
 {
   return &@(spec.pkg_name)::srv::typesupport_opensplice_cpp::handle;
 }

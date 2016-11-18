@@ -21,7 +21,7 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_IMPORT
-extern const char * typesupport_opensplice_identifier;
+extern const char * typesupport_identifier;
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 

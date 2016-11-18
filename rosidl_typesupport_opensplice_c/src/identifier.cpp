@@ -24,7 +24,7 @@ extern "C"
 ROSIDL_TYPESUPPORT_OPENSPLICE_C_EXPORT
 const char *
   rosidl_typesupport_opensplice_c__identifier =
-  rosidl_typesupport_opensplice_cpp::typesupport_opensplice_identifier;
+  rosidl_typesupport_opensplice_cpp::typesupport_identifier;
 
 #if defined(__cplusplus)
 }
