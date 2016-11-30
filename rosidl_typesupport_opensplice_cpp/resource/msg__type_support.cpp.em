@@ -19,9 +19,7 @@
 #include <u_instanceHandle.h>
 
 #include "rosidl_generator_c/message_type_support_struct.h"
-// this is defined in the rosidl_typesupport_opensplice_cpp package and
-// is in the include/rosidl_typesupport_opensplice_cpp/impl folder
-#include "rosidl_generator_cpp/message_type_support.hpp"
+#include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 
 @{header_file_name = get_header_filename_from_msg_name(spec.base_type.type)}@
@@ -30,6 +28,7 @@
 #include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/message_type_support_decl.hpp"
 
 // include type support for builtin interfaces
 @{

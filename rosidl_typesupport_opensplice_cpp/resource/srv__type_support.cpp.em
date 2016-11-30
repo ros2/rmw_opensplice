@@ -16,10 +16,8 @@
 #include <string>
 
 #include "rosidl_generator_c/service_type_support.h"
-// This is defined in the rosidl_typesupport_opensplice_cpp package and
-// is in the include/rosidl_typesupport_opensplice_cpp/impl folder.
-#include "rosidl_generator_cpp/message_type_support.hpp"
-#include "rosidl_generator_cpp/service_type_support.hpp"
+#include "rosidl_typesupport_cpp/message_type_support.hpp"
+#include "rosidl_typesupport_cpp/service_type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 #include "rmw/rmw.h"
 
@@ -35,6 +33,7 @@
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_Sample_@(spec.srv_name)_Response_.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/service_type_support_decl.hpp"
 #include "rosidl_typesupport_opensplice_cpp/requester.hpp"
 #include "rosidl_typesupport_opensplice_cpp/responder.hpp"
 
