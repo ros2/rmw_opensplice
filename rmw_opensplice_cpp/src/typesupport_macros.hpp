@@ -15,17 +15,14 @@
 #ifndef TYPESUPPORT_MACROS_HPP_
 #define TYPESUPPORT_MACROS_HPP_
 
-#include "rosidl_typesupport_cpp/message_type_support_dispatch.hpp"
-#include "rosidl_typesupport_cpp/service_type_support_dispatch.hpp"
-
 #define RMW_OPENSPLICE_EXTRACT_MESSAGE_TYPESUPPORT(TYPE_SUPPORTS, TYPE_SUPPORT) \
   if (!TYPE_SUPPORTS) { \
     RMW_SET_ERROR_MSG("type supports handle is null"); \
     return nullptr; \
   } \
   const rosidl_message_type_support_t * TYPE_SUPPORT = \
-    rosidl_typesupport_cpp::dispatch_message_type_support_handle( \
-    rosidl_typesupport_opensplice_cpp::typesupport_identifier, TYPE_SUPPORTS); \
+    get_message_typesupport_handle( \
+    TYPE_SUPPORTS, rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
   if (!TYPE_SUPPORT) { \
     char __msg[1024]; \
     snprintf( \
@@ -46,8 +43,8 @@
     return nullptr; \
   } \
   const rosidl_service_type_support_t * TYPE_SUPPORT = \
-    rosidl_typesupport_cpp::dispatch_service_type_support_handle( \
-    rosidl_typesupport_opensplice_cpp::typesupport_identifier, TYPE_SUPPORTS); \
+    get_service_typesupport_handle( \
+    TYPE_SUPPORTS, rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
   if (!TYPE_SUPPORT) { \
     char __msg[1024]; \
     snprintf( \

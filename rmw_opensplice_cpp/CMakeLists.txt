@@ -26,14 +26,16 @@ endif()
 find_package(rosidl_typesupport_cpp REQUIRED)
 
 find_package(rmw REQUIRED)
+find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
 ament_export_dependencies(
   rmw
+  rosidl_generator_c
   rosidl_generator_cpp
+  rosidl_typesupport_cpp
   rosidl_typesupport_opensplice_c
   rosidl_typesupport_opensplice_cpp
-  rosidl_typesupport_cpp
 )
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
@@ -64,6 +66,7 @@ add_library(rmw_opensplice_cpp SHARED
 )
 ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
+  "rosidl_generator_c"
   "rosidl_generator_cpp"
   "rosidl_typesupport_opensplice_c"
   "rosidl_typesupport_opensplice_cpp"

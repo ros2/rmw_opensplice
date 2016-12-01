@@ -75,6 +75,7 @@ ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Duration)() {
   static rosidl_message_type_support_t type_support = {
     rosidl_typesupport_opensplice_c__identifier,  // typesupport_identifier
     &callbacks,  // data
+    get_message_typesupport_handle_function,  // func
   };
   return &type_support;
 }

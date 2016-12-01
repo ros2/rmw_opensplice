@@ -20,6 +20,7 @@
 
 #include "rosidl_generator_c/message_type_support_struct.h"
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
+#include "rosidl_typesupport_interface/macros.h"
 #include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 
 @{header_file_name = get_header_filename_from_msg_name(spec.base_type.type)}@
@@ -396,7 +397,8 @@ static message_type_support_callbacks_t callbacks = {
 
 static rosidl_message_type_support_t handle = {
   rosidl_typesupport_opensplice_cpp::typesupport_identifier,
-  &callbacks
+  &callbacks,
+  get_message_typesupport_handle_function,
 };
 
 }  // namespace typesupport_opensplice_cpp
@@ -419,3 +421,18 @@ get_message_type_support_handle<
 }
 
 }  // namespace rosidl_typesupport_opensplice_cpp
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
+const rosidl_message_type_support_t *
+ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_cpp, @(spec.base_type.pkg_name), @(subfolder), @(spec.base_type.type))() {
+  return &@(spec.base_type.pkg_name)::@(subfolder)::typesupport_opensplice_cpp::handle;
+}
+
+#ifdef __cplusplus
+}
+#endif

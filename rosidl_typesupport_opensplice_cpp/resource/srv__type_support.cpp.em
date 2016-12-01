@@ -18,6 +18,7 @@
 #include "rosidl_generator_c/service_type_support.h"
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rosidl_typesupport_cpp/service_type_support.hpp"
+#include "rosidl_typesupport_interface/macros.h"
 #include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 #include "rmw/rmw.h"
 
@@ -586,7 +587,8 @@ static service_type_support_callbacks_t callbacks = {
 
 static rosidl_service_type_support_t handle = {
   rosidl_typesupport_opensplice_cpp::typesupport_identifier,
-  &callbacks
+  &callbacks,
+  get_service_typesupport_handle_function,
 };
 
 }  // namespace typesupport_opensplice_cpp
@@ -608,3 +610,18 @@ get_service_type_support_handle<@(spec.pkg_name)::srv::@(spec.srv_name)>()
 }
 
 }  // namespace rosidl_typesupport_opensplice_cpp
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
+const rosidl_service_type_support_t *
+ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(rosidl_typesupport_opensplice_cpp, @(spec.pkg_name), @(spec.srv_name))() {
+  return &@(spec.pkg_name)::srv::typesupport_opensplice_cpp::handle;
+}
+
+#ifdef __cplusplus
+}
+#endif
