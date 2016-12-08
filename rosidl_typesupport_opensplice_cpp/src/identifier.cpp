@@ -18,6 +18,6 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
-const char * typesupport_identifier = "opensplice_static";
+const char * typesupport_identifier = "rosidl_typesupport_opensplice_cpp";
 
 }  // namespace rosidl_typesupport_opensplice_cpp

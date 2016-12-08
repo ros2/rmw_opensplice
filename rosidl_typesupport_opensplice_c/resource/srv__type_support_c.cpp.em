@@ -247,17 +247,14 @@ static service_type_support_callbacks_t __callbacks = {
 };
 
 static rosidl_service_type_support_t __type_support = {
-  // Cannot be set since it is not a constexpr, it is set in the get type support function below.
-  0,  // typesupport_identifier
+  rosidl_typesupport_opensplice_c__identifier,
   &__callbacks,  // data
+  get_service_typesupport_handle_function,
 };
 
 ROSIDL_GENERATOR_C_EXPORT_@(spec.pkg_name)
 const rosidl_service_type_support_t *
 ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(spec.pkg_name), srv, @(spec.srv_name))() {
-  if (!__type_support.typesupport_identifier) {
-    __type_support.typesupport_identifier = rosidl_typesupport_opensplice_c__identifier;
-  }
   return &__type_support;
 }
 

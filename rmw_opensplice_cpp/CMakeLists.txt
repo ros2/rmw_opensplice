@@ -23,13 +23,17 @@ if(NOT rosidl_typesupport_opensplice_cpp_FOUND OR NOT rosidl_typesupport_openspl
   message(WARNING "Could not find ROSIDL TypeSupport for OpenSplice (rosidl_typesupport_opensplice_cpp or rosidl_typesupport_opensplice_c) - skipping '${PROJECT_NAME}'")
   return()
 endif()
+find_package(rosidl_typesupport_cpp REQUIRED)
 
 find_package(rmw REQUIRED)
+find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
 ament_export_dependencies(
   rmw
+  rosidl_generator_c
   rosidl_generator_cpp
+  rosidl_typesupport_cpp
   rosidl_typesupport_opensplice_c
   rosidl_typesupport_opensplice_cpp
 )
@@ -62,9 +66,11 @@ add_library(rmw_opensplice_cpp SHARED
 )
 ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
+  "rosidl_generator_c"
   "rosidl_generator_cpp"
   "rosidl_typesupport_opensplice_c"
   "rosidl_typesupport_opensplice_cpp"
+  "rosidl_typesupport_cpp"
   "OpenSplice")
 # On Windows this adds the RMW_BUILDING_DLL definition.
 # On Unix (GCC or Clang) it hides the symbols with -fvisibility=hidden.
@@ -81,7 +87,7 @@ ament_export_libraries(rmw_opensplice_cpp)
 
 register_rmw_implementation(
   "c:rosidl_typesupport_opensplice_c"
-  "cpp:rosidl_typesupport_opensplice_cpp")
+  "cpp:rosidl_typesupport_opensplice_cpp:rosidl_typesupport_cpp")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

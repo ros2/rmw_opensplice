@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rosidl_generator_cpp/message_type_support.hpp"
+#include "rosidl_typesupport_cpp/message_type_support.hpp"
 
 #include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
+#include "rosidl_typesupport_opensplice_cpp/message_type_support_decl.hpp"
 
 namespace builtin_interfaces
 {

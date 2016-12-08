@@ -246,6 +246,10 @@ add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED
   ${_generated_external_msg_files}
   ${_generated_srv_files}
   ${_generated_external_srv_files})
+if(rosidl_generate_interfaces_LIBRARY_NAME)
+  set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
+    PROPERTIES OUTPUT_NAME "${rosidl_generate_interfaces_LIBRARY_NAME}${_target_suffix}")
+endif()
 if(NOT WIN32)
   set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PROPERTIES COMPILE_FLAGS "-std=c++11 -Wall -Wextra")
@@ -269,6 +273,7 @@ ament_target_dependencies(
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
   "OpenSplice"
   "rmw"
+  "rosidl_typesupport_interface"
   "rosidl_typesupport_opensplice_cpp")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   set(_msg_include_dir "${${_pkg_name}_DIR}/../../../include/${_pkg_name}/msg/dds_opensplice")
@@ -302,7 +307,7 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
     RUNTIME DESTINATION bin
   )
 
-  ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix} ${OpenSplice_LIBRARIES})
+  ament_export_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix})
 endif()
 
 if(BUILD_TESTING AND rosidl_generate_interfaces_ADD_LINTER_TESTS)

@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "rmw/error_handling.h"
+#include "rmw/types.h"
 
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
@@ -32,6 +33,15 @@
 
 namespace rosidl_typesupport_opensplice_cpp
 {
+
+template<typename T>
+class Sample;
+
+template<typename T>
+class TemplateDataReader;
+
+template<typename T>
+class TemplateDataWriter;
 
 template<typename RequestT, typename ResponseT>
 class Requester
