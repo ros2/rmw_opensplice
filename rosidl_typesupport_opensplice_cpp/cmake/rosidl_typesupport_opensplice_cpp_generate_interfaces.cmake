@@ -248,7 +248,7 @@ add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED
   ${_generated_external_srv_files})
 if(NOT WIN32)
   set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-    PROPERTIES COMPILE_FLAGS "-std=c++11 -Wall -Wextra")
+    PROPERTIES COMPILE_FLAGS "-std=c++14 -Wall -Wextra")
 endif()
 if(WIN32)
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
