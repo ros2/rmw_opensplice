@@ -10,6 +10,9 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
+@{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
+#include "@(spec.pkg_name)/srv/@(header_file_name)__rosidl_typesupport_opensplice_cpp.hpp"
+
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -17,17 +20,14 @@
 
 #include "rosidl_generator_c/service_type_support.h"
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
-#include "rosidl_typesupport_cpp/service_type_support.hpp"
-#include "rosidl_typesupport_interface/macros.h"
 #include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 #include "rmw/rmw.h"
 
-@{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
 #include "@(spec.pkg_name)/srv/@(header_file_name)__struct.hpp"
 @{req_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '_Request')}@
 @{res_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '_Response')}@
-#include "@(spec.pkg_name)/srv/dds_opensplice/@(req_header_file_name)__type_support.hpp"
-#include "@(spec.pkg_name)/srv/dds_opensplice/@(res_header_file_name)__type_support.hpp"
+#include "@(spec.pkg_name)/srv/@(req_header_file_name)__rosidl_typesupport_opensplice_cpp.hpp"
+#include "@(spec.pkg_name)/srv/@(res_header_file_name)__rosidl_typesupport_opensplice_cpp.hpp"
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_@(spec.srv_name)_Request_.h"
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_@(spec.srv_name)_Response_.h"
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_Sample_@(spec.srv_name)_Request_.h"
@@ -602,7 +602,7 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 template<>
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.pkg_name)
 const rosidl_service_type_support_t *
 get_service_type_support_handle<@(spec.pkg_name)::srv::@(spec.srv_name)>()
 {
@@ -616,7 +616,6 @@ extern "C"
 {
 #endif
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_service_type_support_t *
 ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(rosidl_typesupport_opensplice_cpp, @(spec.pkg_name), @(spec.srv_name))() {
   return &@(spec.pkg_name)::srv::typesupport_opensplice_cpp::handle;

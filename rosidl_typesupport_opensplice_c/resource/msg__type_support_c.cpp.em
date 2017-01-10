@@ -19,22 +19,20 @@
 @#  - get_header_filename_from_msg_name (function)
 @##########################################################################
 @
+#include "@(spec.base_type.pkg_name)/@(subfolder)/@(get_header_filename_from_msg_name(spec.base_type.type))__rosidl_typesupport_opensplice_c.h"
+
 #include <cassert>
 #include <limits>
 
 #include <u_instanceHandle.h>
 
-// Provides the definition of the rosidl_message_type_support_t struct as well
-// as the OpenSplice specific macros, e.g. ROSIDL_GET_TYPE_SUPPORT_FUNCTION.
-#include "rosidl_generator_c/message_type_support.h"
-// Ensure the correct version of the above header was included.
-static_assert(USING_ROSIDL_TYPESUPPORT_OPENSPLICE_C, "expected OpenSplice C message type support");
 // Provides the rosidl_typesupport_opensplice_c__identifier symbol declaration.
 #include "rosidl_typesupport_opensplice_c/identifier.h"
 #include "@(spec.base_type.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 // Provides the definition of the message_type_support_callbacks_t struct.
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 
+#include "@(pkg)/msg/rosidl_typesupport_opensplice_c__visibility_control.h"
 @{header_file_name = get_header_filename_from_msg_name(type)}@
 #include "@(pkg)/@(subfolder)/@(header_file_name)__struct.h"
 #include "@(pkg)/@(subfolder)/@(header_file_name)__functions.h"
@@ -97,10 +95,10 @@ for field in spec.fields:
 }@
 @[for key in sorted(forward_declares.keys())]@
 @[  if key[0] != pkg]@
-ROSIDL_GENERATOR_C_IMPORT_@(pkg)
+ROSIDL_TYPESUPPORT_OPENSPLICE_C_IMPORT_@(pkg)
 @[  end if]@
 const rosidl_message_type_support_t *
-  ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(key[0]), msg, @(key[1]))();  // @(', '.join(forward_declares[key]))
+  ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(key[0]), msg, @(key[1]))();
 @[end for]@
 
 @# // Make callback functions specific to this message type.
@@ -166,8 +164,8 @@ convert_ros_to_dds(const void * untyped_ros_message, void * untyped_dds_message)
   {
 @[  if not field.type.is_primitive_type()]@
     const message_type_support_callbacks_t * @(field.type.pkg_name)__msg__@(field.type.type)__callbacks =
-      static_cast<const message_type_support_callbacks_t *>(ROSIDL_GET_TYPE_SUPPORT_FUNCTION(
-        @(field.type.pkg_name), msg, @(field.type.type)
+      static_cast<const message_type_support_callbacks_t *>(
+      ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(field.type.pkg_name), msg, @(field.type.type)
       )()->data);
 @[  end if]@
 @[  if field.type.is_array]@
@@ -381,7 +379,7 @@ else:
       ros_i = dds_message->@(field.name)_[i];
 @[    else]@
       const rosidl_message_type_support_t * ts =
-        ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(field.type.pkg_name), msg, @(field.type.type))();
+        ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(field.type.pkg_name), msg, @(field.type.type))();
       const message_type_support_callbacks_t * callbacks =
         static_cast<const message_type_support_callbacks_t *>(ts->data);
       callbacks->convert_dds_to_ros(&dds_message->@(field.name)_[i], &ros_i);
@@ -401,7 +399,7 @@ else:
     ros_message->@(field.name) = dds_message->@(field.name)_@(' == TRUE' if field.type.type == 'bool' else '');
 @[  else]@
     const rosidl_message_type_support_t * ts =
-      ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(field.type.pkg_name), msg, @(field.type.type))();
+      ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(field.type.pkg_name), msg, @(field.type.type))();
     const message_type_support_callbacks_t * callbacks =
       static_cast<const message_type_support_callbacks_t *>(ts->data);
     callbacks->convert_dds_to_ros(&dds_message->@(field.name)_, &ros_message->@(field.name));
@@ -559,9 +557,8 @@ static rosidl_message_type_support_t __type_support = {
   get_message_typesupport_handle_function,
 };
 
-ROSIDL_GENERATOR_C_EXPORT_@(spec.base_type.pkg_name)
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(pkg), @(subfolder), @(msg))() {
+ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(pkg), @(subfolder), @(msg))() {
   return &__type_support;
 }
 

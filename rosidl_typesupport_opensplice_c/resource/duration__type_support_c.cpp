@@ -15,11 +15,10 @@
 #include <ccpp_dds_dcps.h>
 
 #include <builtin_interfaces/msg/duration__struct.h>
-#include <rosidl_generator_c/message_type_support.h>
 #include <rosidl_typesupport_opensplice_c/identifier.h>
 #include <rosidl_typesupport_opensplice_cpp/message_type_support.h>
 
-#include "builtin_interfaces/msg/rosidl_generator_c__visibility_control.h"
+#include "builtin_interfaces/msg/rosidl_typesupport_opensplice_c__visibility_control.h"
 
 #if defined(__cplusplus)
 extern "C"
@@ -60,9 +59,10 @@ convert_dds_to_ros(const void * untyped_dds_message, void * untyped_ros_message)
   return 0;
 }
 
-ROSIDL_GENERATOR_C_EXPORT_builtin_interfaces
+ROSIDL_TYPESUPPORT_OPENSPLICE_C_EXPORT_builtin_interfaces
 const rosidl_message_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(builtin_interfaces, msg, Duration)() {
+ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(
+  rosidl_typesupport_opensplice_c, builtin_interfaces, msg, Duration)() {
   static message_type_support_callbacks_t callbacks = {
     "builtin_interfaces",  // package_name
     "Duration",  // message_name

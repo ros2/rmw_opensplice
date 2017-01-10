@@ -12,14 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__TIME__TYPE_SUPPORT_HPP_
-#define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__TIME__TYPE_SUPPORT_HPP_
+// copied from
+// rosidl_typesupport_opensplice_cpp/resource/time__rosidl_typesupport_opensplice_cpp.hpp
+
+// NOLINT(build/header_guard)
+#ifndef BUILTIN_INTERFACES__MSG__TIME__ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_HPP_
+#define BUILTIN_INTERFACES__MSG__TIME__ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_HPP_
 
 #include <ccpp_dds_dcps.h>
 
-#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
-
 #include "builtin_interfaces/msg/time__struct.hpp"
+
+#include "rosidl_generator_c/message_type_support_struct.h"
+#include "rosidl_typesupport_interface/macros.h"
+
+#include "builtin_interfaces/msg/rosidl_typesupport_opensplice_cpp__visibility_control.h"
 
 namespace builtin_interfaces
 {
@@ -28,12 +35,12 @@ namespace msg
 namespace typesupport_opensplice_cpp
 {
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_builtin_interfaces
 extern void convert_ros_message_to_dds(
   const builtin_interfaces::msg::Time & ros_message,
   DDS::Time_t & dds_message);
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_builtin_interfaces
 extern void convert_dds_message_to_ros(
   const DDS::Time_t & dds_message,
   builtin_interfaces::msg::Time & ros_message);
@@ -42,4 +49,18 @@ extern void convert_dds_message_to_ros(
 }  // namespace msg
 }  // namespace builtin_interfaces
 
-#endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__TIME__TYPE_SUPPORT_HPP_
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_builtin_interfaces
+const rosidl_message_type_support_t *
+  ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(
+  rosidl_typesupport_opensplice_cpp, builtin_interfaces, msg, Time)();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // BUILTIN_INTERFACES__MSG__TIME__ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_HPP_

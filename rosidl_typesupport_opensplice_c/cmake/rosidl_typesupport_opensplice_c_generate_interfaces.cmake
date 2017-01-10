@@ -14,6 +14,13 @@
 
 set(_target_suffix "__rosidl_typesupport_opensplice_c")
 
+set(_generated_msg_files "")
+set(_generated_external_msg_files "")
+set(_generated_srv_files "")
+set(_generated_external_srv_files "")
+
+set(_output_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_c/${PROJECT_NAME}")
+
 # avoid generating any opensplice specific stuff for builtin_interfaces
 if(NOT PROJECT_NAME STREQUAL "builtin_interfaces")
 
@@ -35,12 +42,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   endif()
 endforeach()
 
-set(_output_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_c/${PROJECT_NAME}")
 set(_dds_output_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_cpp/${PROJECT_NAME}")
-set(_generated_msg_files "")
-set(_generated_external_msg_files "")
-set(_generated_srv_files "")
-set(_generated_external_srv_files "")
 foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   get_filename_component(_extension "${_idl_file}" EXT)
   get_filename_component(_msg_name "${_idl_file}" NAME_WE)
@@ -68,8 +70,10 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
       "${_dds_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_SplDcps.cpp"
       "${_dds_output_path}/${_parent_folder}/dds_opensplice/ccpp_${_msg_name}_.h")
     list(APPEND ${_var2}
+      "${_output_path}/${_parent_folder}/${_header_name}__rosidl_typesupport_opensplice_c.h"
       "${_output_path}/${_parent_folder}/dds_opensplice_c/${_header_name}__type_support_c.cpp")
   elseif(_extension STREQUAL ".srv")
+    list(APPEND _generated_srv_files "${_output_path}/srv/${_header_name}__rosidl_typesupport_opensplice_c.h")
     list(APPEND _generated_srv_files "${_output_path}/srv/dds_opensplice_c/${_header_name}__type_support_c.cpp")
 
     foreach(_suffix "_Request" "_Response")
@@ -143,7 +147,9 @@ endforeach()
 set(target_dependencies
   "${rosidl_typesupport_opensplice_c_BIN}"
   ${rosidl_typesupport_opensplice_c_GENERATOR_FILES}
+  "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/msg__rosidl_typesupport_opensplice_c.h.em"
   "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/msg__type_support_c.cpp.em"
+  "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/srv__rosidl_typesupport_opensplice_c.h.em"
   "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/srv__type_support_c.cpp.em"
   ${_dependency_files})
 foreach(dep ${target_dependencies})
@@ -179,19 +185,48 @@ add_custom_command(
   VERBATIM
 )
 
+else()  # builtin_interfaces
+
+  # use static typesupport code for the builtin_interfaces package
+  set(_static_msg_headers
+    ${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/include/builtin_interfaces/msg/duration__rosidl_typesupport_opensplice_c.h
+    ${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/include/builtin_interfaces/msg/time__rosidl_typesupport_opensplice_c.h
+  )
+  set(_static_msg_sources
+    ${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/duration__type_support_c.cpp
+    ${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/time__type_support_c.cpp
+  )
+  list(APPEND _generated_msg_files ${_static_msg_headers} ${_static_msg_sources})
+
+  include_directories("${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/include")
+
+  if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
+    install(
+      FILES ${_static_msg_headers}
+      DESTINATION "include/${PROJECT_NAME}/msg"
+    )
+  endif()
+
+endif()  # builtin_interfaces
+
+# generate header to switch between export and import for a specific package
+set(_visibility_control_file
+  "${_output_path}/msg/rosidl_typesupport_opensplice_c__visibility_control.h")
+string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
+configure_file(
+  "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/rosidl_typesupport_opensplice_c__visibility_control.h.in"
+  "${_visibility_control_file}"
+  @ONLY
+)
+list(APPEND _generated_msg_files "${_visibility_control_file}")
+
 if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
-  if(NOT _generated_msg_files STREQUAL "" OR NOT _generated_external_msg_files STREQUAL "")
-    install(
-      FILES ${_generated_msg_files} ${_generated_external_msg_files}
-      DESTINATION "include/${PROJECT_NAME}/msg/dds_opensplice_c"
-    )
-  endif()
-  if(NOT _generated_srv_files STREQUAL "" OR NOT _generated_external_srv_files STREQUAL "")
-    install(
-      FILES ${_generated_srv_files} ${_generated_external_srv_files}
-      DESTINATION "include/${PROJECT_NAME}/srv/dds_opensplice_c"
-    )
-  endif()
+  install(
+    DIRECTORY "${_output_path}/"
+    DESTINATION "include/${PROJECT_NAME}"
+    PATTERN "*.cpp" EXCLUDE
+  )
+
   if(
     NOT _generated_msg_files STREQUAL "" OR
     NOT _generated_external_msg_files STREQUAL "" OR
@@ -200,19 +235,6 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
   )
     ament_export_include_directories(include)
   endif()
-endif()
-
-else()
-
-  # generate specific type support code for the builtin_interfaces package
-  set(_generated_msg_files
-    ${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/duration__type_support_c.cpp
-    ${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}/time__type_support_c.cpp
-  )
-  set(_generated_external_msg_files)
-  set(_generated_srv_files)
-  set(_generated_external_srv_files)
-
 endif()
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
@@ -231,15 +253,11 @@ if(NOT WIN32)
 endif()
 if(WIN32)
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-    PRIVATE "ROSIDL_BUILDING_DLL")
+    PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_C_BUILDING_DLL_${PROJECT_NAME}")
+  # The following still uses CPP because the OpenSplice code which uses it was generated for CPP.
   target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-    PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_C_BUILDING_DLL")
-  target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-    PRIVATE "ROSIDL_GENERATOR_C_BUILDING_DLL_${PROJECT_NAME}")
+    PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL_${PROJECT_NAME}")
 endif()
-# The following still uses CPP because the OpenSplice code which uses it was generated for CPP.
-target_compile_definitions(${rosidl_generate_interfaces_TARGET}${_target_suffix}
-  PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL_${PROJECT_NAME}")
 target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   PUBLIC
   ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_c
@@ -253,6 +271,7 @@ target_include_directories(${rosidl_generate_interfaces_TARGET}${_target_suffix}
 ament_target_dependencies(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   "rmw"
   "rosidl_generator_c"
+  "rosidl_typesupport_interface"
 )
 target_link_libraries(${rosidl_generate_interfaces_TARGET}${_target_suffix}
   ${rosidl_generate_interfaces_TARGET}__rosidl_typesupport_opensplice_cpp

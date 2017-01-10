@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from rosidl_generator_dds_idl import _msg_type_to_idl
 from rosidl_generator_dds_idl import get_include_directives as \
     get_default_include_directives
 from rosidl_generator_dds_idl import get_post_struct_lines as \
     get_default_post_struct_lines
 from rosidl_generator_dds_idl import msg_type_to_idl as \
     default_msg_type_to_idl
-from rosidl_generator_dds_idl import _msg_type_to_idl
 
 
 def get_include_directives(spec, subfolders):

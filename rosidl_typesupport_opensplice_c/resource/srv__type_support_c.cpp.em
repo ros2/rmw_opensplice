@@ -10,15 +10,15 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
+#include "@(spec.pkg_name)/srv/@(get_header_filename_from_msg_name(spec.srv_name))__rosidl_typesupport_opensplice_c.h"
+
 #include <cstring>
 #include <iostream>
 #include <sstream>
 
-// This is defined in the rosidl_typesupport_opensplice_c package and
-// is in the include/rosidl_typesupport_opensplice_c/impl folder.
-#include "rosidl_generator_c/message_type_support.h"
 #include "rmw/rmw.h"
 
+#include "@(spec.pkg_name)/msg/rosidl_typesupport_opensplice_c__visibility_control.h"
 @{header_file_name = get_header_filename_from_msg_name(spec.srv_name)}@
 @{req_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '__request')}@
 @{res_header_file_name = get_header_filename_from_msg_name(spec.srv_name + '__response')}@
@@ -30,6 +30,7 @@
 #include "@(spec.pkg_name)/srv/dds_opensplice/ccpp_Sample_@(spec.srv_name)_Response_.h"
 #include "rosidl_typesupport_opensplice_c/identifier.h"
 
+// TODO(dirk-thomas) including another cpp file is just nasty
 #include "@(spec.pkg_name)/srv/dds_opensplice/@(get_header_filename_from_msg_name(spec.srv_name))__type_support.cpp"
 #include "@(spec.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 
@@ -43,6 +44,12 @@ __dds_sample_type_prefix = "{spec.pkg_name}::srv::dds_::Sample_{spec.srv_name}".
 extern "C"
 {
 #endif
+
+// forward declare type support functions
+const rosidl_message_type_support_t *
+  ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), srv, @(spec.srv_name)_Request)();
+const rosidl_message_type_support_t *
+  ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), srv, @(spec.srv_name)_Response)();
 
 const char *
 register_types__@(spec.srv_name)(
@@ -92,7 +99,7 @@ send_request__@(spec.srv_name)(
 
   SampleT request;
   const rosidl_message_type_support_t * ts =
-    ROSIDL_GET_TYPE_SUPPORT(@(spec.pkg_name), srv, @(spec.srv_name)_Request);
+    ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), srv, @(spec.srv_name)_Request)();
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(ts->data);
   callbacks->convert_ros_to_dds(untyped_ros_request, static_cast<void *>(&request.data()));
@@ -133,7 +140,7 @@ take_request__@(spec.srv_name)(
 
   if (*taken) {
     const rosidl_message_type_support_t * ts =
-      ROSIDL_GET_TYPE_SUPPORT(@(spec.pkg_name), srv, @(spec.srv_name)_Request);
+      ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), srv, @(spec.srv_name)_Request)();
     const message_type_support_callbacks_t * callbacks =
       static_cast<const message_type_support_callbacks_t *>(ts->data);
     callbacks->convert_dds_to_ros(static_cast<void *>(&request.data()), untyped_ros_request);
@@ -159,7 +166,7 @@ send_response__@(spec.srv_name)(
 {
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
   const rosidl_message_type_support_t * ts =
-    ROSIDL_GET_TYPE_SUPPORT(@(spec.pkg_name), srv, @(spec.srv_name)_Response);
+    ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), srv, @(spec.srv_name)_Response)();
   const message_type_support_callbacks_t * callbacks =
     static_cast<const message_type_support_callbacks_t *>(ts->data);
   callbacks->convert_ros_to_dds(untyped_ros_response, static_cast<void *>(&response.data()));
@@ -197,7 +204,7 @@ take_response__@(spec.srv_name)(
     request_header->sequence_number = response.sequence_number_;
 
     const rosidl_message_type_support_t * ts =
-      ROSIDL_GET_TYPE_SUPPORT(@(spec.pkg_name), srv, @(spec.srv_name)_Response);
+      ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), srv, @(spec.srv_name)_Response)();
     const message_type_support_callbacks_t * callbacks =
       static_cast<const message_type_support_callbacks_t *>(ts->data);
     callbacks->convert_dds_to_ros(
@@ -252,9 +259,8 @@ static rosidl_service_type_support_t __type_support = {
   get_service_typesupport_handle_function,
 };
 
-ROSIDL_GENERATOR_C_EXPORT_@(spec.pkg_name)
 const rosidl_service_type_support_t *
-ROSIDL_GET_TYPE_SUPPORT_FUNCTION(@(spec.pkg_name), srv, @(spec.srv_name))() {
+ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(spec.pkg_name), @(spec.srv_name))() {
   return &__type_support;
 }
 

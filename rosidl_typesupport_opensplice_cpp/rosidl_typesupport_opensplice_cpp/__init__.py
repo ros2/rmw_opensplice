@@ -67,8 +67,9 @@ def generate_dds_opensplice_cpp(
         if os.name == 'nt':
             cmd[-1:-1] = [
                 '-P',
-                'ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_%s,%s' %
-                (pkg_name, '%s/msg/dds_opensplice/visibility_control.h' % pkg_name)]
+                'ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC_%s,%s' % (
+                    pkg_name,
+                    '%s/msg/rosidl_typesupport_opensplice_cpp__visibility_control.h' % pkg_name)]
         subprocess.check_call(cmd)
 
         # modify generated code to compile with Visual Studio 2015
@@ -136,11 +137,15 @@ def _replace_path_and_timestamp(lines, msg_name, idl_path):
 def generate_typesupport_opensplice_cpp(args):
     template_dir = args['template_dir']
     mapping_msgs = {
-        os.path.join(template_dir, 'msg__type_support.hpp.em'): '%s__type_support.hpp',
-        os.path.join(template_dir, 'msg__type_support.cpp.em'): '%s__type_support.cpp',
+        os.path.join(template_dir, 'msg__rosidl_typesupport_opensplice_cpp.hpp.em'):
+        '%s__rosidl_typesupport_opensplice_cpp.hpp',
+        os.path.join(template_dir, 'msg__type_support.cpp.em'):
+        '%s__type_support.cpp',
     }
 
     mapping_srvs = {
+        os.path.join(template_dir, 'srv__rosidl_typesupport_opensplice_cpp.hpp.em'):
+        '%s__rosidl_typesupport_opensplice_cpp.hpp',
         os.path.join(template_dir, 'srv__type_support.cpp.em'):
         '%s__type_support.cpp',
     }
@@ -170,8 +175,11 @@ def generate_typesupport_opensplice_cpp(args):
             validate_field_types(spec, known_msg_types)
             subfolder = os.path.basename(os.path.dirname(idl_file))
             for template_file, generated_filename in mapping_msgs.items():
+                generated_file = os.path.join(args['output_dir'], subfolder)
+                if generated_filename.endswith('.cpp'):
+                    generated_file = os.path.join(generated_file, 'dds_opensplice')
                 generated_file = os.path.join(
-                    args['output_dir'], subfolder, 'dds_opensplice', generated_filename %
+                    generated_file, generated_filename %
                     convert_camel_case_to_lower_case_underscore(spec.base_type.type))
 
                 data = {'spec': spec, 'subfolder': subfolder}
@@ -184,8 +192,11 @@ def generate_typesupport_opensplice_cpp(args):
             spec = parse_service_file(pkg_name, idl_file)
             validate_field_types(spec, known_msg_types)
             for template_file, generated_filename in mapping_srvs.items():
+                generated_file = os.path.join(args['output_dir'], 'srv')
+                if generated_filename.endswith('.cpp'):
+                    generated_file = os.path.join(generated_file, 'dds_opensplice')
                 generated_file = os.path.join(
-                    args['output_dir'], 'srv', 'dds_opensplice', generated_filename %
+                    generated_file, generated_filename %
                     convert_camel_case_to_lower_case_underscore(spec.srv_name))
 
                 data = {'spec': spec}
