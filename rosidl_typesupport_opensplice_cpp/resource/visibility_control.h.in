@@ -1,8 +1,8 @@
 // generated from rosidl_typesupport_opensplice_cpp/resource/visibility_control.h.in
 // generated code does not contain a copyright notice
 
-#ifndef @PROJECT_NAME_UPPER@__MSG__DDS_OPENSPLICE__VISIBILITY_CONTROL_H_
-#define @PROJECT_NAME_UPPER@__MSG__DDS_OPENSPLICE__VISIBILITY_CONTROL_H_
+#ifndef @PROJECT_NAME_UPPER@__MSG__ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__VISIBILITY_CONTROL_H_
+#define @PROJECT_NAME_UPPER@__MSG__ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__VISIBILITY_CONTROL_H_
 
 #if __cplusplus
 extern "C"
@@ -34,4 +34,4 @@ extern "C"
 }
 #endif
 
-#endif  // @PROJECT_NAME_UPPER@__MSG__DDS_OPENSPLICE__VISIBILITY_CONTROL_H_
+#endif  // @PROJECT_NAME_UPPER@__MSG__ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__VISIBILITY_CONTROL_H_

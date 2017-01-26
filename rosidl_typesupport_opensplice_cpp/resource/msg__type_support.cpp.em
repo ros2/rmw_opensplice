@@ -13,19 +13,17 @@
 @#  - get_header_filename_from_msg_name (function)
 @#######################################################################
 @
+@{header_file_name = get_header_filename_from_msg_name(spec.base_type.type)}@
+#include "@(spec.base_type.pkg_name)/@(subfolder)/@(header_file_name)__rosidl_typesupport_opensplice_cpp.hpp"
+
 #include <limits>
 #include <stdexcept>
 
 #include <u_instanceHandle.h>
 
-#include "rosidl_generator_c/message_type_support_struct.h"
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
-#include "rosidl_typesupport_interface/macros.h"
-#include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 
-@{header_file_name = get_header_filename_from_msg_name(spec.base_type.type)}@
 #include "@(spec.base_type.pkg_name)/@(subfolder)/@(header_file_name)__struct.hpp"
-#include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/@(header_file_name)__type_support.hpp"
 #include "@(spec.base_type.pkg_name)/@(subfolder)/dds_opensplice/ccpp_@(spec.base_type.type)_.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
@@ -36,7 +34,7 @@
 includes = {}
 for field in spec.fields:
     if not field.type.is_primitive_type() and field.type.pkg_name == 'builtin_interfaces':
-        key = 'rosidl_typesupport_opensplice_cpp/%s__type_support.hpp' % field.type.type.lower()
+        key = 'builtin_interfaces/msg/%s__rosidl_typesupport_opensplice_cpp.hpp' % field.type.type.lower()
         if key not in includes:
             includes[key] = set([])
         includes[key].add(field.name)
@@ -411,7 +409,7 @@ namespace rosidl_typesupport_opensplice_cpp
 {
 
 template<>
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT_@(spec.base_type.pkg_name)
 const rosidl_message_type_support_t *
 get_message_type_support_handle<
   @(spec.base_type.pkg_name)::@(subfolder)::@(spec.base_type.type)
@@ -427,7 +425,6 @@ extern "C"
 {
 #endif
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_message_type_support_t *
 ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_cpp, @(spec.base_type.pkg_name), @(subfolder), @(spec.base_type.type))() {
   return &@(spec.base_type.pkg_name)::@(subfolder)::typesupport_opensplice_cpp::handle;

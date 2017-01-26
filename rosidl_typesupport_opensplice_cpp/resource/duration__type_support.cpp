@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "builtin_interfaces/msg/duration__rosidl_typesupport_opensplice_cpp.hpp"
+
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
 
-#include "rosidl_typesupport_opensplice_cpp/duration__type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support_decl.hpp"
+
+#include "builtin_interfaces/msg/rosidl_typesupport_opensplice_cpp__visibility_control.h"
 
 namespace builtin_interfaces
 {
@@ -24,7 +27,6 @@ namespace msg
 namespace typesupport_opensplice_cpp
 {
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 void convert_ros_message_to_dds(
   const builtin_interfaces::msg::Duration & ros_message,
   DDS::Duration_t & dds_message)
@@ -33,7 +35,6 @@ void convert_ros_message_to_dds(
   dds_message.nanosec = ros_message.nanosec;
 }
 
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 void convert_dds_message_to_ros(
   const DDS::Duration_t & dds_message,
   builtin_interfaces::msg::Duration & ros_message)
@@ -46,15 +47,17 @@ void convert_dds_message_to_ros(
 }  // namespace msg
 }  // namespace builtin_interfaces
 
-namespace rosidl_typesupport_opensplice_cpp
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-template<>
-ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_EXPORT
 const rosidl_message_type_support_t *
-get_message_type_support_handle<builtin_interfaces::msg::Duration>()
-{
+ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(
+  rosidl_typesupport_opensplice_cpp, builtin_interfaces, msg, Duration)() {
   return 0;
 }
 
-}  // namespace rosidl_typesupport_opensplice_cpp
+#ifdef __cplusplus
+}
+#endif
