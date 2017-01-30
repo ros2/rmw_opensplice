@@ -48,6 +48,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_guard_condition.cpp
   src/rmw_init.cpp
   src/rmw_node.cpp
+  src/rmw_node_names.cpp
   src/rmw_publish.cpp
   src/rmw_publisher.cpp
   src/rmw_request.cpp
