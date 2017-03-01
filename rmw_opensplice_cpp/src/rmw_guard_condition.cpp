@@ -41,7 +41,7 @@ rmw_create_guard_condition()
     goto fail;
   }
   RMW_TRY_PLACEMENT_NEW(
-    guard_condition->data, guard_condition->data, goto fail, DDS::GuardCondition)
+    guard_condition->data, guard_condition->data, goto fail, DDS::GuardCondition, )
   return guard_condition;
 fail:
   if (guard_condition->data) {
