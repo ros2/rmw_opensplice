@@ -24,8 +24,8 @@ extern "C"
 {
 rmw_ret_t
 rmw_get_node_names(
-  const rmw_node_t * node,
-  rmw_string_array_t * node_names)
+  const rmw_node_t * /* node */,
+  rmw_string_array_t * /* node_names */)
 {
   RMW_SET_ERROR_MSG("get_node_names is not supported for Opensplice");
   return RMW_RET_ERROR;
@@ -33,9 +33,9 @@ rmw_get_node_names(
 
 rmw_ret_t
 rmw_destroy_node_names(
-  rmw_string_array_t * node_names)
+  rmw_string_array_t * /* node_names */)
 {
-  RMW_SET_ERROR_MSG("get_node_names is not supported for Opensplice");
+  RMW_SET_ERROR_MSG("destroy_node_names is not supported for Opensplice");
   return RMW_RET_ERROR;
 }
 }  // extern "C"
