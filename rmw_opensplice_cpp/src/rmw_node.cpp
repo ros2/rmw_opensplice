@@ -32,7 +32,7 @@ rmw_create_secure_node(
   const char * name,
   const char * namespace_,
   size_t domain_id,
-  char ** security_files_paths)
+  const char * security_root_path)
 {
   (void)security_files_paths;
   return rmw_create_node(name, namespace_, domain_id);
