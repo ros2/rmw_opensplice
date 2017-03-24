@@ -156,7 +156,7 @@ rmw_create_subscription(
     goto fail;
   }
   // Use a placement new to construct the instance in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(subscriber_info, buf, goto fail, OpenSpliceStaticSubscriberInfo)
+  RMW_TRY_PLACEMENT_NEW(subscriber_info, buf, goto fail, OpenSpliceStaticSubscriberInfo, )
   buf = nullptr;  // Only free the subscriber_info pointer; don't need the buf pointer anymore.
   subscriber_info->dds_topic = topic;
   subscriber_info->dds_subscriber = dds_subscriber;

@@ -55,7 +55,7 @@ rmw_create_waitset(size_t max_conditions)
   }
 
   RMW_TRY_PLACEMENT_NEW(
-    waitset_info->waitset, waitset_info->waitset, goto fail, DDS::WaitSet)
+    waitset_info->waitset, waitset_info->waitset, goto fail, DDS::WaitSet, )
 
   // Now allocate storage for the ConditionSeq objects
   waitset_info->active_conditions =
@@ -87,11 +87,11 @@ rmw_create_waitset(size_t max_conditions)
     // Default-construct the ConditionSeqs.
     RMW_TRY_PLACEMENT_NEW(
       waitset_info->active_conditions, waitset_info->active_conditions, goto fail,
-      DDS::ConditionSeq)
+      DDS::ConditionSeq, )
 
     RMW_TRY_PLACEMENT_NEW(
       waitset_info->attached_conditions, waitset_info->attached_conditions, goto fail,
-      DDS::ConditionSeq)
+      DDS::ConditionSeq, )
   }
 
   return waitset;

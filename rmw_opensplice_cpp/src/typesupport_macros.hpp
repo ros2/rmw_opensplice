@@ -30,9 +30,9 @@
       "type support handle implementation '%s' (%p) does not match valid type support " \
       "('%s' (%p))", \
       TYPE_SUPPORTS->typesupport_identifier, \
-      TYPE_SUPPORTS->typesupport_identifier, \
+      static_cast<const void *>(TYPE_SUPPORTS->typesupport_identifier), \
       rosidl_typesupport_opensplice_cpp::typesupport_identifier, \
-      rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
+      static_cast<const void *>(rosidl_typesupport_opensplice_cpp::typesupport_identifier)); \
     RMW_SET_ERROR_MSG(__msg); \
     return nullptr; \
   }
@@ -52,9 +52,9 @@
       "type support handle implementation '%s' (%p) does not match valid type support " \
       "('%s' (%p))", \
       TYPE_SUPPORTS->typesupport_identifier, \
-      TYPE_SUPPORTS->typesupport_identifier, \
+      static_cast<const void *>(TYPE_SUPPORTS->typesupport_identifier), \
       rosidl_typesupport_opensplice_cpp::typesupport_identifier, \
-      rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
+      static_cast<const void *>(rosidl_typesupport_opensplice_cpp::typesupport_identifier)); \
     RMW_SET_ERROR_MSG(__msg); \
     return NULL; \
   }

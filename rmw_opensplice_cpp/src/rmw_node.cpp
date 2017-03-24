@@ -207,7 +207,7 @@ rmw_create_node(const char * name, size_t domain_id)
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
-  RMW_TRY_PLACEMENT_NEW(node_info, buf, goto fail, OpenSpliceStaticNodeInfo)
+  RMW_TRY_PLACEMENT_NEW(node_info, buf, goto fail, OpenSpliceStaticNodeInfo, )
   buf = nullptr;
   node_info->participant = participant;
   node_info->graph_guard_condition = graph_guard_condition;
