@@ -28,10 +28,14 @@
 extern "C"
 {
 rmw_node_t *
-rmw_create_node(const char * name, size_t domain_id)
+rmw_create_node(const char * name, const char * namespace_, size_t domain_id)
 {
   if (!name) {
     RMW_SET_ERROR_MSG("name is null");
+    return nullptr;
+  }
+  if (!namespace_) {
+    RMW_SET_ERROR_MSG("namespace_ is null");
     return nullptr;
   }
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
@@ -201,6 +205,13 @@ rmw_create_node(const char * name, size_t domain_id)
     goto fail;
   }
   memcpy(const_cast<char *>(node->name), name, strlen(name) + 1);
+
+  node->namespace_ = reinterpret_cast<const char *>(rmw_allocate(sizeof(char) * strlen(namespace_) + 1));
+  if (!node->namespace_) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for node namespace");
+    goto fail;
+  }
+  memcpy(const_cast<char *>(node->namespace_), namespace_, strlen(namespace_) + 1);
 
   buf = rmw_allocate(sizeof(OpenSpliceStaticNodeInfo));
   if (!buf) {
