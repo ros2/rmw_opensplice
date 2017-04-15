@@ -15,6 +15,7 @@
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 #include "rmw/types.h"
+#include "c_utilities/types.h"
 
 // TODO(karsten1987): Implement based on
 // https://github.com/PrismTech/opensplice/blob/master/docs/pdf/OpenSplice_refman_CPP.pdf
@@ -25,7 +26,7 @@ extern "C"
 rmw_ret_t
 rmw_get_node_names(
   const rmw_node_t * /* node */,
-  rmw_string_array_t * /* node_names */)
+  utilities_string_array_t * /* node_names */)
 {
   RMW_SET_ERROR_MSG("get_node_names is not supported for Opensplice");
   return RMW_RET_ERROR;
@@ -33,7 +34,7 @@ rmw_get_node_names(
 
 rmw_ret_t
 rmw_destroy_node_names(
-  rmw_string_array_t * /* node_names */)
+  utilities_string_array_t * /* node_names */)
 {
   RMW_SET_ERROR_MSG("destroy_node_names is not supported for Opensplice");
   return RMW_RET_ERROR;

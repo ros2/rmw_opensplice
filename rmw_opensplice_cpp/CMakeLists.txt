@@ -25,11 +25,13 @@ if(NOT rosidl_typesupport_opensplice_cpp_FOUND OR NOT rosidl_typesupport_openspl
 endif()
 
 find_package(rmw REQUIRED)
+find_package(c_utilities REQUIRED)
 find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
 ament_export_dependencies(
   rmw
+  c_utilities
   rosidl_generator_c
   rosidl_generator_cpp
   rosidl_typesupport_opensplice_c
@@ -65,6 +67,7 @@ add_library(rmw_opensplice_cpp SHARED
 )
 ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
+  "c_utilities"
   "rosidl_generator_c"
   "rosidl_generator_cpp"
   "rosidl_typesupport_opensplice_c"
