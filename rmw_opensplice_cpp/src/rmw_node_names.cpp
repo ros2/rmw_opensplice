@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "c_utilities/types.h"
 #include "rmw/error_handling.h"
 #include "rmw/rmw.h"
 #include "rmw/types.h"
-#include "c_utilities/types.h"
 
 // TODO(karsten1987): Implement based on
 // https://github.com/PrismTech/opensplice/blob/master/docs/pdf/OpenSplice_refman_CPP.pdf
