@@ -206,7 +206,8 @@ rmw_create_node(const char * name, const char * namespace_, size_t domain_id)
   }
   memcpy(const_cast<char *>(node->name), name, strlen(name) + 1);
 
-  node->namespace_ = reinterpret_cast<const char *>(rmw_allocate(sizeof(char) * strlen(namespace_) + 1));
+  node->namespace_ = reinterpret_cast<const char *>(
+    rmw_allocate(sizeof(char) * strlen(namespace_) + 1));
   if (!node->namespace_) {
     RMW_SET_ERROR_MSG("failed to allocate memory for node namespace");
     goto fail;

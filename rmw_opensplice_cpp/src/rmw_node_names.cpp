@@ -31,5 +31,4 @@ rmw_get_node_names(
   RMW_SET_ERROR_MSG("get_node_names is not supported for Opensplice");
   return RMW_RET_ERROR;
 }
-
 }  // extern "C"
