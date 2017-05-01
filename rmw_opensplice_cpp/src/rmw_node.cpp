@@ -28,25 +28,21 @@
 extern "C"
 {
 rmw_node_t *
-rmw_create_secure_node(
-  const char * name,
-  const char * namespace_,
-  size_t domain_id,
-  const char * security_root_path)
+rmw_create_node(
+  const char * name, const char * namespace_, size_t domain_id,
+  bool enforce_security, const char * security_root_path)
 {
-  (void)security_files_paths;
-  return rmw_create_node(name, namespace_, domain_id);
-}
-
-rmw_node_t *
-rmw_create_node(const char * name, const char * namespace_, size_t domain_id)
-{
+  (void)security_root_path;
   if (!name) {
     RMW_SET_ERROR_MSG("name is null");
     return nullptr;
   }
   if (!namespace_) {
     RMW_SET_ERROR_MSG("namespace_ is null");
+    return nullptr;
+  }
+  if (enforce_security) {
+    RMW_SET_ERROR_MSG("Opensplice doesn't support DDS Security");
     return nullptr;
   }
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
