@@ -30,9 +30,9 @@ extern "C"
 rmw_node_t *
 rmw_create_node(
   const char * name, const char * namespace_, size_t domain_id,
-  bool enforce_security, const char * security_root_path)
+  const rmw_node_security_options_t * options)
 {
-  (void)security_root_path;
+  (void)options;
   if (!name) {
     RMW_SET_ERROR_MSG("name is null");
     return nullptr;
@@ -41,7 +41,7 @@ rmw_create_node(
     RMW_SET_ERROR_MSG("namespace_ is null");
     return nullptr;
   }
-  if (enforce_security) {
+  if (options->enforce_security) {
     RMW_SET_ERROR_MSG("Opensplice doesn't support DDS Security");
     return nullptr;
   }
