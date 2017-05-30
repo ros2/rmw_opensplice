@@ -32,7 +32,6 @@ rmw_create_node(
   const char * name, const char * namespace_, size_t domain_id,
   const rmw_node_security_options_t * options)
 {
-  (void)options;
   if (!name) {
     RMW_SET_ERROR_MSG("name is null");
     return nullptr;
