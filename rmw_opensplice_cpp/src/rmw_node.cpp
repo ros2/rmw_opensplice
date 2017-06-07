@@ -143,6 +143,12 @@ rmw_create_node(
   }
 #endif
 
+  // enable the participant, otherwise get_builtin_subscriber can't be called
+  if (participant->enable() != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("failed to enable domain participant");
+    return nullptr;
+  }
+
   rmw_node_t * node = nullptr;
   OpenSpliceStaticNodeInfo * node_info = nullptr;
   rmw_guard_condition_t * graph_guard_condition = nullptr;
@@ -238,12 +244,6 @@ rmw_create_node(
 
   node->implementation_identifier = opensplice_cpp_identifier;
   node->data = node_info;
-
-  // finally enable the participant
-  if (participant->enable() != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("failed to enable domain participant");
-    goto fail;
-  }
 
   return node;
 fail:
