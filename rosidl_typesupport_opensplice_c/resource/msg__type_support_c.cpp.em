@@ -31,6 +31,7 @@
 #include "@(spec.base_type.pkg_name)/msg/rosidl_generator_c__visibility_control.h"
 // Provides the definition of the message_type_support_callbacks_t struct.
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/u__instanceHandle.h"
 
 #include "@(pkg)/msg/rosidl_typesupport_opensplice_c__visibility_control.h"
 @{header_file_name = get_header_filename_from_msg_name(type)}@

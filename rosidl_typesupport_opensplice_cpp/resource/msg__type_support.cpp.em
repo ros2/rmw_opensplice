@@ -28,6 +28,7 @@
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support_decl.hpp"
+#include "rosidl_typesupport_opensplice_cpp/u__instanceHandle.h"
 
 // include type support for builtin interfaces
 @{
