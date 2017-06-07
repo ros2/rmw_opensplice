@@ -107,9 +107,9 @@ def _copy_constructor_and_assignment_operator(lines, msg_name, idl_path=None):
     for i, line in enumerate(lines):
         if line.strip() == 'public:':
             new_lines = [
-                '%sTypeSupportFactory(const %sTypeSupportFactory & o) = delete;' %
+                '%sTypeSupportMetaHolder(const %sTypeSupportMetaHolder & o) = delete;' %
                 (msg_name, msg_name),
-                '%sTypeSupportFactory & operator=(const %sTypeSupportFactory & o) = delete;' %
+                '%sTypeSupportMetaHolder & operator=(const %sTypeSupportMetaHolder & o) = delete;' %
                 (msg_name, msg_name),
             ]
             lines[i + 1:i + 1] = [' ' * 16 + l for l in new_lines]
