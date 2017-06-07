@@ -56,6 +56,11 @@ rmw_create_client(
     RMW_SET_ERROR_MSG("qos_profile is null");
     return nullptr;
   }
+  
+  if (qos_profile->avoid_ros_namespace_conventions) {
+    RMW_SET_ERROR_MSG("QoS 'avoid_ros_namespace_conventions' is not implemented");
+    return NULL;
+  }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
   if (!node_info) {
