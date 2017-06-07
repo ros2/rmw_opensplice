@@ -76,7 +76,6 @@ if(NOT _ospl_home STREQUAL "")
     "ddsserialization"
     "ddsuser"
     "ddsutil"
-    "durability"
     "spliced"
     # we can't link against both sacpp and isocpp at the same time
     #"dcpsisocpp"
