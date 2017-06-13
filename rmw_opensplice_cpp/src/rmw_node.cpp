@@ -40,6 +40,10 @@ rmw_create_node(
     RMW_SET_ERROR_MSG("namespace_ is null");
     return nullptr;
   }
+  if (!security_options) {
+    RMW_SET_ERROR_MSG("security_options is null");
+    return nullptr;
+  }
   if (security_options->enforce_security) {
     RMW_SET_ERROR_MSG("OpenSplice doesn't support DDS Security");
     return nullptr;
