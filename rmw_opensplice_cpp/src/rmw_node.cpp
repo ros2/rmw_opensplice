@@ -41,7 +41,7 @@ rmw_create_node(
     return nullptr;
   }
   if (security_options->enforce_security) {
-    RMW_SET_ERROR_MSG("Opensplice doesn't support DDS Security");
+    RMW_SET_ERROR_MSG("OpenSplice doesn't support DDS Security");
     return nullptr;
   }
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
