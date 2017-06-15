@@ -28,7 +28,9 @@
 extern "C"
 {
 rmw_node_t *
-rmw_create_node(const char * name, const char * namespace_, size_t domain_id)
+rmw_create_node(
+  const char * name, const char * namespace_, size_t domain_id,
+  const rmw_node_security_options_t * security_options)
 {
   if (!name) {
     RMW_SET_ERROR_MSG("name is null");
@@ -36,6 +38,14 @@ rmw_create_node(const char * name, const char * namespace_, size_t domain_id)
   }
   if (!namespace_) {
     RMW_SET_ERROR_MSG("namespace_ is null");
+    return nullptr;
+  }
+  if (!security_options) {
+    RMW_SET_ERROR_MSG("security_options is null");
+    return nullptr;
+  }
+  if (security_options->enforce_security) {
+    RMW_SET_ERROR_MSG("OpenSplice doesn't support DDS Security");
     return nullptr;
   }
   DDS::DomainParticipantFactory_var dp_factory = DDS::DomainParticipantFactory::get_instance();
