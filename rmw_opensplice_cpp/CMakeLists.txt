@@ -69,6 +69,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_wait.cpp
   src/rmw_waitset.cpp
   src/types.cpp
+  src/misc.cpp
 )
 ament_target_dependencies(rmw_opensplice_cpp
   "rcutils"
