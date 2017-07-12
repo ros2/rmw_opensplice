@@ -44,6 +44,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
 )
+ament_target_dependencies(${PROJECT_NAME} "OpenSplice")
 ament_export_libraries(${PROJECT_NAME})
 
 ament_index_register_resource("rosidl_typesupport_cpp")
