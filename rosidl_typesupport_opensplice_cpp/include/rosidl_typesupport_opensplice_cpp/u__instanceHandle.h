@@ -17,8 +17,8 @@
  *   limitations under the License.
  *
  */
-#ifndef U__INSTANCEHANDLE_H
-#define U__INSTANCEHANDLE_H
+#ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__U__INSTANCEHANDLE_H_
+#define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__U__INSTANCEHANDLE_H_
 
 #if __cplusplus
 extern "C"
@@ -30,10 +30,10 @@ extern "C"
 
 v_gid
 u_instanceHandleToGID (
-    u_instanceHandle _this);
+  u_instanceHandle _this);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__U__INSTANCEHANDLE_H_

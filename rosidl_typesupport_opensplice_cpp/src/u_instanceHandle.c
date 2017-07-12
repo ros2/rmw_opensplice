@@ -22,25 +22,25 @@
 #define HANDLE_GLOBAL_MASK (0x80000000)
 
 typedef union {
-    struct {
-        c_ulong lifecycleId;
-        c_ulong localId;
-    } lid;
-    u_instanceHandle handle;
+  struct {
+    c_ulong lifecycleId;
+    c_ulong localId;
+  } lid;
+  u_instanceHandle handle;
 } u_instanceHandleTranslator;
 
 v_gid
 u_instanceHandleToGID (
-    u_instanceHandle handle)
+  u_instanceHandle handle)
 {
-    u_instanceHandleTranslator translator;
-    v_gid gid;
+  u_instanceHandleTranslator translator;
+  v_gid gid;
 
-    translator.handle = handle;
+  translator.handle = handle;
 
-    gid.systemId = translator.lid.lifecycleId & ~HANDLE_GLOBAL_MASK;
-    gid.localId = translator.lid.localId;
-    gid.serial = 0;
+  gid.systemId = translator.lid.lifecycleId & ~HANDLE_GLOBAL_MASK;
+  gid.localId = translator.lid.localId;
+  gid.serial = 0;
 
-    return gid;
+  return gid;
 }
