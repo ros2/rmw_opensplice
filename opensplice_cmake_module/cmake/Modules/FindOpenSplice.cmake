@@ -44,7 +44,10 @@
 set(OpenSplice_FOUND FALSE)
 
 # check if provided OSPL_HOME is from an "official" binary package
-file(TO_CMAKE_PATH "$ENV{OSPL_HOME}" _ospl_home)
+set(_ospl_home "")
+if(DEFINED ENV{OSPL_HOME})
+  file(TO_CMAKE_PATH "$ENV{OSPL_HOME}" _ospl_home)
+endif()
 if(WIN32)
   set(_ospl_release_file release.bat)
 else()
