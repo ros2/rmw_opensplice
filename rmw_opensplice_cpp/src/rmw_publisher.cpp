@@ -29,6 +29,7 @@
 #include "qos.hpp"
 #include "types.hpp"
 #include "typesupport_macros.hpp"
+#include "misc.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
@@ -108,12 +109,30 @@ rmw_create_publisher(
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
   OpenSpliceStaticPublisherInfo * publisher_info = nullptr;
+  char * partition_str = nullptr;
+  char * topic_str = nullptr;
+
   // Begin initializing elements.
   publisher = rmw_publisher_allocate();
   if (!publisher) {
     RMW_SET_ERROR_MSG("failed to allocate rmw_publisher_t");
     goto fail;
   }
+
+  if (!process_topic_name(
+    topic_name,
+    qos_profile->avoid_ros_namespace_conventions,
+    &topic_str,
+    &partition_str))
+  {
+    goto fail;
+  }
+
+  if (strlen(partition_str) != 0) {  // only set if not empty
+    publisher_qos.partition.name.length(1);
+    publisher_qos.partition.name.get_buffer(FALSE)[0] = partition_str; // pass reference
+  }
+
   dds_publisher = participant->create_publisher(publisher_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!dds_publisher) {
     RMW_SET_ERROR_MSG("failed to create publisher");
@@ -126,12 +145,8 @@ rmw_create_publisher(
     goto fail;
   }
 
-  if (std::string(topic_name).find("/") != std::string::npos) {
-    RMW_SET_ERROR_MSG("topic_name contains a '/'");
-    goto fail;
-  }
   topic = participant->create_topic(
-    topic_name, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic_str, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
     RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
@@ -176,6 +191,8 @@ rmw_create_publisher(
   }
   memcpy(const_cast<char *>(publisher->topic_name), topic_name, strlen(topic_name) + 1);
 
+  DDS::string_free (topic_str);
+
   return publisher;
 fail:
   if (publisher) {
@@ -199,6 +216,7 @@ fail:
       fprintf(stderr, "%s\n", check_delete_topic(status));
     }
   }
+  DDS::string_free (topic_str);
   if (publisher_info) {
     rmw_free(publisher_info);
   }

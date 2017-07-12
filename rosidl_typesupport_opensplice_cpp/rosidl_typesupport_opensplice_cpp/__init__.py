@@ -105,15 +105,16 @@ def _modify(filename, msg_name, callback, idl_path=None):
 
 def _copy_constructor_and_assignment_operator(lines, msg_name, idl_path=None):
     for i, line in enumerate(lines):
-        if line.strip() == 'public:':
-            new_lines = [
-                '%sTypeSupportFactory(const %sTypeSupportFactory & o) = delete;' %
-                (msg_name, msg_name),
-                '%sTypeSupportFactory & operator=(const %sTypeSupportFactory & o) = delete;' %
-                (msg_name, msg_name),
-            ]
-            lines[i + 1:i + 1] = [' ' * 16 + l for l in new_lines]
-            return lines
+        if line.strip() != 'public:':
+            continue
+        new_lines = [
+            '%sTypeSupportMetaHolder(const %sTypeSupportMetaHolder & o) = delete;' %
+            (msg_name, msg_name),
+            '%sTypeSupportMetaHolder & operator=(const %sTypeSupportMetaHolder & o) = delete;' %
+            (msg_name, msg_name),
+        ]
+        lines[i + 1:i + 1] = [' ' * 16 + l for l in new_lines]
+        return lines
     assert False, 'Failed to find insertion point'
 
 

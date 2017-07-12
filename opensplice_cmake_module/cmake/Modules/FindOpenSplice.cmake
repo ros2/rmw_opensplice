@@ -44,7 +44,10 @@
 set(OpenSplice_FOUND FALSE)
 
 # check if provided OSPL_HOME is from an "official" binary package
-file(TO_CMAKE_PATH "$ENV{OSPL_HOME}" _ospl_home)
+set(_ospl_home "")
+if(DEFINED ENV{OSPL_HOME})
+  file(TO_CMAKE_PATH "$ENV{OSPL_HOME}" _ospl_home)
+endif()
 if(WIN32)
   set(_ospl_release_file release.bat)
 else()
@@ -76,7 +79,6 @@ if(NOT _ospl_home STREQUAL "")
     "ddsserialization"
     "ddsuser"
     "ddsutil"
-    "durability"
     "spliced"
     # we can't link against both sacpp and isocpp at the same time
     #"dcpsisocpp"
@@ -107,6 +109,28 @@ else()
     set(OpenSplice_FOUND TRUE)
   endif()
 endif()
+
+# convert libraries into absolute paths
+set(_libs ${OpenSplice_LIBRARIES})
+set(OpenSplice_LIBRARIES)
+foreach(_library ${_libs})
+  if(NOT IS_ABSOLUTE "${_library}")
+    set(_lib "NOTFOUND")
+    find_library(
+      _lib "${_library}"
+      HINTS ${OpenSplice_LIBRARY_DIRS})
+    if(NOT _lib)
+      message(FATAL_ERROR "OpenSplice exports the library '${_library}' which couldn't be found")
+    elseif(NOT IS_ABSOLUTE "${_lib}")
+      message(FATAL_ERROR "The OpenSplice library '${_library}' was found at '${_lib}' which is not an absolute path")
+    elseif(NOT EXISTS "${_lib}")
+      message(FATAL_ERROR "The OpenSplice library '${_library}' was found at '${_lib}' which doesn't exist")
+    endif()
+    set(_library "${_lib}")
+  endif()
+  list(APPEND OpenSplice_LIBRARIES "${_library}")
+endforeach()
+
 if(NOT WIN32)
   list(APPEND OpenSplice_LIBRARIES "pthread" "dl")
 endif()

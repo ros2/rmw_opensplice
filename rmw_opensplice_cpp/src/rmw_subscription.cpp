@@ -29,6 +29,7 @@
 #include "qos.hpp"
 #include "types.hpp"
 #include "typesupport_macros.hpp"
+#include "misc.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datareader_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
@@ -111,12 +112,30 @@ rmw_create_subscription(
   DDS::ReadCondition * read_condition = nullptr;
   void * buf = nullptr;
   OpenSpliceStaticSubscriberInfo * subscriber_info = nullptr;
+  char * partition_str = nullptr;
+  char * topic_str = nullptr;
+
   // Begin initializing elements.
   subscription = rmw_subscription_allocate();
   if (!subscription) {
     RMW_SET_ERROR_MSG("failed to allocate rmw_subscription_t");
     goto fail;
   }
+
+  if (!process_topic_name(
+    topic_name,
+    qos_profile->avoid_ros_namespace_conventions,
+    &topic_str,
+    &partition_str))
+  {
+    goto fail;
+  }
+
+  if (strlen(partition_str) != 0) {  // only set if not empty
+    subscriber_qos.partition.name.length(1);
+    subscriber_qos.partition.name[0] = partition_str; // pass reference
+  }
+
   dds_subscriber = participant->create_subscriber(subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!dds_subscriber) {
     RMW_SET_ERROR_MSG("failed to create subscriber");
@@ -130,7 +149,7 @@ rmw_create_subscription(
   }
 
   topic = participant->create_topic(
-    topic_name, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic_str, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
     RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
@@ -180,6 +199,8 @@ rmw_create_subscription(
   }
   memcpy(const_cast<char *>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
 
+  DDS::string_free (topic_str);
+
   return subscription;
 fail:
   if (dds_subscriber) {
@@ -205,6 +226,7 @@ fail:
       fprintf(stderr, "%s\n", check_delete_topic(status));
     }
   }
+  DDS::string_free (topic_str);
   if (subscriber_info) {
     rmw_free(subscriber_info);
   }

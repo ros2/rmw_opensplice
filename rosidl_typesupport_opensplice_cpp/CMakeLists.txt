@@ -33,7 +33,9 @@ ament_export_include_directories(include)
 
 ament_python_install_package(${PROJECT_NAME})
 
-add_library(${PROJECT_NAME} SHARED src/identifier.cpp)
+add_library(${PROJECT_NAME} SHARED
+  src/identifier.cpp
+  src/u_instanceHandle.c)
 if(WIN32)
   target_compile_definitions(${PROJECT_NAME}
     PRIVATE "ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_BUILDING_DLL")
@@ -42,6 +44,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
 )
+ament_target_dependencies(${PROJECT_NAME} "OpenSplice")
 ament_export_libraries(${PROJECT_NAME})
 
 ament_index_register_resource("rosidl_typesupport_cpp")
