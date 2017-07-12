@@ -247,10 +247,8 @@ if(rosidl_generate_interfaces_LIBRARY_NAME)
   set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PROPERTIES OUTPUT_NAME "${rosidl_generate_interfaces_LIBRARY_NAME}${_target_suffix}")
 endif()
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
+  PROPERTIES CXX_STANDARD 14)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix} PROPERTIES
     COMPILE_FLAGS "-Wall -Wextra -Wpedantic")
