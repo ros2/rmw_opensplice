@@ -29,7 +29,7 @@ extern "C"
 #include "v_collection.h"
 
 v_gid
-u_instanceHandleToGID (
+u_instanceHandleToGID(
   u_instanceHandle _this);
 
 #ifdef __cplusplus
