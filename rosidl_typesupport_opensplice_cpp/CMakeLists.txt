@@ -35,6 +35,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 add_library(${PROJECT_NAME} SHARED
   src/identifier.cpp
+  src/misc.cpp
   src/u_instanceHandle.c)
 if(WIN32)
   target_compile_definitions(${PROJECT_NAME}

@@ -17,6 +17,7 @@
 #include <string>
 
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
+#include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 
 #include "rmw/allocators.h"
@@ -29,13 +30,13 @@
 #include "qos.hpp"
 #include "types.hpp"
 #include "typesupport_macros.hpp"
-#include "misc.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_datawriter;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_publisher;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_topic;
+using rosidl_typesupport_opensplice_cpp::process_topic_name;
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
@@ -59,11 +60,16 @@ rmw_create_publisher(
   RMW_OPENSPLICE_EXTRACT_MESSAGE_TYPESUPPORT(
     type_supports, type_support)
 
+  if (!topic_name || strlen(topic_name) == 0) {
+    RMW_SET_ERROR_MSG("publisher topic is null or empty string");
+    return nullptr;
+  }
+
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
     return nullptr;
   }
-  
+
   if (qos_profile->avoid_ros_namespace_conventions) {
     RMW_SET_ERROR_MSG("QoS 'avoid_ros_namespace_conventions' is not implemented");
     return NULL;
@@ -109,8 +115,8 @@ rmw_create_publisher(
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
   OpenSpliceStaticPublisherInfo * publisher_info = nullptr;
-  char * partition_str = nullptr;
-  char * topic_str = nullptr;
+  std::string partition_str;
+  std::string topic_str;
 
   // Begin initializing elements.
   publisher = rmw_publisher_allocate();
@@ -120,17 +126,14 @@ rmw_create_publisher(
   }
 
   if (!process_topic_name(
-    topic_name,
-    qos_profile->avoid_ros_namespace_conventions,
-    &topic_str,
-    &partition_str))
-  {
+      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str, partition_str)) {
+    RMW_SET_ERROR_MSG("failed to process topic name");
     goto fail;
   }
 
-  if (strlen(partition_str) != 0) {  // only set if not empty
+  if (0 != partition_str.size()) {  // only set if not empty
     publisher_qos.partition.name.length(1);
-    publisher_qos.partition.name.get_buffer(FALSE)[0] = partition_str; // pass reference
+    publisher_qos.partition.name.get_buffer(FALSE)[0] = DDS::string_dup(partition_str.c_str());
   }
 
   dds_publisher = participant->create_publisher(publisher_qos, NULL, DDS::STATUS_MASK_NONE);
@@ -146,7 +149,7 @@ rmw_create_publisher(
   }
 
   topic = participant->create_topic(
-    topic_str, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic_str.c_str(), type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
     RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
@@ -191,8 +194,6 @@ rmw_create_publisher(
   }
   memcpy(const_cast<char *>(publisher->topic_name), topic_name, strlen(topic_name) + 1);
 
-  DDS::string_free (topic_str);
-
   return publisher;
 fail:
   if (publisher) {
@@ -216,7 +217,6 @@ fail:
       fprintf(stderr, "%s\n", check_delete_topic(status));
     }
   }
-  DDS::string_free (topic_str);
   if (publisher_info) {
     rmw_free(publisher_info);
   }

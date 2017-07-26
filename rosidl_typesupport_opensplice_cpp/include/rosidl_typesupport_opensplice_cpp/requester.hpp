@@ -30,6 +30,7 @@
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
+#include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 
 namespace rosidl_typesupport_opensplice_cpp
 {
@@ -51,7 +52,11 @@ public:
     DDS::DomainParticipant * participant, const std::string & service_name,
     const std::string & service_type_name)
   : participant_(participant), service_name_(service_name),
-    service_type_name_(service_type_name), sequence_number_(0)
+    service_type_name_(service_type_name), response_datareader_(nullptr),
+    request_datawriter_(nullptr), response_topic_(nullptr),
+    content_filtered_response_topic_(nullptr), request_topic_(nullptr),
+    response_subscriber_(nullptr), request_publisher_(nullptr),
+    sequence_number_(0)
   {}
 
   const char * init(const DDS::DataReaderQos * datareader_qos,
@@ -88,21 +93,37 @@ public:
     std::string request_topic_name = service_name_ + "_Request";
     std::string response_type_name = service_type_name_ + "_Response_";
     std::string response_topic_name = service_name_ + "_Response";
+    std::string request_topic_str;
+    std::string request_partition_str;
+    std::string response_topic_str;
+    std::string response_partition_str;
     std::string content_filtered_topic_name = service_name_ +
       std::to_string(writer_guid_.first) + "_" + std::to_string(writer_guid_.second);
     const char * estr = nullptr;
-    request_topic_ = nullptr;
-    request_publisher_ = nullptr;
-    request_datawriter_ = nullptr;
-    response_topic_ = nullptr;
-    response_subscriber_ = nullptr;
-    response_datareader_ = nullptr;
-    content_filtered_response_topic_ = nullptr;
+
+    if (!process_topic_name(
+        request_topic_name.c_str(), false, request_topic_str, request_partition_str))
+    {
+      estr = "process_topic_name: failed for request";
+      goto fail;
+    }
+
+    if (!process_topic_name(
+        response_topic_name.c_str(), false, response_topic_str, response_partition_str))
+    {
+      estr = "process_topic_name: failed for response";
+      goto fail;
+    }
 
     // Create request Publisher and DataWriter
     status = participant_->get_default_publisher_qos(publisher_qos);
     if (nullptr != (estr = impl::check_get_default_publisher_qos(status))) {
       goto fail;
+    }
+
+    if (0 != request_partition_str.size()) {
+      publisher_qos.partition.name.length(1);
+      publisher_qos.partition.name[0] = DDS::string_dup(request_partition_str.c_str());
     }
 
     request_publisher_ =
@@ -118,7 +139,7 @@ public:
     }
 
     request_topic_ = participant_->create_topic(
-      request_topic_name.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
+      request_topic_str.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
     if (!request_topic_) {
       estr = "DomainParticipant::create_topic: failed for request";
@@ -138,6 +159,11 @@ public:
       goto fail;
     }
 
+    if (0 != response_partition_str.size()) {
+      subscriber_qos.partition.name.length(1);
+      subscriber_qos.partition.name[0] = DDS::string_dup(response_partition_str.c_str());
+    }
+
     response_subscriber_ = participant_->create_subscriber(
       subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
     if (!response_subscriber_) {
@@ -146,7 +172,7 @@ public:
     }
 
     response_topic_ = participant_->create_topic(
-      response_topic_name.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
+      response_topic_str.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
     if (!response_topic_) {
       estr = "DomainParticipant::create_topic: failed for response";
@@ -168,6 +194,7 @@ public:
       estr = "Subscriber::create_datawriter: failed for response";
       goto fail;
     }
+
     return nullptr;
 fail:
     if (response_datareader_) {

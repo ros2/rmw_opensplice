@@ -17,6 +17,7 @@
 #include <string>
 
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
+#include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
 
 #include "rmw/allocators.h"
@@ -29,13 +30,13 @@
 #include "qos.hpp"
 #include "types.hpp"
 #include "typesupport_macros.hpp"
-#include "misc.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datareader_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_datareader;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_subscriber;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_topic;
+using rosidl_typesupport_opensplice_cpp::process_topic_name;
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
@@ -60,11 +61,16 @@ rmw_create_subscription(
   RMW_OPENSPLICE_EXTRACT_MESSAGE_TYPESUPPORT(
     type_supports, type_support)
 
+  if (!topic_name || strlen(topic_name) == 0) {
+    RMW_SET_ERROR_MSG("publisher topic is null or empty string");
+    return nullptr;
+  }
+
   if (!qos_profile) {
     RMW_SET_ERROR_MSG("qos_profile is null");
     return nullptr;
   }
-  
+
   if (qos_profile->avoid_ros_namespace_conventions) {
     RMW_SET_ERROR_MSG("QoS 'avoid_ros_namespace_conventions' is not implemented");
     return NULL;
@@ -112,8 +118,8 @@ rmw_create_subscription(
   DDS::ReadCondition * read_condition = nullptr;
   void * buf = nullptr;
   OpenSpliceStaticSubscriberInfo * subscriber_info = nullptr;
-  char * partition_str = nullptr;
-  char * topic_str = nullptr;
+  std::string partition_str;
+  std::string topic_str;
 
   // Begin initializing elements.
   subscription = rmw_subscription_allocate();
@@ -121,19 +127,16 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("failed to allocate rmw_subscription_t");
     goto fail;
   }
-
   if (!process_topic_name(
-    topic_name,
-    qos_profile->avoid_ros_namespace_conventions,
-    &topic_str,
-    &partition_str))
+      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str, partition_str))
   {
+    RMW_SET_ERROR_MSG("failed to process topic name");
     goto fail;
   }
 
-  if (strlen(partition_str) != 0) {  // only set if not empty
+  if (0 != partition_str.size()) {  // only set if not empty
     subscriber_qos.partition.name.length(1);
-    subscriber_qos.partition.name[0] = partition_str; // pass reference
+    subscriber_qos.partition.name[0] = DDS::string_dup(partition_str.c_str());
   }
 
   dds_subscriber = participant->create_subscriber(subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
@@ -149,7 +152,7 @@ rmw_create_subscription(
   }
 
   topic = participant->create_topic(
-    topic_str, type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic_str.c_str(), type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
     RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
@@ -199,8 +202,6 @@ rmw_create_subscription(
   }
   memcpy(const_cast<char *>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
 
-  DDS::string_free (topic_str);
-
   return subscription;
 fail:
   if (dds_subscriber) {
@@ -226,7 +227,6 @@ fail:
       fprintf(stderr, "%s\n", check_delete_topic(status));
     }
   }
-  DDS::string_free (topic_str);
   if (subscriber_info) {
     rmw_free(subscriber_info);
   }
