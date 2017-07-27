@@ -16,6 +16,7 @@
 #include <dds_dcps.h>
 #include <string>
 
+#include "rosidl_typesupport_opensplice_c/identifier.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"

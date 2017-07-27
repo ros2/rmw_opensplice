@@ -16,6 +16,7 @@
 #include <dds_dcps.h>
 #include <string>
 
+#include "rosidl_typesupport_opensplice_c/identifier.h"
 #include "rosidl_typesupport_opensplice_cpp/identifier.hpp"
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "rosidl_typesupport_opensplice_cpp/impl/error_checking.hpp"
@@ -126,7 +127,8 @@ rmw_create_publisher(
   }
 
   if (!process_topic_name(
-      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str, partition_str)) {
+      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str, partition_str))
+  {
     RMW_SET_ERROR_MSG("failed to process topic name");
     goto fail;
   }

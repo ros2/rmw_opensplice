@@ -22,19 +22,25 @@
   } \
   const rosidl_message_type_support_t * TYPE_SUPPORT = \
     get_message_typesupport_handle( \
-    TYPE_SUPPORTS, rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
+    TYPE_SUPPORTS, rosidl_typesupport_opensplice_c__identifier); \
   if (!TYPE_SUPPORT) { \
-    char __msg[1024]; \
-    snprintf( \
-      __msg, 1024, \
-      "type support handle implementation '%s' (%p) does not match valid type support " \
-      "('%s' (%p))", \
-      TYPE_SUPPORTS->typesupport_identifier, \
-      static_cast<const void *>(TYPE_SUPPORTS->typesupport_identifier), \
-      rosidl_typesupport_opensplice_cpp::typesupport_identifier, \
-      static_cast<const void *>(rosidl_typesupport_opensplice_cpp::typesupport_identifier)); \
-    RMW_SET_ERROR_MSG(__msg); \
-    return nullptr; \
+    TYPE_SUPPORT = get_message_typesupport_handle( \
+      TYPE_SUPPORTS, rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
+    if (!TYPE_SUPPORT) { \
+      char __msg[1024]; \
+      snprintf( \
+        __msg, 1024, \
+        "type support handle implementation '%s' (%p) does not match valid type supports " \
+        "('%s' (%p), '%s' (%p))", \
+        TYPE_SUPPORTS->typesupport_identifier, \
+        static_cast<const void *>(TYPE_SUPPORTS->typesupport_identifier), \
+        rosidl_typesupport_opensplice_cpp::typesupport_identifier, \
+        static_cast<const void *>(rosidl_typesupport_opensplice_cpp::typesupport_identifier), \
+        rosidl_typesupport_opensplice_c__identifier, \
+        static_cast<const void *>(rosidl_typesupport_opensplice_c__identifier)); \
+      RMW_SET_ERROR_MSG(__msg); \
+      return nullptr; \
+    } \
   }
 
 #define RMW_OPENSPLICE_EXTRACT_SERVICE_TYPESUPPORT(TYPE_SUPPORTS, TYPE_SUPPORT) \
@@ -44,19 +50,25 @@
   } \
   const rosidl_service_type_support_t * TYPE_SUPPORT = \
     get_service_typesupport_handle( \
-    TYPE_SUPPORTS, rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
+    TYPE_SUPPORTS, rosidl_typesupport_opensplice_c__identifier); \
   if (!TYPE_SUPPORT) { \
-    char __msg[1024]; \
-    snprintf( \
-      __msg, 1024, \
-      "type support handle implementation '%s' (%p) does not match valid type support " \
-      "('%s' (%p))", \
-      TYPE_SUPPORTS->typesupport_identifier, \
-      static_cast<const void *>(TYPE_SUPPORTS->typesupport_identifier), \
-      rosidl_typesupport_opensplice_cpp::typesupport_identifier, \
-      static_cast<const void *>(rosidl_typesupport_opensplice_cpp::typesupport_identifier)); \
-    RMW_SET_ERROR_MSG(__msg); \
-    return NULL; \
+    TYPE_SUPPORT = get_service_typesupport_handle( \
+      TYPE_SUPPORTS, rosidl_typesupport_opensplice_cpp::typesupport_identifier); \
+    if (!TYPE_SUPPORT) { \
+      char __msg[1024]; \
+      snprintf( \
+        __msg, 1024, \
+        "type support handle implementation '%s' (%p) does not match valid type supports " \
+        "('%s' (%p), '%s' (%p))", \
+        TYPE_SUPPORTS->typesupport_identifier, \
+        static_cast<const void *>(TYPE_SUPPORTS->typesupport_identifier), \
+        rosidl_typesupport_opensplice_cpp::typesupport_identifier, \
+        static_cast<const void *>(rosidl_typesupport_opensplice_cpp::typesupport_identifier), \
+        rosidl_typesupport_opensplice_c__identifier, \
+        static_cast<const void *>(rosidl_typesupport_opensplice_c__identifier)); \
+      RMW_SET_ERROR_MSG(__msg); \
+      return nullptr; \
+    } \
   }
 
 #endif  // TYPESUPPORT_MACROS_HPP_
