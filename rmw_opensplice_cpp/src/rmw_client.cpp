@@ -58,11 +58,6 @@ rmw_create_client(
     return nullptr;
   }
 
-  if (qos_profile->avoid_ros_namespace_conventions) {
-    RMW_SET_ERROR_MSG("QoS 'avoid_ros_namespace_conventions' is not implemented");
-    return NULL;
-  }
-
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
   if (!node_info) {
     RMW_SET_ERROR_MSG("node info handle is null");
@@ -112,6 +107,7 @@ rmw_create_client(
     reinterpret_cast<void **>(&response_datareader),
     reinterpret_cast<const void *>(&datareader_qos),
     reinterpret_cast<const void *>(&datawriter_qos),
+    qos_profile->avoid_ros_namespace_conventions,
     &rmw_allocate);
   if (error_string) {
     RMW_SET_ERROR_MSG((std::string("failed to create requester: ") + error_string).c_str());
