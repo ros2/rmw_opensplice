@@ -61,6 +61,7 @@ def generate_dds_opensplice_cpp(
         cmd += [
             '-S',
             '-l', 'cpp',
+            '-N',
             '-d', output_path,
             idl_file
         ]
