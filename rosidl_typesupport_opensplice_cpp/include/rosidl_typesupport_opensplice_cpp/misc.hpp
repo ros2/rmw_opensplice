@@ -17,9 +17,13 @@
 
 #include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 #include <string>
+#include <vector>
 
 namespace rosidl_typesupport_opensplice_cpp
 {
+
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
+const std::vector<std::string> & get_ros_prefixes();
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 bool process_topic_name(

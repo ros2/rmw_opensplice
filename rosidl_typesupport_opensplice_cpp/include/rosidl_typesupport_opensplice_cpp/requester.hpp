@@ -324,39 +324,32 @@ fail:
 
   /// Return NULL on success, otherwise an error string.
   const char *
-  server_is_available(
-    const rmw_node_t * node, bool * is_available,
-    rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
-    rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *)
-  ) noexcept
+  server_is_available(const rmw_node_t * node, bool * is_available) noexcept
   {
+    (void)node;
     if (!is_available) {
       return "argument is_available is null";
     }
     *is_available = false;
     // In the OpenSplice RPC implementation, a server is ready when:
-    //   - At least one server is subscribed to the request topic.
-    //   - At least one server is publishing to the reponse topic.
-    size_t number_of_request_subscriptions = 0;
-    rmw_ret_t ret = count_subscribers(
-      node,
-      request_topic_->get_name(),
-      &number_of_request_subscriptions);
-    if (ret != RMW_RET_OK) {
-      return rmw_get_error_string_safe();
+    //   - At least one reader is matched to the request writer.
+    //   - At least one writer is matched to the reponse reader.
+    DDS::ReturnCode_t retcode;
+    DDS::PublicationMatchedStatus publication_status;
+    retcode = request_datawriter_->get_publication_matched_status(publication_status);
+    if (retcode != DDS::RETCODE_OK) {
+      return "DataWriter::get_publication_matched_status: failed";
     }
-    if (number_of_request_subscriptions == 0) {
-      return nullptr;
+
+    DDS::SubscriptionMatchedStatus subscription_status;
+    retcode = response_datareader_->get_subscription_matched_status(subscription_status);
+    if (retcode != DDS::RETCODE_OK) {
+      return "DataReader::get_subscription_matched_status: failed";
     }
-    size_t number_of_response_publishers = 0;
-    ret = count_publishers(
-      node,
-      response_topic_->get_name(),
-      &number_of_response_publishers);
-    if (ret != RMW_RET_OK) {
-      return rmw_get_error_string_safe();
-    }
-    if (number_of_response_publishers == 0) {
+
+    if (publication_status.current_count == 0 ||
+      subscription_status.current_count == 0)
+    {
       return nullptr;
     }
     *is_available = true;

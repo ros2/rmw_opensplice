@@ -62,8 +62,7 @@ rmw_service_server_is_available(
     return RMW_RET_ERROR;
   }
 
-  const char * err = callbacks->server_is_available(
-    client_info->requester_, node, is_available, &rmw_count_publishers, &rmw_count_subscribers);
+  const char * err = callbacks->server_is_available(client_info->requester_, node, is_available);
   if (err) {
     RMW_SET_ERROR_MSG(err);
     return RMW_RET_ERROR;

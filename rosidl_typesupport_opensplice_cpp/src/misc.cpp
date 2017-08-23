@@ -13,11 +13,23 @@
 // limitations under the License.
 
 #include <string>
+#include <vector>
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 
 namespace rosidl_typesupport_opensplice_cpp
 {
 static const char * const ros_topic_prefix = "rt";
+static const char * const ros_service_request_prefix = "rq";
+static const char * const ros_service_response_prefix = "rr";
+
+const std::vector<std::string> &
+get_ros_prefixes()
+{
+  static const std::vector<std::string> ros_prefixes =
+  {ros_topic_prefix, ros_service_request_prefix, ros_service_response_prefix};
+
+  return ros_prefixes;
+}
 
 bool
 process_topic_name(
