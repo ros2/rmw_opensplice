@@ -72,9 +72,7 @@ typedef struct service_type_support_callbacks_t
   // Returns NULL if the check was successfully, otherwise an error string.
   // If no server is available, NULL is returned but is_available will be set to false.
   const char * (*server_is_available)(
-    void * requester, const rmw_node_t * node, bool * is_available,
-    rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
-    rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *));
+    void * requester, const rmw_node_t * node, bool * is_available);
 } service_type_support_callbacks_t;
 
 #endif  // ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__SERVICE_TYPE_SUPPORT_H_

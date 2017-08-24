@@ -560,9 +560,7 @@ destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocato
 
 const char *
 server_is_available__@(spec.srv_name)(
-  void * requester, const rmw_node_t * node, bool * is_available,
-  rmw_ret_t (* count_publishers)(const rmw_node_t *, const char *, size_t *),
-  rmw_ret_t (* count_subscribers)(const rmw_node_t *, const char *, size_t *))
+  void * requester, const rmw_node_t * node, bool * is_available)
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
       @(__dds_msg_type_prefix)_Request_,
@@ -571,8 +569,7 @@ server_is_available__@(spec.srv_name)(
 
   auto typed_requester = reinterpret_cast<RequesterT *>(requester);
 
-  return typed_requester->server_is_available(
-    node, is_available, count_publishers, count_subscribers);
+  return typed_requester->server_is_available(node, is_available);
 }
 
 static service_type_support_callbacks_t callbacks = {

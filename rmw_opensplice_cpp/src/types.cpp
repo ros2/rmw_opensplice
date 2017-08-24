@@ -19,7 +19,9 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
+#include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "rmw/error_handling.h"
 
 std::string
@@ -29,6 +31,31 @@ create_type_name(
 {
   return std::string(callbacks->package_name) +
          "::" + sep + "::dds_::" + callbacks->message_name + "_";
+}
+
+/// Return the ROS specific prefix if it exists, otherwise "".
+static inline
+std::string
+_get_ros_prefix_if_exists(const std::string & topic_name)
+{
+  for (auto prefix : rosidl_typesupport_opensplice_cpp::get_ros_prefixes()) {
+    if (topic_name.rfind(std::string(prefix) + "/", 0) == 0) {
+      return prefix;
+    }
+  }
+  return "";
+}
+
+/// Return the demangle ROS topic or the original if not a ROS topic.
+static inline
+std::string
+_demangle_if_ros_topic(const std::string & topic_name)
+{
+  std::string prefix = _get_ros_prefix_if_exists(topic_name);
+  if (prefix.length()) {
+    return topic_name.substr(prefix.length());
+  }
+  return topic_name;
 }
 
 CustomDataReaderListener::CustomDataReaderListener()
@@ -65,11 +92,23 @@ size_t
 CustomDataReaderListener::count_topic(const char * topic_name)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  auto it = topic_names_and_types_.find(topic_name);
+  auto it = std::find_if(
+    topic_names_and_types_.begin(),
+    topic_names_and_types_.end(),
+    [&](auto tnt) -> bool {
+    auto fqdn = _demangle_if_ros_topic(tnt.first);
+    if (fqdn == topic_name) {
+      return true;
+    }
+    return false;
+  });
+  size_t count;
   if (it == topic_names_and_types_.end()) {
-    return 0;
+    count = 0;
+  } else {
+    count = it->second.size();
   }
-  return it->second.size();
+  return count;
 }
 
 void
@@ -176,10 +215,17 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
   }
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
+    std::string topic_name = "";
     if (info_seq[i].valid_data) {
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        for (DDS::ULong j = 0; j < data_seq[i].partition.name.length(); ++j) {
+          topic_name += data_seq[i].partition.name[j];
+          topic_name += "/";
+        }
+        topic_name += data_seq[i].topic_name.in();
+
         add_information(
-          info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in(), PublisherEP);
+          info_seq[i], topic_name, data_seq[i].type_name.in(), PublisherEP);
       } else {
         remove_information(info_seq[i], PublisherEP);
       }
@@ -225,10 +271,17 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
   }
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
+    std::string topic_name("");
     if (info_seq[i].valid_data) {
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        for (DDS::ULong j = 0; j < data_seq[i].partition.name.length(); ++j) {
+          topic_name += data_seq[i].partition.name[j];
+          topic_name += "/";
+        }
+        topic_name += data_seq[i].topic_name.in();
+
         add_information(
-          info_seq[i], data_seq[i].topic_name.in(), data_seq[i].type_name.in(), SubscriberEP);
+          info_seq[i], topic_name, data_seq[i].type_name.in(), SubscriberEP);
       } else {
         remove_information(info_seq[i], SubscriberEP);
       }
