@@ -18,6 +18,8 @@
 namespace rosidl_typesupport_opensplice_cpp
 {
 static const char * const ros_topic_prefix = "rt";
+static const char * const ros_service_request_prefix = "rq";
+static const char * const ros_service_response_prefix = "rr";
 
 bool
 process_topic_name(
@@ -40,6 +42,36 @@ process_topic_name(
   }
   partition_str += topic_name_.substr(0, pos);
   topic_str = topic_name_.substr(pos + 1);
+
+  return true;
+}
+
+bool
+process_service_name(
+  const char * service_name,
+  bool avoid_ros_namespace_conventions,
+  std::string & service_str,
+  std::string & request_partition_str,
+  std::string & response_partition_str)
+{
+  const std::string service_name_ = service_name;
+  size_t pos;
+
+  pos = service_name_.find_last_of('/');
+
+  request_partition_str.clear();
+  response_partition_str.clear();
+  if (!avoid_ros_namespace_conventions) {
+    request_partition_str = ros_service_request_prefix;
+    response_partition_str = ros_service_response_prefix;
+    if (0 != service_name_.substr(0, pos).size()) {
+      request_partition_str += '/';
+      response_partition_str += '/';
+    }
+  }
+  request_partition_str += service_name_.substr(0, pos);
+  response_partition_str += service_name_.substr(0, pos);
+  service_str = service_name_.substr(pos + 1);
 
   return true;
 }

@@ -282,6 +282,7 @@ create_requester__@(spec.srv_name)(
   void ** untyped_requester, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
+  bool avoid_ros_namespace_conventions,
   void * (*allocator)(size_t))
 {
   auto _allocator = allocator ? allocator : &malloc;
@@ -321,7 +322,8 @@ create_requester__@(spec.srv_name)(
     // throw exceptions below.
     return "C++ exception caught during construction of RequesterT";
   }
-  error_string = requester->init(datareader_qos, datawriter_qos);
+  error_string = requester->init(datareader_qos, datawriter_qos,
+      avoid_ros_namespace_conventions);
   if (error_string) {
     return error_string;
   }
@@ -338,6 +340,7 @@ create_responder__@(spec.srv_name)(
   void ** untyped_responder, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
+  bool avoid_ros_namespace_conventions,
   void * (*allocator)(size_t))
 {
   auto _allocator = allocator ? allocator : &malloc;
@@ -377,7 +380,8 @@ create_responder__@(spec.srv_name)(
     // throw exceptions below.
     return "C++ exception caught during construction of ResponderT";
   }
-  error_string = responder->init(datareader_qos, datawriter_qos);
+  error_string = responder->init(datareader_qos, datawriter_qos,
+      avoid_ros_namespace_conventions);
   if (error_string) {
     return error_string;
   }

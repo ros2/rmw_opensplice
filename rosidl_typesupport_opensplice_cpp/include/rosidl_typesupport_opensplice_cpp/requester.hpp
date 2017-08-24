@@ -60,7 +60,8 @@ public:
   {}
 
   const char * init(const DDS::DataReaderQos * datareader_qos,
-    const DDS::DataWriterQos * datawriter_qos) noexcept
+    const DDS::DataWriterQos * datawriter_qos,
+    bool avoid_ros_namespace_conventions) noexcept
   {
     std::random_device rd;
     std::default_random_engine e1(rd());
@@ -89,31 +90,27 @@ public:
     DDS::TopicQos default_topic_qos;
     DDS::PublisherQos publisher_qos;
     DDS::SubscriberQos subscriber_qos;
+    std::string service_str;
     std::string request_type_name = service_type_name_ + "_Request_";
-    std::string request_topic_name = service_name_ + "_Request";
+    std::string request_topic_name;
+    std::string request_partition_name;
     std::string response_type_name = service_type_name_ + "_Response_";
-    std::string response_topic_name = service_name_ + "_Response";
-    std::string request_topic_str;
-    std::string request_partition_str;
-    std::string response_topic_str;
-    std::string response_partition_str;
-    std::string content_filtered_topic_name = service_name_ +
-      std::to_string(writer_guid_.first) + "_" + std::to_string(writer_guid_.second);
+    std::string response_topic_name;
+    std::string response_partition_name;
+    std::string content_filtered_topic_name;
     const char * estr = nullptr;
 
-    if (!process_topic_name(
-        request_topic_name.c_str(), false, request_topic_str, request_partition_str))
+    if (!process_service_name(
+        service_name_.c_str(), avoid_ros_namespace_conventions, service_str,
+        request_partition_name, response_partition_name))
     {
-      estr = "process_topic_name: failed for request";
+      estr = "process_service_name: failed";
       goto fail;
     }
-
-    if (!process_topic_name(
-        response_topic_name.c_str(), false, response_topic_str, response_partition_str))
-    {
-      estr = "process_topic_name: failed for response";
-      goto fail;
-    }
+    request_topic_name = service_str + "_Request";
+    response_topic_name = service_str + "_Response";
+    content_filtered_topic_name = service_str +
+      std::to_string(writer_guid_.first) + "_" + std::to_string(writer_guid_.second);
 
     // Create request Publisher and DataWriter
     status = participant_->get_default_publisher_qos(publisher_qos);
@@ -121,9 +118,9 @@ public:
       goto fail;
     }
 
-    if (0 != request_partition_str.size()) {
+    if (0 != request_partition_name.size()) {
       publisher_qos.partition.name.length(1);
-      publisher_qos.partition.name[0] = DDS::string_dup(request_partition_str.c_str());
+      publisher_qos.partition.name[0] = DDS::string_dup(request_partition_name.c_str());
     }
 
     request_publisher_ =
@@ -139,7 +136,7 @@ public:
     }
 
     request_topic_ = participant_->create_topic(
-      request_topic_str.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
+      request_topic_name.c_str(), request_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
     if (!request_topic_) {
       estr = "DomainParticipant::create_topic: failed for request";
@@ -159,9 +156,9 @@ public:
       goto fail;
     }
 
-    if (0 != response_partition_str.size()) {
+    if (0 != response_partition_name.size()) {
       subscriber_qos.partition.name.length(1);
-      subscriber_qos.partition.name[0] = DDS::string_dup(response_partition_str.c_str());
+      subscriber_qos.partition.name[0] = DDS::string_dup(response_partition_name.c_str());
     }
 
     response_subscriber_ = participant_->create_subscriber(
@@ -172,7 +169,7 @@ public:
     }
 
     response_topic_ = participant_->create_topic(
-      response_topic_str.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
+      response_topic_name.c_str(), response_type_name.c_str(), default_topic_qos, NULL,
       DDS::STATUS_MASK_NONE);
     if (!response_topic_) {
       estr = "DomainParticipant::create_topic: failed for response";
