@@ -65,6 +65,7 @@ create_requester__@(spec.srv_name)(
   void ** untyped_requester, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
+  bool avoid_ros_namespace_conventions,
   void * (*allocator)(size_t))
 {
   return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::create_requester__@(spec.srv_name)(
@@ -72,6 +73,7 @@ create_requester__@(spec.srv_name)(
     untyped_requester, untyped_reader,
     untyped_datareader_qos,
     untyped_datawriter_qos,
+    avoid_ros_namespace_conventions,
     allocator);
 }
 
@@ -81,6 +83,7 @@ create_responder__@(spec.srv_name)(
   void ** untyped_responder, void ** untyped_reader,
   const void * untyped_datareader_qos,
   const void * untyped_datawriter_qos,
+  bool avoid_ros_namespace_conventions,
   void * (*allocator)(size_t))
 {
   return @(spec.pkg_name)::srv::typesupport_opensplice_cpp::create_responder__@(spec.srv_name)(
@@ -88,6 +91,7 @@ create_responder__@(spec.srv_name)(
     untyped_responder, untyped_reader,
     untyped_datareader_qos,
     untyped_datawriter_qos,
+    avoid_ros_namespace_conventions,
     allocator);
 }
 
