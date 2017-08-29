@@ -25,8 +25,8 @@ extern "C"
 {
 #endif
 
-#include "u_instanceHandle.h"
-#include "v_collection.h"
+#include "u_instanceHandle.h"  // NOLINT
+#include "v_collection.h"  // NOLINT
 
 v_gid
 u_instanceHandleToGID(
