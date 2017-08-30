@@ -69,7 +69,6 @@ rmw_get_topic_names_and_types(
     RMW_SET_ERROR_MSG("subscriber listener handle is null");
     return RMW_RET_ERROR;
   }
-  printf("no_demangle=%s\n", no_demangle?"true":"false");
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
