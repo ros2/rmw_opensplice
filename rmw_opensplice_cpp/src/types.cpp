@@ -34,9 +34,8 @@ create_type_name(
 }
 
 /// Return the ROS specific prefix if it exists, otherwise "".
-static inline
 std::string
-_get_ros_prefix_if_exists(const std::string & topic_name)
+get_ros_prefix_if_exists(const std::string & topic_name)
 {
   for (auto prefix : rosidl_typesupport_opensplice_cpp::get_ros_prefixes()) {
     if (topic_name.rfind(std::string(prefix) + "/", 0) == 0) {
@@ -47,15 +46,33 @@ _get_ros_prefix_if_exists(const std::string & topic_name)
 }
 
 /// Return the demangle ROS topic or the original if not a ROS topic.
-static inline
 std::string
-_demangle_if_ros_topic(const std::string & topic_name)
+demangle_if_ros_topic(const std::string & topic_name)
 {
-  std::string prefix = _get_ros_prefix_if_exists(topic_name);
+  std::string prefix = get_ros_prefix_if_exists(topic_name);
   if (prefix.length()) {
     return topic_name.substr(prefix.length());
   }
   return topic_name;
+}
+
+/// Return the demangled ROS type or the original if not a ROS type.
+std::string
+demangle_if_ros_type(const std::string & dds_type_string)
+{
+  std::string substring = "::msg::dds_::";
+  size_t substring_position = dds_type_string.find(substring);
+  if (
+    dds_type_string[dds_type_string.size() - 1] == '_' &&
+    substring_position != std::string::npos)
+  {
+    std::string pkg = dds_type_string.substr(0, substring_position);
+    size_t start = substring_position + substring.size();
+    std::string type_name = dds_type_string.substr(start, dds_type_string.length() - 1 - start);
+    return pkg + "/" + type_name;
+  }
+  // not a ROS type
+  return dds_type_string;
 }
 
 CustomDataReaderListener::CustomDataReaderListener()
@@ -96,7 +113,7 @@ CustomDataReaderListener::count_topic(const char * topic_name)
     topic_names_and_types_.begin(),
     topic_names_and_types_.end(),
     [&](auto tnt) -> bool {
-    auto fqdn = _demangle_if_ros_topic(tnt.first);
+    auto fqdn = demangle_if_ros_topic(tnt.first);
     if (fqdn == topic_name) {
       return true;
     }
@@ -113,10 +130,16 @@ CustomDataReaderListener::count_topic(const char * topic_name)
 
 void
 CustomDataReaderListener::fill_topic_names_and_types(
+  bool no_demangle,
   std::map<std::string, std::set<std::string>> & tnat)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   for (auto it : topic_names_and_types_) {
+    if (!no_demangle && (get_ros_prefix_if_exists(it.first) !=
+      rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
+    {
+      continue;
+    }
     for (auto & jt : it.second) {
       tnat[it.first].insert(jt);
     }

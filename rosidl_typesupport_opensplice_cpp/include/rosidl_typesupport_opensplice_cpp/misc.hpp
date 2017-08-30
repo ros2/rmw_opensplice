@@ -26,6 +26,9 @@ ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 const std::vector<std::string> & get_ros_prefixes();
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
+std::string get_ros_topic_prefix();
+
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 bool process_topic_name(
   const char * topic_name,
   bool avoid_ros_namespace_conventions,
