@@ -31,6 +31,12 @@ get_ros_prefixes()
   return ros_prefixes;
 }
 
+std::string
+get_ros_topic_prefix()
+{
+  return ros_topic_prefix;
+}
+
 bool
 process_topic_name(
   const char * topic_name,

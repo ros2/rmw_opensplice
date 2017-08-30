@@ -35,6 +35,18 @@ create_type_name(
   const message_type_support_callbacks_t * callbacks,
   const std::string & sep);
 
+RMW_LOCAL
+std::string
+get_ros_prefix_if_exists(const std::string & topic_name);
+
+RMW_LOCAL
+std::string
+demangle_if_ros_topic(const std::string & topic_name);
+
+RMW_LOCAL
+std::string
+demangle_if_ros_type(const std::string & dds_type_string);
+
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {
@@ -66,7 +78,9 @@ public:
     DDS::DataReader_ptr, const DDS::SampleLostStatus &)
   {}
 
-  void fill_topic_names_and_types(std::map<std::string, std::set<std::string>> & tnat);
+  void fill_topic_names_and_types(
+    bool no_demangle,
+    std::map<std::string, std::set<std::string>> & tnat);
   size_t count_topic(const char * topic_name);
 
   enum EndPointType
