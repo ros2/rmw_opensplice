@@ -118,8 +118,27 @@ rmw_create_node(
   }
 #endif
 
+  // Communicate the ROS Node name as DDS Builtin Participant Topic userData
+  //   For extensibility and backwards compatibility a format is applied that must be understood.
+  //   The format specifies a list of name-value pairs,
+  //   Format (byte ascii string) syntax : { <name> '=' <value> ';' }*
+  //   A <name> is a string and a <value> is a sequence of octets.
+  //   The '=' and ';' characters are reserved delimiters.
+  //   For <name> only alphanumeric character are allowed.
+  //   For <value> there is no limitation, ';' can be used as part of the <value> when escaped by
+  //   a second ';'.
+  //   Implemented policy value: "name=<node-name>;"
+  //   userData not following this policy will be ignored completely.
+
+  DDS::DomainParticipantQos dpqos;
+  size_t length = strlen(name) + strlen("name=;") + 1;
+  dp_factory->get_default_participant_qos(dpqos);
+  dpqos.user_data.value.length(length);
+  snprintf(reinterpret_cast<char *>(dpqos.user_data.value.get_buffer(false)), length, "name=%s;",
+    name);
+
   participant = dp_factory->create_participant(
-    domain, PARTICIPANT_QOS_DEFAULT, NULL, DDS::STATUS_MASK_NONE);
+    domain, dpqos, NULL, DDS::STATUS_MASK_NONE);
   if (!participant) {
     RMW_SET_ERROR_MSG("failed to create domain participant");
     return NULL;
