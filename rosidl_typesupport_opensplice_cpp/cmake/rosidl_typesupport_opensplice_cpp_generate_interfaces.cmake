@@ -80,7 +80,7 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
       "${_output_path}/${_parent_folder}/dds_opensplice/${_msg_name}_SplDcps.cpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/ccpp_${_msg_name}_.h")
     list(APPEND ${_var2}
-      "${_output_path}/msg/${_header_name}__rosidl_typesupport_opensplice_cpp.hpp"
+      "${_output_path}/${_parent_folder}/${_header_name}__rosidl_typesupport_opensplice_cpp.hpp"
       "${_output_path}/${_parent_folder}/dds_opensplice/${_header_name}__type_support.cpp")
   elseif(_extension STREQUAL ".srv")
     list(APPEND _generated_srv_files "${_output_path}/srv/${_header_name}__rosidl_typesupport_opensplice_cpp.hpp")
