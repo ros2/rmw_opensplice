@@ -20,6 +20,9 @@
 #ifndef ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__U__INSTANCEHANDLE_H_
 #define ROSIDL_TYPESUPPORT_OPENSPLICE_CPP__U__INSTANCEHANDLE_H_
 
+// Provides visibility macros like ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC.
+#include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
+
 #if __cplusplus
 extern "C"
 {
@@ -28,6 +31,7 @@ extern "C"
 #include "u_instanceHandle.h"  // NOLINT
 #include "v_collection.h"  // NOLINT
 
+ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 v_gid
 u_instanceHandleToGID(
   u_instanceHandle _this);
