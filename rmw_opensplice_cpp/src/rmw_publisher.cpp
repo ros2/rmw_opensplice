@@ -130,7 +130,7 @@ rmw_create_publisher(
 
   if (0 != partition_str.size()) {  // only set if not empty
     publisher_qos.partition.name.length(1);
-    publisher_qos.partition.name.get_buffer(FALSE)[0] = DDS::string_dup(partition_str.c_str());
+    publisher_qos.partition.name[0] = partition_str.c_str();
   }
 
   dds_publisher = participant->create_publisher(publisher_qos, NULL, DDS::STATUS_MASK_NONE);
