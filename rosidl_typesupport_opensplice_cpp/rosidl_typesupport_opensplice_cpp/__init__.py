@@ -73,13 +73,9 @@ def generate_dds_opensplice_cpp(
                     '%s/msg/rosidl_typesupport_opensplice_cpp__visibility_control.h' % pkg_name)]
         subprocess.check_call(cmd)
 
-        # modify generated code to compile with Visual Studio 2015
-        msg_name = os.path.splitext(os.path.basename(idl_file))[0]
-        dcps_impl_h_filename = os.path.join(output_path, '%sDcps_impl.h' % msg_name)
-        _modify(dcps_impl_h_filename, msg_name, _copy_constructor_and_assignment_operator)
-
         # modify generated code to
         # remove path information of the building machine as well as timestamps
+        msg_name = os.path.splitext(os.path.basename(idl_file))[0]
         idl_path = os.path.join(
             pkg_name, os.path.basename(parent_folder), os.path.basename(folder),
             os.path.basename(idl_file))
@@ -102,21 +98,6 @@ def _modify(filename, msg_name, callback, idl_path=None):
     if modified:
         with open(filename, 'w') as h:
             h.write('\n'.join(lines))
-
-
-def _copy_constructor_and_assignment_operator(lines, msg_name, idl_path=None):
-    for i, line in enumerate(lines):
-        if line.strip() != 'public:':
-            continue
-        new_lines = [
-            '%sTypeSupportMetaHolder(const %sTypeSupportMetaHolder & o) = delete;' %
-            (msg_name, msg_name),
-            '%sTypeSupportMetaHolder & operator=(const %sTypeSupportMetaHolder & o) = delete;' %
-            (msg_name, msg_name),
-        ]
-        lines[i + 1:i + 1] = [' ' * 16 + l for l in new_lines]
-        return lines
-    assert False, 'Failed to find insertion point'
 
 
 def _replace_path_and_timestamp(lines, msg_name, idl_path):
