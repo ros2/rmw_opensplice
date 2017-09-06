@@ -302,6 +302,9 @@ fail:
     if (node->name) {
       rmw_free(const_cast<char *>(node->name));
     }
+    if (node->namespace_) {
+      rmw_free(const_cast<char *>(node->namespace_));
+    }
     rmw_node_free(node);
   }
   return nullptr;
@@ -383,6 +386,8 @@ rmw_destroy_node(rmw_node_t * node)
   node->data = nullptr;
   rmw_free(const_cast<char *>(node->name));
   node->name = nullptr;
+  rmw_free(const_cast<char *>(node->namespace_));
+  node->namespace_ = nullptr;
   rmw_node_free(node);
   return result;
 }
