@@ -150,7 +150,10 @@ rosidl_write_generator_arguments(
   OUTPUT_DIR "${_output_path}"
   TEMPLATE_DIR "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}"
   TARGET_DEPENDENCIES ${target_dependencies}
-  ADDITIONAL_FILES ${_dds_idl_files}
+  ADDITIONAL_FILES
+  ${_dds_idl_files}
+  ${_generated_external_msg_files}
+  ${_generated_external_srv_files}
 )
 
 add_custom_command(
