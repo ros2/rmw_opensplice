@@ -397,7 +397,7 @@ else:
       return "failed to assign string into field '@(field.name)'";
     }
 @[  elif field.type.is_primitive_type()]@
-    ros_message->@(field.name) = dds_message->@(field.name)_@(' == TRUE' if field.type.type == 'bool' else '');
+    ros_message->@(field.name) = @('(' if field.type.type == 'bool' else '')dds_message->@(field.name)_@(' != 0)' if field.type.type == 'bool' else '');
 @[  else]@
     const rosidl_message_type_support_t * ts =
       ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_opensplice_c, @(field.type.pkg_name), msg, @(field.type.type))();

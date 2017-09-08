@@ -152,8 +152,6 @@ rosidl_write_generator_arguments(
   TARGET_DEPENDENCIES ${target_dependencies}
   ADDITIONAL_FILES
   ${_dds_idl_files}
-  ${_generated_external_msg_files}
-  ${_generated_external_srv_files}
 )
 
 add_custom_command(
@@ -165,8 +163,6 @@ add_custom_command(
   DEPENDS
   ${target_dependencies}
   ${_dds_idl_files}
-  ${_generated_external_msg_files}
-  ${_generated_external_srv_files}
   COMMENT "Generating C type support for PrismTech OpenSplice"
   VERBATIM
 )
