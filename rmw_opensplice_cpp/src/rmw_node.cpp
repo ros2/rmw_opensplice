@@ -133,7 +133,7 @@ rmw_create_node(
   DDS::DomainParticipantQos dpqos;
   size_t length = strlen(name) + strlen("name=;") + 1;
   dp_factory->get_default_participant_qos(dpqos);
-  dpqos.user_data.value.length(length);
+  dpqos.user_data.value.length(static_cast<DDS::ULong>(length));
   snprintf(reinterpret_cast<char *>(dpqos.user_data.value.get_buffer(false)), length, "name=%s;",
     name);
 

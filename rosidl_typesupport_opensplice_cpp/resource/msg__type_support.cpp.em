@@ -239,7 +239,7 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
       ros_message.@(field.name)[i] = (dds_message.@(field.name)_[i] != 0);
 @[    elif field.type.is_primitive_type()]@
       ros_message.@(field.name)[i] =
-        dds_message.@(field.name)_[i]@(' == TRUE' if field.type.type == 'bool' else '');
+        dds_message.@(field.name)_[i];
 @[    else]@
       @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
         dds_message.@(field.name)_[i], ros_message.@(field.name)[i]);
@@ -248,7 +248,7 @@ convert_dds_message_to_ros(const __dds_msg_type & dds_message, __ros_msg_type & 
   }
 @[  elif field.type.is_primitive_type()]@
   ros_message.@(field.name) =
-    dds_message.@(field.name)_@(' == TRUE' if field.type.type == 'bool' else '');
+    @('(' if field.type.type == 'bool' else '')dds_message.@(field.name)_@(' != 0)' if field.type.type == 'bool' else '');
 @[  else]@
   @(field.type.pkg_name)::msg::typesupport_opensplice_cpp::convert_dds_message_to_ros(
     dds_message.@(field.name)_, ros_message.@(field.name));
