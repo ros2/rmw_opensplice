@@ -93,23 +93,6 @@ foreach(_idl_file ${rosidl_generate_interfaces_IDL_FILES})
   endif()
 endforeach()
 
-# If not on Windows, disable some warnings with OpenSplice's generated code
-if(NOT WIN32)
-  set(_opensplice_compile_flags)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(_opensplice_compile_flags
-      "-Wno-unused-but-set-variable"
-    )
-  endif()
-  if(NOT _opensplice_compile_flags STREQUAL "")
-    string(REPLACE ";" " " _opensplice_compile_flags "${_opensplice_compile_flags}")
-    foreach(_gen_file ${_generated_external_msg_files} ${_generated_external_srv_files})
-      set_source_files_properties("${_gen_file}"
-        PROPERTIES COMPILE_FLAGS "${_opensplice_compile_flags}")
-    endforeach()
-  endif()
-endif()
-
 set(_dependency_files "")
 set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
@@ -167,7 +150,10 @@ rosidl_write_generator_arguments(
   OUTPUT_DIR "${_output_path}"
   TEMPLATE_DIR "${rosidl_typesupport_opensplice_c_TEMPLATE_DIR}"
   TARGET_DEPENDENCIES ${target_dependencies}
-  ADDITIONAL_FILES ${_dds_idl_files}
+  ADDITIONAL_FILES
+  ${_dds_idl_files}
+  ${_generated_external_msg_files}
+  ${_generated_external_srv_files}
 )
 
 add_custom_command(
@@ -229,9 +215,7 @@ if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
 
   if(
     NOT _generated_msg_files STREQUAL "" OR
-    NOT _generated_external_msg_files STREQUAL "" OR
-    NOT _generated_srv_files STREQUAL "" OR
-    NOT _generated_external_srv_files STREQUAL ""
+    NOT _generated_srv_files STREQUAL ""
   )
     ament_export_include_directories(include)
   endif()
@@ -240,9 +224,7 @@ endif()
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(${rosidl_generate_interfaces_TARGET}${_target_suffix} SHARED
   ${_generated_msg_files}
-  ${_generated_external_msg_files}
-  ${_generated_srv_files}
-  ${_generated_external_srv_files})
+  ${_generated_srv_files})
 if(rosidl_generate_interfaces_LIBRARY_NAME)
   set_target_properties(${rosidl_generate_interfaces_TARGET}${_target_suffix}
     PROPERTIES OUTPUT_NAME "${rosidl_generate_interfaces_LIBRARY_NAME}${_target_suffix}")
