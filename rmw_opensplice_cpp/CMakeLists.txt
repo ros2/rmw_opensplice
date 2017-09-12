@@ -44,6 +44,7 @@ ament_export_dependencies(
 
 link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(rmw_opensplice_cpp SHARED
+  src/demangle.cpp
   src/identifier.cpp
   src/qos.cpp
   src/rmw_client.cpp

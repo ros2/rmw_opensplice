@@ -21,8 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "rmw/error_handling.h"
+#include "rosidl_typesupport_opensplice_cpp/misc.hpp"
+#include "demangle.hpp"
 
 std::string
 create_type_name(
@@ -31,48 +32,6 @@ create_type_name(
 {
   return std::string(callbacks->package_name) +
          "::" + sep + "::dds_::" + callbacks->message_name + "_";
-}
-
-/// Return the ROS specific prefix if it exists, otherwise "".
-std::string
-get_ros_prefix_if_exists(const std::string & topic_name)
-{
-  for (auto prefix : rosidl_typesupport_opensplice_cpp::get_ros_prefixes()) {
-    if (topic_name.rfind(std::string(prefix) + "/", 0) == 0) {
-      return prefix;
-    }
-  }
-  return "";
-}
-
-/// Return the demangle ROS topic or the original if not a ROS topic.
-std::string
-demangle_if_ros_topic(const std::string & topic_name)
-{
-  std::string prefix = get_ros_prefix_if_exists(topic_name);
-  if (prefix.length()) {
-    return topic_name.substr(prefix.length());
-  }
-  return topic_name;
-}
-
-/// Return the demangled ROS type or the original if not a ROS type.
-std::string
-demangle_if_ros_type(const std::string & dds_type_string)
-{
-  std::string substring = "::msg::dds_::";
-  size_t substring_position = dds_type_string.find(substring);
-  if (
-    dds_type_string[dds_type_string.size() - 1] == '_' &&
-    substring_position != std::string::npos)
-  {
-    std::string pkg = dds_type_string.substr(0, substring_position);
-    size_t start = substring_position + substring.size();
-    std::string type_name = dds_type_string.substr(start, dds_type_string.length() - 1 - start);
-    return pkg + "/" + type_name;
-  }
-  // not a ROS type
-  return dds_type_string;
 }
 
 CustomDataReaderListener::CustomDataReaderListener()

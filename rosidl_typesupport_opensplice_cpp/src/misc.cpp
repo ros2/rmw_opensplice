@@ -37,6 +37,18 @@ get_ros_topic_prefix()
   return ros_topic_prefix;
 }
 
+std::string
+get_ros_service_request_prefix()
+{
+  return ros_service_request_prefix;
+}
+
+std::string
+get_ros_service_response_prefix()
+{
+  return ros_service_response_prefix;
+}
+
 bool
 process_topic_name(
   const char * topic_name,

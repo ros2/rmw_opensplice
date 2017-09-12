@@ -35,18 +35,6 @@ create_type_name(
   const message_type_support_callbacks_t * callbacks,
   const std::string & sep);
 
-RMW_LOCAL
-std::string
-get_ros_prefix_if_exists(const std::string & topic_name);
-
-RMW_LOCAL
-std::string
-demangle_if_ros_topic(const std::string & topic_name);
-
-RMW_LOCAL
-std::string
-demangle_if_ros_type(const std::string & dds_type_string);
-
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {

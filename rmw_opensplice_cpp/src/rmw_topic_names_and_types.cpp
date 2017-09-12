@@ -31,6 +31,7 @@
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "identifier.hpp"
 #include "types.hpp"
+#include "demangle.hpp"
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
