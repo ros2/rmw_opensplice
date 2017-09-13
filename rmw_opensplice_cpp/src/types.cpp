@@ -24,6 +24,7 @@
 #include "rmw/error_handling.h"
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "demangle.hpp"
+#include "namespace_prefix.hpp"
 
 std::string
 create_type_name(
@@ -72,7 +73,7 @@ CustomDataReaderListener::count_topic(const char * topic_name)
     topic_names_and_types_.begin(),
     topic_names_and_types_.end(),
     [&](auto tnt) -> bool {
-    auto fqdn = demangle_if_ros_topic(tnt.first);
+    auto fqdn = _demangle_if_ros_topic(tnt.first);
     if (fqdn == topic_name) {
       return true;
     }
@@ -94,13 +95,33 @@ CustomDataReaderListener::fill_topic_names_and_types(
 {
   std::lock_guard<std::mutex> lock(mutex_);
   for (auto it : topic_names_and_types_) {
-    if (!no_demangle && (get_ros_prefix_if_exists(it.first) !=
+    if (!no_demangle && (_get_ros_prefix_if_exists(it.first) !=
       rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
     {
       continue;
     }
     for (auto & jt : it.second) {
       tnat[it.first].insert(jt);
+    }
+  }
+}
+
+void
+CustomDataReaderListener::fill_service_names_and_types(
+  std::map<std::string, std::set<std::string>> & services)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  for (auto it : topic_names_and_types_) {
+    std::string service_name = _demangle_service_from_topic(it.first);
+    if (!service_name.length()) {
+      // not a service
+      continue;
+    }
+    for (auto & itt : it.second) {
+      std::string service_type = _demangle_service_type_only(itt);
+      if (service_type.length()) {
+        services[service_name].insert(service_type);
+      }
     }
   }
 }
@@ -240,6 +261,7 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
   DDS::SubscriptionBuiltinTopicDataSeq data_seq;
   DDS::SampleInfoSeq info_seq;
+
   DDS::ReturnCode_t retcode = builtin_reader->take(
     data_seq, info_seq, DDS::LENGTH_UNLIMITED,
     DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);

@@ -46,6 +46,7 @@ link_directories(${OpenSplice_LIBRARY_DIRS})
 add_library(rmw_opensplice_cpp SHARED
   src/demangle.cpp
   src/identifier.cpp
+  src/namespace_prefix.cpp
   src/qos.cpp
   src/rmw_client.cpp
   src/rmw_compare_gids_equal.cpp

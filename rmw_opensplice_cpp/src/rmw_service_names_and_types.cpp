@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <set>
+#include <map>
+#include <string>
+
 #include "rcutils/allocator.h"
 #include "rcutils/logging_macros.h"
 #include "rcutils/strdup.h"
@@ -55,6 +59,9 @@ rmw_get_service_names_and_types(
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
   if (!node_info) {
     RMW_SET_ERROR_MSG("node info handle is null");
+  }
+  if (!node_info->publisher_listener) {
+    RMW_SET_ERROR_MSG("publisher listener handle is null");
     return RMW_RET_ERROR;
   }
   if (!node_info->publisher_listener) {
@@ -68,8 +75,8 @@ rmw_get_service_names_and_types(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->publisher_listener->fill_topic_names_and_types(true, services);
-  node_info->subscriber_listener->fill_topic_names_and_types(true, services);
+  node_info->publisher_listener->fill_service_names_and_types(services);
+  node_info->subscriber_listener->fill_service_names_and_types(services);
 
   // Fill out service_names_and_types
   if (services.size()) {

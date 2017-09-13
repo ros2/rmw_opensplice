@@ -69,6 +69,10 @@ public:
   void fill_topic_names_and_types(
     bool no_demangle,
     std::map<std::string, std::set<std::string>> & tnat);
+
+  void fill_service_names_and_types(
+    std::map<std::string, std::set<std::string>> & services);
+
   size_t count_topic(const char * topic_name);
 
   enum EndPointType
