@@ -31,6 +31,7 @@
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "identifier.hpp"
 #include "types.hpp"
+#include "demangle.hpp"
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
@@ -90,8 +91,8 @@ rmw_get_topic_names_and_types(
         }
       };
     // Setup demangling functions based on no_demangle option
-    auto demangle_topic = demangle_if_ros_topic;
-    auto demangle_type = demangle_if_ros_type;
+    auto demangle_topic = _demangle_if_ros_topic;
+    auto demangle_type = _demangle_if_ros_type;
     if (no_demangle) {
       auto noop = [](const std::string & in) {
           return in;
