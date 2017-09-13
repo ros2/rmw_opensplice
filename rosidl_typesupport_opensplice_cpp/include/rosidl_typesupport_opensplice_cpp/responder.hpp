@@ -70,8 +70,8 @@ public:
       estr = "process_service_name: failed";
       goto fail;
     }
-    request_topic_name = service_str + "_Request";
-    response_topic_name = service_str + "_Response";
+    request_topic_name = service_str + "Request";
+    response_topic_name = service_str + "Reply";
 
     // Create request Publisher and DataWriter
     status = participant_->get_default_topic_qos(default_topic_qos);
