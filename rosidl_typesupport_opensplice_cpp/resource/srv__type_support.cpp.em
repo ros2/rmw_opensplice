@@ -508,7 +508,7 @@ take_response__@(spec.srv_name)(
 }
 
 const char *
-destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocator)(void *))
+destroy_requester__@(spec.srv_name)(void * untyped_requester, void (*deallocator)(void *))
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
       @(__dds_msg_type_prefix)_Request_,
@@ -534,7 +534,7 @@ destroy_requester__@(spec.srv_name)(void * untyped_requester, void (* deallocato
 }
 
 const char *
-destroy_responder__@(spec.srv_name)(void * untyped_responder, void (* deallocator)(void *))
+destroy_responder__@(spec.srv_name)(void * untyped_responder, void (*deallocator)(void *))
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
       @(__dds_msg_type_prefix)_Request_,
