@@ -59,7 +59,8 @@ public:
     sequence_number_(0)
   {}
 
-  const char * init(const DDS::DataReaderQos * datareader_qos,
+  const char * init(
+    const DDS::DataReaderQos * datareader_qos,
     const DDS::DataWriterQos * datawriter_qos,
     bool avoid_ros_namespace_conventions) noexcept
   {

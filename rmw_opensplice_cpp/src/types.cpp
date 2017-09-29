@@ -53,9 +53,11 @@ CustomDataReaderListener::CustomDataReaderListener()
   if (discovery_logging_value) {
     std::string str(discovery_logging_value, discovery_logging_size);
     std::string str_lower(str);
-    std::transform(str_lower.begin(), str_lower.end(), str_lower.begin(), [](unsigned char c) {
-      return std::tolower(c);
-    });
+    std::transform(
+      str_lower.begin(), str_lower.end(), str_lower.begin(),
+      [](unsigned char c) {
+        return std::tolower(c);
+      });
     if (str != "0" && str_lower != "false" && str_lower != "off") {
       print_discovery_logging_ = true;
     }
@@ -73,12 +75,12 @@ CustomDataReaderListener::count_topic(const char * topic_name)
     topic_names_and_types_.begin(),
     topic_names_and_types_.end(),
     [&](auto tnt) -> bool {
-    auto fqdn = _demangle_if_ros_topic(tnt.first);
-    if (fqdn == topic_name) {
-      return true;
-    }
-    return false;
-  });
+      auto fqdn = _demangle_if_ros_topic(tnt.first);
+      if (fqdn == topic_name) {
+        return true;
+      }
+      return false;
+    });
   size_t count;
   if (it == topic_names_and_types_.end()) {
     count = 0;

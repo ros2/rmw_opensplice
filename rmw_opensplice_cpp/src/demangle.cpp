@@ -63,9 +63,12 @@ _demangle_service_from_topic(const std::string & topic_name)
     _get_ros_service_request_prefix(),
     _get_ros_service_response_prefix(),
   };
-  if (std::none_of(prefixes.cbegin(), prefixes.cend(), [&prefix](auto x) {
-    return prefix == x;
-  }))
+  if (
+    std::none_of(
+      prefixes.cbegin(), prefixes.cend(),
+      [&prefix](auto x) {
+        return prefix == x;
+      }))
   {
     // not a ROS service topic
     return "";
