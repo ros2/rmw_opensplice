@@ -226,9 +226,7 @@ fail:
   if (subscriber_info) {
     rmw_free(subscriber_info);
   }
-  if (subscription) {
-    rmw_subscription_free(subscription);
-  }
+
   if (buf) {
     rmw_free(buf);
   }

@@ -193,9 +193,6 @@ rmw_create_publisher(
 
   return publisher;
 fail:
-  if (publisher) {
-    rmw_publisher_free(publisher);
-  }
   if (dds_publisher) {
     if (topic_writer) {
       status = dds_publisher->delete_datawriter(topic_writer);
