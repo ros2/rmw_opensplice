@@ -161,22 +161,24 @@ rmw_wait(
   }
 
   // add a condition for each subscriber
-  for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
-    OpenSpliceStaticSubscriberInfo * subscriber_info =
-      static_cast<OpenSpliceStaticSubscriberInfo *>(subscriptions->subscribers[i]);
-    if (!subscriber_info) {
-      RMW_SET_ERROR_MSG("subscriber info handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::ReadCondition * read_condition = subscriber_info->read_condition;
-    if (!read_condition) {
-      RMW_SET_ERROR_MSG("read condition handle is null");
-      return RMW_RET_ERROR;
-    }
-    rmw_ret_t status = check_attach_condition_error(
-      dds_waitset->attach_condition(read_condition));
-    if (status != RMW_RET_OK) {
-      return status;
+  if (subscriptions) {
+    for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
+      OpenSpliceStaticSubscriberInfo * subscriber_info =
+        static_cast<OpenSpliceStaticSubscriberInfo *>(subscriptions->subscribers[i]);
+      if (!subscriber_info) {
+        RMW_SET_ERROR_MSG("subscriber info handle is null");
+        return RMW_RET_ERROR;
+      }
+      DDS::ReadCondition * read_condition = subscriber_info->read_condition;
+      if (!read_condition) {
+        RMW_SET_ERROR_MSG("read condition handle is null");
+        return RMW_RET_ERROR;
+      }
+      rmw_ret_t status = check_attach_condition_error(
+        dds_waitset->attach_condition(read_condition));
+      if (status != RMW_RET_OK) {
+        return status;
+      }
     }
   }
 
@@ -198,42 +200,46 @@ rmw_wait(
   }
 
   // add a condition for each service
-  for (size_t i = 0; i < services->service_count; ++i) {
-    OpenSpliceStaticServiceInfo * service_info =
-      static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
-    if (!service_info) {
-      RMW_SET_ERROR_MSG("service info handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::ReadCondition * read_condition = service_info->read_condition_;
-    if (!read_condition) {
-      RMW_SET_ERROR_MSG("read condition handle is null");
-      return RMW_RET_ERROR;
-    }
-    rmw_ret_t status = check_attach_condition_error(
-      dds_waitset->attach_condition(read_condition));
-    if (status != RMW_RET_OK) {
-      return status;
+  if (services) {
+    for (size_t i = 0; i < services->service_count; ++i) {
+      OpenSpliceStaticServiceInfo * service_info =
+        static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
+      if (!service_info) {
+        RMW_SET_ERROR_MSG("service info handle is null");
+        return RMW_RET_ERROR;
+      }
+      DDS::ReadCondition * read_condition = service_info->read_condition_;
+      if (!read_condition) {
+        RMW_SET_ERROR_MSG("read condition handle is null");
+        return RMW_RET_ERROR;
+      }
+      rmw_ret_t status = check_attach_condition_error(
+        dds_waitset->attach_condition(read_condition));
+      if (status != RMW_RET_OK) {
+        return status;
+      }
     }
   }
 
   // add a condition for each client
-  for (size_t i = 0; i < clients->client_count; ++i) {
-    OpenSpliceStaticClientInfo * client_info =
-      static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
-    if (!client_info) {
-      RMW_SET_ERROR_MSG("client info handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::ReadCondition * read_condition = client_info->read_condition_;
-    if (!read_condition) {
-      RMW_SET_ERROR_MSG("read condition handle is null");
-      return RMW_RET_ERROR;
-    }
-    rmw_ret_t status = check_attach_condition_error(
-      dds_waitset->attach_condition(read_condition));
-    if (status != RMW_RET_OK) {
-      return status;
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      OpenSpliceStaticClientInfo * client_info =
+        static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
+      if (!client_info) {
+        RMW_SET_ERROR_MSG("client info handle is null");
+        return RMW_RET_ERROR;
+      }
+      DDS::ReadCondition * read_condition = client_info->read_condition_;
+      if (!read_condition) {
+        RMW_SET_ERROR_MSG("read condition handle is null");
+        return RMW_RET_ERROR;
+      }
+      rmw_ret_t status = check_attach_condition_error(
+        dds_waitset->attach_condition(read_condition));
+      if (status != RMW_RET_OK) {
+        return status;
+      }
     }
   }
 
@@ -254,26 +260,28 @@ rmw_wait(
   }
 
   // set subscriber handles to zero for all not triggered status conditions
-  for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
-    OpenSpliceStaticSubscriberInfo * subscriber_info =
-      static_cast<OpenSpliceStaticSubscriberInfo *>(subscriptions->subscribers[i]);
-    if (!subscriber_info) {
-      RMW_SET_ERROR_MSG("subscriber info handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::ReadCondition * read_condition = subscriber_info->read_condition;
-    if (!read_condition) {
-      RMW_SET_ERROR_MSG("read condition handle is null");
-      return RMW_RET_ERROR;
-    }
-    if (!read_condition->get_trigger_value()) {
-      // if the status condition was not triggered
-      // reset the subscriber handle
-      subscriptions->subscribers[i] = 0;
-    }
-    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to detach guard condition");
-      return RMW_RET_ERROR;
+  if (subscriptions) {
+    for (size_t i = 0; i < subscriptions->subscriber_count; ++i) {
+      OpenSpliceStaticSubscriberInfo * subscriber_info =
+        static_cast<OpenSpliceStaticSubscriberInfo *>(subscriptions->subscribers[i]);
+      if (!subscriber_info) {
+        RMW_SET_ERROR_MSG("subscriber info handle is null");
+        return RMW_RET_ERROR;
+      }
+      DDS::ReadCondition * read_condition = subscriber_info->read_condition;
+      if (!read_condition) {
+        RMW_SET_ERROR_MSG("read condition handle is null");
+        return RMW_RET_ERROR;
+      }
+      if (!read_condition->get_trigger_value()) {
+        // if the status condition was not triggered
+        // reset the subscriber handle
+        subscriptions->subscribers[i] = 0;
+      }
+      if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+        RMW_SET_ERROR_MSG("failed to detach guard condition");
+        return RMW_RET_ERROR;
+      }
     }
   }
 
@@ -303,66 +311,70 @@ rmw_wait(
   }
 
   // set service handles to zero for all not triggered conditions
-  for (size_t i = 0; i < services->service_count; ++i) {
-    OpenSpliceStaticServiceInfo * service_info =
-      static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
-    if (!service_info) {
-      RMW_SET_ERROR_MSG("service info handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::ReadCondition * read_condition = service_info->read_condition_;
-    if (!read_condition) {
-      RMW_SET_ERROR_MSG("read condition handle is null");
-      return RMW_RET_ERROR;
-    }
-
-    // search for service condition in active set
-    uint32_t j = 0;
-    for (; j < active_conditions->length(); ++j) {
-      if ((*active_conditions)[j] == read_condition) {
-        break;
+  if (services) {
+    for (size_t i = 0; i < services->service_count; ++i) {
+      OpenSpliceStaticServiceInfo * service_info =
+        static_cast<OpenSpliceStaticServiceInfo *>(services->services[i]);
+      if (!service_info) {
+        RMW_SET_ERROR_MSG("service info handle is null");
+        return RMW_RET_ERROR;
       }
-    }
-    // if service condition is not found in the active set
-    // reset the service handle
-    if (!(j < active_conditions->length())) {
-      services->services[i] = 0;
-    }
-    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to detach guard condition");
-      return RMW_RET_ERROR;
+      DDS::ReadCondition * read_condition = service_info->read_condition_;
+      if (!read_condition) {
+        RMW_SET_ERROR_MSG("read condition handle is null");
+        return RMW_RET_ERROR;
+      }
+
+      // search for service condition in active set
+      uint32_t j = 0;
+      for (; j < active_conditions->length(); ++j) {
+        if ((*active_conditions)[j] == read_condition) {
+          break;
+        }
+      }
+      // if service condition is not found in the active set
+      // reset the service handle
+      if (!(j < active_conditions->length())) {
+        services->services[i] = 0;
+      }
+      if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+        RMW_SET_ERROR_MSG("failed to detach guard condition");
+        return RMW_RET_ERROR;
+      }
     }
   }
 
   // set client handles to zero for all not triggered conditions
-  for (size_t i = 0; i < clients->client_count; ++i) {
-    OpenSpliceStaticClientInfo * client_info =
-      static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
-    if (!client_info) {
-      RMW_SET_ERROR_MSG("client info handle is null");
-      return RMW_RET_ERROR;
-    }
-    DDS::ReadCondition * read_condition = client_info->read_condition_;
-    if (!read_condition) {
-      RMW_SET_ERROR_MSG("read condition handle is null");
-      return RMW_RET_ERROR;
-    }
-
-    // search for service condition in active set
-    uint32_t j = 0;
-    for (; j < active_conditions->length(); ++j) {
-      if ((*active_conditions)[j] == read_condition) {
-        break;
+  if (clients) {
+    for (size_t i = 0; i < clients->client_count; ++i) {
+      OpenSpliceStaticClientInfo * client_info =
+        static_cast<OpenSpliceStaticClientInfo *>(clients->clients[i]);
+      if (!client_info) {
+        RMW_SET_ERROR_MSG("client info handle is null");
+        return RMW_RET_ERROR;
       }
-    }
-    // if client condition is not found in the active set
-    // reset the client handle
-    if (!(j < active_conditions->length())) {
-      clients->clients[i] = 0;
-    }
-    if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
-      RMW_SET_ERROR_MSG("failed to detach guard condition");
-      return RMW_RET_ERROR;
+      DDS::ReadCondition * read_condition = client_info->read_condition_;
+      if (!read_condition) {
+        RMW_SET_ERROR_MSG("read condition handle is null");
+        return RMW_RET_ERROR;
+      }
+
+      // search for service condition in active set
+      uint32_t j = 0;
+      for (; j < active_conditions->length(); ++j) {
+        if ((*active_conditions)[j] == read_condition) {
+          break;
+        }
+      }
+      // if client condition is not found in the active set
+      // reset the client handle
+      if (!(j < active_conditions->length())) {
+        clients->clients[i] = 0;
+      }
+      if (dds_waitset->detach_condition(read_condition) != DDS::RETCODE_OK) {
+        RMW_SET_ERROR_MSG("failed to detach guard condition");
+        return RMW_RET_ERROR;
+      }
     }
   }
 
