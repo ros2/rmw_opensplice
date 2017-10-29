@@ -208,6 +208,10 @@ rmw_create_node(
     publisher_listener, buf, goto fail, CustomPublisherListener, graph_guard_condition)
   buf = nullptr;
   builtin_publication_datareader->set_listener(publisher_listener, DDS::DATA_AVAILABLE_STATUS);
+  // listener is set on an already created reader. This could mean that the reader already contains
+  // data for which the on_data_available callback is not called. To ensure we have not missed
+  // anything manually call the on_data_available callback.
+  publisher_listener->on_data_available(builtin_publication_datareader);
 
   data_reader = builtin_subscriber->lookup_datareader("DCPSSubscription");
   builtin_subscription_datareader =
@@ -227,6 +231,10 @@ rmw_create_node(
     subscriber_listener, buf, goto fail, CustomSubscriberListener, graph_guard_condition)
   buf = nullptr;
   builtin_subscription_datareader->set_listener(subscriber_listener, DDS::DATA_AVAILABLE_STATUS);
+  // listener is set on an already created reader. This could mean that the reader already contains
+  // data for which the on_data_available callback is not called. To ensure we have not missed
+  // anything manually call the on_data_available callback.
+  subscriber_listener->on_data_available(builtin_subscription_datareader);
 
   node = rmw_node_allocate();
   if (!node) {

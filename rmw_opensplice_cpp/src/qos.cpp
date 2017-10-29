@@ -23,7 +23,8 @@ using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datareader_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datawriter_qos;
 
 template<typename DDSEntityQos>
-bool set_entity_qos_from_profile(const rmw_qos_profile_t & qos_profile,
+bool set_entity_qos_from_profile(
+  const rmw_qos_profile_t & qos_profile,
   DDSEntityQos & entity_qos)
 {
   switch (qos_profile.history) {
@@ -77,8 +78,7 @@ bool set_entity_qos_from_profile(const rmw_qos_profile_t & qos_profile,
   assert(entity_qos.history.depth >= 0);
   if (
     entity_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
-    static_cast<size_t>(entity_qos.history.depth) < qos_profile.depth
-  )
+    static_cast<size_t>(entity_qos.history.depth) < qos_profile.depth)
   {
     if (qos_profile.depth > (std::numeric_limits<DDS::Long>::max)()) {
       RMW_SET_ERROR_MSG(

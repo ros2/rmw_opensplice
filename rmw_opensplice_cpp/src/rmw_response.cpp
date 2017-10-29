@@ -75,7 +75,8 @@ rmw_send_response(
 }
 
 rmw_ret_t
-rmw_take_response(const rmw_client_t * client, rmw_request_id_t * request_header,
+rmw_take_response(
+  const rmw_client_t * client, rmw_request_id_t * request_header,
   void * ros_response, bool * taken)
 {
   if (!client) {
