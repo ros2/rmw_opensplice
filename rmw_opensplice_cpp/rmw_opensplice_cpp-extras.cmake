@@ -14,26 +14,32 @@
 
 # copied from rmw_opensplice_cpp/rmw_opensplice_cpp-extras.cmake
 
-find_package(opensplice_cmake_module REQUIRED)
-find_package(OpenSplice MODULE REQUIRED)
+find_package(opensplice_cmake_module QUIET)
+find_package(OpenSplice MODULE QUIET)
 
-list(APPEND rmw_opensplice_cpp_DEFINITIONS ${OpenSplice_DEFINITIONS})
-list(APPEND rmw_opensplice_cpp_INCLUDE_DIRS ${OpenSplice_INCLUDE_DIRS})
-foreach(_library ${OpenSplice_LIBRARIES})
-  # ensure to add libraries with absolute paths
-  if(NOT IS_ABSOLUTE "${_library}")
-    set(_lib "NOTFOUND")
-    find_library(
-      _lib "${_library}"
-      HINTS ${OpenSplice_LIBRARY_DIRS})
-    if(NOT _lib)
-      message(FATAL_ERROR "OpenSplice exports the library '${_library}' which couldn't be found")
-    elseif(NOT IS_ABSOLUTE "${_lib}")
-      message(FATAL_ERROR "The OpenSplice library '${_library}' was found at '${_lib}' which is not an absolute path")
-    elseif(NOT EXISTS "${_lib}")
-      message(FATAL_ERROR "The OpenSplice library '${_library}' was found at '${_lib}' which doesn't exist")
+if(NOT OpenSplice_FOUND)
+  message(STATUS
+    "Could not find PrismTech OpenSplice - skipping rmw_opensplice_cpp")
+  set(rmw_opensplice_cpp_FOUND FALSE)
+else()
+  list(APPEND rmw_opensplice_cpp_DEFINITIONS ${OpenSplice_DEFINITIONS})
+  list(APPEND rmw_opensplice_cpp_INCLUDE_DIRS ${OpenSplice_INCLUDE_DIRS})
+  foreach(_library ${OpenSplice_LIBRARIES})
+    # ensure to add libraries with absolute paths
+    if(NOT IS_ABSOLUTE "${_library}")
+      set(_lib "NOTFOUND")
+      find_library(
+        _lib "${_library}"
+        HINTS ${OpenSplice_LIBRARY_DIRS})
+      if(NOT _lib)
+        message(FATAL_ERROR "OpenSplice exports the library '${_library}' which couldn't be found")
+      elseif(NOT IS_ABSOLUTE "${_lib}")
+        message(FATAL_ERROR "The OpenSplice library '${_library}' was found at '${_lib}' which is not an absolute path")
+      elseif(NOT EXISTS "${_lib}")
+        message(FATAL_ERROR "The OpenSplice library '${_library}' was found at '${_lib}' which doesn't exist")
+      endif()
+      set(_library "${_lib}")
     endif()
-    set(_library "${_lib}")
-  endif()
-  list(APPEND rmw_opensplice_cpp_LIBRARIES "${_library}")
-endforeach()
+    list(APPEND rmw_opensplice_cpp_LIBRARIES "${_library}")
+  endforeach()
+endif()
