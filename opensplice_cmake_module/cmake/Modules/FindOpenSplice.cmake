@@ -41,6 +41,10 @@
 
 # lint_cmake: -convention/filename, -package/stdargs
 
+if(DEFINED OpenSplice_FOUND)
+  return()
+endif()
+
 set(OpenSplice_FOUND FALSE)
 
 # check if provided OSPL_HOME is from an "official" binary package
