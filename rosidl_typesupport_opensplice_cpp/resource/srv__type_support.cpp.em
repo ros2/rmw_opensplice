@@ -18,7 +18,7 @@
 #include <sstream>
 #include <string>
 
-#include "rosidl_generator_c/service_type_support.h"
+#include "rosidl_generator_c/service_type_support_struct.h"
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
 #include "rosidl_typesupport_opensplice_cpp/visibility_control.h"
 #include "rmw/rmw.h"
