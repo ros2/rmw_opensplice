@@ -177,7 +177,7 @@ struct OpenSpliceStaticServiceInfo
 
 struct OpenSpliceWaitSetInfo
 {
-  DDS::WaitSet * waitset;
+  DDS::WaitSet * wait_set;
   DDS::ConditionSeq * active_conditions;
   DDS::ConditionSeq * attached_conditions;
 };
