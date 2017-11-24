@@ -35,7 +35,7 @@ rmw_create_wait_set(size_t max_conditions)
 
   // From here onward, error results in unrolling in the goto fail block.
   if (!wait_set) {
-    RMW_SET_ERROR_MSG("failed to allocate wait_set");
+    RMW_SET_ERROR_MSG("failed to allocate wait set");
     goto fail;
   }
   wait_set->implementation_identifier = opensplice_cpp_identifier;
@@ -44,13 +44,13 @@ rmw_create_wait_set(size_t max_conditions)
   wait_set_info = static_cast<OpenSpliceWaitSetInfo *>(wait_set->data);
 
   if (!wait_set_info) {
-    RMW_SET_ERROR_MSG("failed to allocate wait_set implementation struct");
+    RMW_SET_ERROR_MSG("failed to allocate wait set implementation struct");
     goto fail;
   }
 
   wait_set_info->wait_set = static_cast<DDS::WaitSet *>(rmw_allocate(sizeof(DDS::WaitSet)));
   if (!wait_set_info->wait_set) {
-    RMW_SET_ERROR_MSG("failed to allocate wait_set");
+    RMW_SET_ERROR_MSG("failed to allocate wait set");
     goto fail;
   }
 
@@ -128,7 +128,7 @@ rmw_ret_t
 rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 {
   if (!wait_set) {
-    RMW_SET_ERROR_MSG("wait_set handle is null");
+    RMW_SET_ERROR_MSG("wait set handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(

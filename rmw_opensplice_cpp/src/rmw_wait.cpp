@@ -33,11 +33,11 @@ rmw_ret_t check_attach_condition_error(DDS::ReturnCode_t retcode)
     return RMW_RET_OK;
   }
   if (retcode == DDS::RETCODE_OUT_OF_RESOURCES) {
-    RMW_SET_ERROR_MSG("failed to attach condition to wait_set: out of resources");
+    RMW_SET_ERROR_MSG("failed to attach condition to wait set: out of resources");
   } else if (retcode == DDS::RETCODE_BAD_PARAMETER) {
-    RMW_SET_ERROR_MSG("failed to attach condition to wait_set: condition pointer was invalid");
+    RMW_SET_ERROR_MSG("failed to attach condition to wait set: condition pointer was invalid");
   } else {
-    RMW_SET_ERROR_MSG("failed to attach condition to wait_set");
+    RMW_SET_ERROR_MSG("failed to attach condition to wait set");
   }
   return RMW_RET_ERROR;
 }
@@ -60,7 +60,7 @@ rmw_wait(
     {
       // Manually detach conditions and clear sequences, to ensure a clean wait set for next time.
       if (!wait_set) {
-        RMW_SET_ERROR_MSG("wait_set handle is null");
+        RMW_SET_ERROR_MSG("wait set handle is null");
         return;
       }
       RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -75,7 +75,7 @@ rmw_wait(
 
       DDS::WaitSet * dds_wait_set = static_cast<DDS::WaitSet *>(wait_set_info->wait_set);
       if (!dds_wait_set) {
-        RMW_SET_ERROR_MSG("DDS wait_set handle is null");
+        RMW_SET_ERROR_MSG("DDS wait set handle is null");
         return;
       }
 
@@ -89,14 +89,14 @@ rmw_wait(
       DDS::ReturnCode_t retcode;
       retcode = dds_wait_set->get_conditions(*attached_conditions);
       if (retcode != DDS::RETCODE_OK) {
-        RMW_SET_ERROR_MSG("Failed to get attached conditions for wait_set");
+        RMW_SET_ERROR_MSG("Failed to get attached conditions for wait set");
         return;
       }
 
       for (uint32_t i = 0; i < attached_conditions->length(); ++i) {
         retcode = dds_wait_set->detach_condition((*attached_conditions)[i]);
         if (retcode != DDS::RETCODE_OK) {
-          RMW_SET_ERROR_MSG("Failed to get detach condition from wait_set");
+          RMW_SET_ERROR_MSG("Failed to get detach condition from wait set");
         }
       }
 
@@ -108,12 +108,12 @@ rmw_wait(
       }
 
       // Disassociate conditions left in active_conditions so that when the
-      // wait_set (and therefore the active_conditions sequence) are destroyed
+      // wait set (and therefore the active_conditions sequence) are destroyed
       // they do not try to free the entities to which they point.
       // These entities are already being deleted (are owned) by other entities
       // like rmw_guard_conditions_t and rmw_node_t.
       // Without this step, sporadic bad memory accesses could occur when the
-      // items added to the wait_set were destroyed before the wait_set.
+      // items added to the wait set were destroyed before the wait set.
       // The items in active_conditions are not being leaked though because
       // other entities own them and are responsible for removing them.
       for (uint32_t i = 0; i < active_conditions->length(); ++i) {
@@ -126,7 +126,7 @@ rmw_wait(
   atexit.wait_set = wait_set;
 
   if (!wait_set) {
-    RMW_SET_ERROR_MSG("wait_set handle is null");
+    RMW_SET_ERROR_MSG("wait set handle is null");
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -142,7 +142,7 @@ rmw_wait(
 
   DDS::WaitSet * dds_wait_set = static_cast<DDS::WaitSet *>(wait_set_info->wait_set);
   if (!dds_wait_set) {
-    RMW_SET_ERROR_MSG("DDS wait_set handle is null");
+    RMW_SET_ERROR_MSG("DDS wait set handle is null");
     return RMW_RET_ERROR;
   }
 
@@ -255,7 +255,7 @@ rmw_wait(
   DDS::ReturnCode_t status = dds_wait_set->wait(*active_conditions, timeout);
 
   if (status != DDS::RETCODE_OK && status != DDS::RETCODE_TIMEOUT) {
-    RMW_SET_ERROR_MSG("failed to wait on wait_set");
+    RMW_SET_ERROR_MSG("failed to wait on wait set");
     return RMW_RET_ERROR;
   }
 
