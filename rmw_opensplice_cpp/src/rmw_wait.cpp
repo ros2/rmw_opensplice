@@ -64,7 +64,7 @@ rmw_wait(
         return;
       }
       RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-        wait_set handle,
+        wait set handle,
         wait_set->implementation_identifier, opensplice_cpp_identifier,
         return )
       OpenSpliceWaitSetInfo * wait_set_info = static_cast<OpenSpliceWaitSetInfo *>(wait_set->data);
@@ -130,7 +130,7 @@ rmw_wait(
     return RMW_RET_ERROR;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    wait_set,
+    wait set,
     wait_set->implementation_identifier, opensplice_cpp_identifier,
     return RMW_RET_ERROR);
 
