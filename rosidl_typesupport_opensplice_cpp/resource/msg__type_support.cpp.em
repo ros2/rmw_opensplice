@@ -30,24 +30,9 @@
 #include "rosidl_typesupport_opensplice_cpp/message_type_support_decl.hpp"
 #include "rosidl_typesupport_opensplice_cpp/u__instanceHandle.h"
 
-// include type support for builtin interfaces
-@{
-includes = {}
-for field in spec.fields:
-    if not field.type.is_primitive_type() and field.type.pkg_name == 'builtin_interfaces':
-        key = 'builtin_interfaces/msg/%s__rosidl_typesupport_opensplice_cpp.hpp' % field.type.type.lower()
-        if key not in includes:
-            includes[key] = set([])
-        includes[key].add(field.name)
-}@
-@[for key in sorted(includes.keys())]@
-#include "@(key)"  // @(', '.join(includes[key]))
-@[end for]@
-
 // forward declaration of message dependencies and their conversion functions
 @[for field in spec.fields]@
 @[  if not field.type.is_primitive_type()]@
-@[    if field.type.pkg_name != 'builtin_interfaces']@
 namespace @(field.type.pkg_name)
 {
 namespace msg
@@ -68,7 +53,6 @@ void convert_dds_message_to_ros(
 }  // namespace msg
 }  // namespace @(field.type.pkg_name)
 
-@[    end if]@
 @[  end if]@
 @[end for]@
 
