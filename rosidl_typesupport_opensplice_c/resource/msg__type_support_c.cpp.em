@@ -40,20 +40,6 @@
 #include "@(pkg)/@(subfolder)/dds_opensplice/ccpp_@(type)_.h"
 
 // includes and forward declarations of message dependencies and their conversion functions
-@# // Include the duration header if needed.
-@[for field in spec.fields]@
-@[  if not field.type.is_primitive_type() and field.type.type == 'builtin_interfaces__duration']@
-#include "rosidl_typesupport_opensplice_c/duration__type_support.h"
-@[    break]@
-@[  end if]@
-@[end for]@
-@# // Include the time header if needed.
-@[for field in spec.fields]@
-@[  if not field.type.is_primitive_type() and field.type.type == 'builtin_interfaces__time']@
-#include "rosidl_typesupport_opensplice_c/time__type_support.h"
-@[    break]@
-@[  end if]@
-@[end for]@
 @# // Include the message header for each non-primitive field.
 #if defined(__cplusplus)
 extern "C"
