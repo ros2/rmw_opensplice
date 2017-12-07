@@ -64,7 +64,7 @@ process_topic_name(
   partition_str.clear();
   if (!avoid_ros_namespace_conventions) {
     partition_str = ros_topic_prefix;
-    if (0 != topic_name_.substr(0, pos).size()) {
+    if (0 != topic_name_.substr(0, pos).size() && topic_name_[0] != '/') {
       partition_str += '/';
     }
   }
@@ -92,7 +92,7 @@ process_service_name(
   if (!avoid_ros_namespace_conventions) {
     request_partition_str = ros_service_request_prefix;
     response_partition_str = ros_service_response_prefix;
-    if (0 != service_name_.substr(0, pos).size()) {
+    if (0 != service_name_.substr(0, pos).size() && service_name_[0] != '/') {
       request_partition_str += '/';
       response_partition_str += '/';
     }
