@@ -9,8 +9,7 @@ if "%OSPL_HOME%" NEQ "" if "%OSPL_HOME%" NEQ "%_DEFAULT_OSPL_HOME%" (
 )
 
 if "%OSPL_HOME%" == "" (
-  echo "OSPL_HOME environment variable not set."
-  echo "Using \"%OSPL_HOME%\" that was detected when the workspace was built."
+  echo "OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the workspace was built: \"%_DEFAULT_OSPL_HOME%\""
   set "OSPL_HOME=%_DEFAULT_OSPL_HOME%"
 )
 

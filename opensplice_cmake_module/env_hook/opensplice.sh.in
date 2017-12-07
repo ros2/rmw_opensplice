@@ -10,8 +10,8 @@ if [ ! -z "$OSPL_HOME" -a "$OSPL_HOME" != "$_DEFAULT_OSPL_HOME" ]; then
 fi
 
 if [ -z "$OSPL_HOME" ]; then
-  echo "OSPL_HOME environment variable not set."
-  echo "Using OSPL_HOME that was detected when the workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
+  echo "OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the" \
+    "workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
   export OSPL_HOME=$_DEFAULT_OSPL_HOME
 fi
 
