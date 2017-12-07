@@ -5,11 +5,11 @@ set "_DEFAULT_OSPL_HOME=@OpenSplice_HOME@"
 
 :: Warn about changing the OpenSplice location
 if "%OSPL_HOME%" NEQ "" if "%OSPL_HOME%" NEQ "%_DEFAULT_OSPL_HOME%" (
-  echo "Setting OSPL_HOME to \"%OSPL_HOME%\" but the one used at build time was \"%_DEFAULT_OSPL_HOME%\"" 1>&2
+  echo "[opensplice_cmake_module] Setting OSPL_HOME to \"%OSPL_HOME%\" but the one used at build time was \"%_DEFAULT_OSPL_HOME%\"" 1>&2
 )
 
 if "%OSPL_HOME%" == "" (
-  echo "OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the workspace was built: \"%_DEFAULT_OSPL_HOME%\""
+  echo "[opensplice_cmake_module] OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the workspace was built: \"%_DEFAULT_OSPL_HOME%\""
   set "OSPL_HOME=%_DEFAULT_OSPL_HOME%"
 )
 
