@@ -1,6 +1,17 @@
+set "_DEFAULT_OSPL_HOME=@OpenSplice_HOME@"
+
+:: Give priority to the OSPL_HOME environment variable because the one detected at build time may
+:: refer to an invalid path, e.g. for users using binaries.
+
+:: Warn about changing the OpenSplice location
+if "%OSPL_HOME%" NEQ "" if "%OSPL_HOME%" NEQ "%_DEFAULT_OSPL_HOME%" (
+  echo "Setting OSPL_HOME to \"%OSPL_HOME%\" but the one used at build time was \"%_DEFAULT_OSPL_HOME%\"" 1>&2
+)
+
 if "%OSPL_HOME%" == "" (
-  set "OSPL_HOME=@OpenSplice_HOME@"	
-  echo OSPL_HOME variable not set. Assuming %OSPL_HOME%
+  echo "OSPL_HOME environment variable not set."
+  echo "Using \"%OSPL_HOME%\" that was detected when the workspace was built."
+  set "OSPL_HOME=%_DEFAULT_OSPL_HOME%"
 )
 
 call "%OSPL_HOME%\release.bat" 1> nul
@@ -13,3 +24,4 @@ set OSPL_VERBOSITY=2
 :: If ROS_DOMAIN_ID is not set, set it to the default of 0.
 :: This is required because rmw_opensplice_cpp cannot work unless it is set.
 if "%ROS_DOMAIN_ID%"=="" set ROS_DOMAIN_ID=0
+set "_DEFAULT_OSPL_HOME="
