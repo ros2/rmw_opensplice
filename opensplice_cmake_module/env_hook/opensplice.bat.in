@@ -1,11 +1,15 @@
 set "_DEFAULT_OSPL_HOME=@OpenSplice_HOME@"
+set "_DEFAULT_OSPL_HOME=%_DEFAULT_OSPL_HOME:/=\%"  :: Replace forward slashes with backslashes
 
 :: Give priority to the OSPL_HOME environment variable because the one detected at build time may
 :: refer to an invalid path, e.g. for users using binaries.
 
 :: Warn about changing the OpenSplice location
-if "%OSPL_HOME%" NEQ "" if "%OSPL_HOME%" NEQ "%_DEFAULT_OSPL_HOME%" (
-  echo "[opensplice_cmake_module] Setting OSPL_HOME to \"%OSPL_HOME%\" but the one used at build time was \"%_DEFAULT_OSPL_HOME%\"" 1>&2
+if "%OSPL_HOME%" NEQ "" (
+  set "OSPL_HOME=%OSPL_HOME:/=\%"  :: Replace forward slashes with backslashes
+  if "%OSPL_HOME%" NEQ "%_DEFAULT_OSPL_HOME%" (
+    echo "[opensplice_cmake_module] Setting OSPL_HOME to \"%OSPL_HOME%\" but the one used at build time was \"%_DEFAULT_OSPL_HOME%\"" 1>&2
+  )
 )
 
 if "%OSPL_HOME%" == "" (
