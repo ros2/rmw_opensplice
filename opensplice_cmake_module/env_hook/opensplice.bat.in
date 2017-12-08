@@ -1,4 +1,4 @@
-set "_DEFAULT_OSPL_HOME=@OpenSplice_HOME@"
+set "_DEFAULT_OSPL_HOME=@OpenSplice_HOME@/"
 set "_DEFAULT_OSPL_HOME=%_DEFAULT_OSPL_HOME:/=\%"  :: Replace forward slashes with backslashes
 
 :: Give priority to the OSPL_HOME environment variable because the one detected at build time may
