@@ -35,8 +35,6 @@ if [ -f "$OSPL_HOME/release.com" ]; then
   fi
   unset _ORIGINAL_OSPL_URI
 else
-  echo "[opensplice_cmake_module] No release.com file found at $OSPL_HOME/release.com. Looking"
-    "workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
   export OSPL_TMPL_PATH=$OSPL_HOME/etc/opensplice/idlpp
   # detect if running on Darwin platform
   _UNAME=`uname -s`
