@@ -17,6 +17,12 @@ if "%OSPL_HOME%" == "" (
   set "OSPL_HOME=%_DEFAULT_OSPL_HOME%"
 )
 
+if not exist %OSPL_HOME% (
+  echo "[opensplice_cmake_module] Error: OSPL_HOME environment variable does not point to a valid directory: " %OSPL_HOME% 1>&2
+  set "_DEFAULT_OSPL_HOME="
+  goto :eof
+)
+
 call "%OSPL_HOME%\release.bat" 1> nul
 
 set "OSPL_URI=file://%AMENT_CURRENT_PREFIX%/share/opensplice_cmake_module/config/ros_ospl.xml"

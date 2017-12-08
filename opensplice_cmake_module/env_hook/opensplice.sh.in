@@ -15,6 +15,12 @@ if [ -z "$OSPL_HOME" ]; then
   export OSPL_HOME=$_DEFAULT_OSPL_HOME
 fi
 
+if [ ! -d "$OSPL_HOME" ]; then
+  echo "[opensplice_cmake_module] Error: OSPL_HOME environment variable does not point to a valid directory: \"$OSPL_HOME\"" 1>&2
+  unset _DEFAULT_OSPL_HOME
+  return
+fi
+
 _DEFAULT_OSPL_URI="file://$AMENT_CURRENT_PREFIX/share/opensplice_cmake_module/config/ros_ospl.xml"
 
 if [ -f "$OSPL_HOME/release.com" ]; then
@@ -29,6 +35,8 @@ if [ -f "$OSPL_HOME/release.com" ]; then
   fi
   unset _ORIGINAL_OSPL_URI
 else
+  echo "[opensplice_cmake_module] No release.com file found at $OSPL_HOME/release.com. Looking"
+    "workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
   export OSPL_TMPL_PATH=$OSPL_HOME/etc/opensplice/idlpp
   # detect if running on Darwin platform
   _UNAME=`uname -s`
