@@ -8,17 +8,17 @@ set "_DEFAULT_OSPL_HOME=%_DEFAULT_OSPL_HOME:/=\%"  :: Replace forward slashes wi
 if "%OSPL_HOME%" NEQ "" (
   set "OSPL_HOME=%OSPL_HOME:/=\%"  :: Replace forward slashes with backslashes
   if "%OSPL_HOME%" NEQ "%_DEFAULT_OSPL_HOME%" (
-    echo "[opensplice_cmake_module] Setting OSPL_HOME to \"%OSPL_HOME%\" but the one used at build time was \"%_DEFAULT_OSPL_HOME%\"" 1>&2
+    echo [opensplice_cmake_module] Setting OSPL_HOME to "%OSPL_HOME%" but the one used at build time was "%_DEFAULT_OSPL_HOME%" 1>&2
   )
 )
 
 if "%OSPL_HOME%" == "" (
-  echo "[opensplice_cmake_module] OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the workspace was built: \"%_DEFAULT_OSPL_HOME%\""
+  echo [opensplice_cmake_module] OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the workspace was built: "%_DEFAULT_OSPL_HOME%"
   set "OSPL_HOME=%_DEFAULT_OSPL_HOME%"
 )
 
 if not exist %OSPL_HOME% (
-  echo "[opensplice_cmake_module] Error: OSPL_HOME environment variable does not point to a valid directory: " %OSPL_HOME% 1>&2
+  echo [opensplice_cmake_module] Error: OSPL_HOME environment variable does not point to a valid directory: "%OSPL_HOME%" 1>&2
   set "_DEFAULT_OSPL_HOME="
   goto :eof
 )
