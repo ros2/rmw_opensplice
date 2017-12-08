@@ -5,8 +5,8 @@ _DEFAULT_OSPL_HOME=@OpenSplice_HOME@
 
 # Warn about changing the OpenSplice location
 if [ ! -z "$OSPL_HOME" -a "$OSPL_HOME" != "$_DEFAULT_OSPL_HOME" ]; then
-  echo "[opensplice_cmake_module] OSPL_HOME environment variable is set to \"$OSPL_HOME\" but the one used at build time was" \
-    "\"$_DEFAULT_OSPL_HOME\"" 1>&2
+  echo "[opensplice_cmake_module] OSPL_HOME environment variable is set to \"$OSPL_HOME\" which" \
+    "is different to what it was when the workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
 fi
 
 if [ -z "$OSPL_HOME" ]; then
