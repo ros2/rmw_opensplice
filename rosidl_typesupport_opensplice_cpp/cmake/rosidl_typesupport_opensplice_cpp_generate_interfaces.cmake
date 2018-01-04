@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# no idl files to generate for builtin_interfaces
-if(NOT PROJECT_NAME STREQUAL "builtin_interfaces")
-  rosidl_generate_dds_interfaces(
-    ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
-    IDL_FILES ${rosidl_generate_interfaces_IDL_FILES}
-    DEPENDENCY_PACKAGE_NAMES ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}
-    OUTPUT_SUBFOLDERS "dds_opensplice"
-    EXTENSION "rosidl_typesupport_opensplice_cpp.rosidl_generator_dds_idl_extension"
-  )
-endif()
+rosidl_generate_dds_interfaces(
+  ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
+  IDL_FILES ${rosidl_generate_interfaces_IDL_FILES}
+  DEPENDENCY_PACKAGE_NAMES ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES}
+  OUTPUT_SUBFOLDERS "dds_opensplice"
+  EXTENSION "rosidl_typesupport_opensplice_cpp.rosidl_generator_dds_idl_extension"
+)
 
 set(_target_suffix "__rosidl_typesupport_opensplice_cpp")
 
@@ -31,9 +28,6 @@ set(_generated_srv_files "")
 set(_generated_external_srv_files "")
 
 set(_output_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_opensplice_cpp/${PROJECT_NAME}")
-
-# avoid generating any opensplice specific stuff for builtin_interfaces
-if(NOT PROJECT_NAME STREQUAL "builtin_interfaces")
 
 set(_dds_idl_files "")
 set(_dds_idl_base_path "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_dds_idl")
@@ -128,13 +122,10 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
     if(_extension STREQUAL ".msg")
       get_filename_component(_parent_folder "${_idl_file}" DIRECTORY)
       get_filename_component(_parent_folder "${_parent_folder}" NAME)
-      # ignore builtin_interfaces since it does not have any idl files
-      if(NOT _pkg_name STREQUAL "builtin_interfaces")
-        get_filename_component(_name "${_idl_file}" NAME_WE)
-        set(_abs_idl_file "${${_pkg_name}_DIR}/../${_parent_folder}/dds_opensplice/${_name}_.idl")
-        normalize_path(_abs_idl_file "${_abs_idl_file}")
-        list(APPEND _dependency_files "${_abs_idl_file}")
-      endif()
+      get_filename_component(_name "${_idl_file}" NAME_WE)
+      set(_abs_idl_file "${${_pkg_name}_DIR}/../${_parent_folder}/dds_opensplice/${_name}_.idl")
+      normalize_path(_abs_idl_file "${_abs_idl_file}")
+      list(APPEND _dependency_files "${_abs_idl_file}")
       set(_abs_idl_file "${${_pkg_name}_DIR}/../${_idl_file}")
       normalize_path(_abs_idl_file "${_abs_idl_file}")
       list(APPEND _dependencies "${_pkg_name}:${_abs_idl_file}")
@@ -199,30 +190,6 @@ add_dependencies(
   ${rosidl_generate_interfaces_TARGET}__dds_opensplice_idl
   ${rosidl_generate_interfaces_TARGET}${_target_suffix}
 )
-
-else()  # builtin_interfaces
-
-  # use static typesupport code for the builtin_interfaces package
-  set(_static_msg_headers
-    ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/include/builtin_interfaces/msg/duration__rosidl_typesupport_opensplice_cpp.hpp
-    ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/include/builtin_interfaces/msg/time__rosidl_typesupport_opensplice_cpp.hpp
-  )
-  set(_static_msg_sources
-    ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/duration__type_support.cpp
-    ${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/time__type_support.cpp
-  )
-  list(APPEND _generated_msg_files ${_static_msg_headers} ${_static_msg_sources})
-
-  include_directories("${rosidl_typesupport_opensplice_cpp_TEMPLATE_DIR}/include")
-
-  if(NOT rosidl_generate_interfaces_SKIP_INSTALL)
-    install(
-      FILES ${_static_msg_headers}
-      DESTINATION "include/${PROJECT_NAME}/msg"
-    )
-  endif()
-
-endif()  # builtin_interfaces
 
 # generate header to switch between export and import for a specific package on Windows
 set(_visibility_control_file

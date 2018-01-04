@@ -41,6 +41,10 @@
 
 # lint_cmake: -convention/filename, -package/stdargs
 
+if(DEFINED OpenSplice_FOUND)
+  return()
+endif()
+
 set(OpenSplice_FOUND FALSE)
 
 # check if provided OSPL_HOME is from an "official" binary package
@@ -89,7 +93,11 @@ if(NOT _ospl_home STREQUAL "")
   set(OpenSplice_FOUND TRUE)
 else()
   # try to find_package() it
-  find_package(opensplice NO_MODULE COMPONENTS CXX
+  set(quiet "")
+  if(OpenSplice_FIND_QUIETLY)
+    set(quiet "QUIET")
+  endif()
+  find_package(opensplice ${quiet} NO_MODULE COMPONENTS CXX
     PATHS $ENV{AMENT_PREFIX_PATH} /usr /usr/local)
   if(OPENSPLICE_FOUND)
     message(STATUS "Found PrismTech OpenSplice: ${opensplice_DIR}")
