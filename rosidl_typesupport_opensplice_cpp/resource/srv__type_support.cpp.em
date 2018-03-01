@@ -303,8 +303,8 @@ create_requester__@(spec.srv_name)(
   }
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
 
   RequesterT * requester = static_cast<RequesterT *>(_allocator(sizeof(RequesterT)));
   if (!requester) {
@@ -361,8 +361,8 @@ create_responder__@(spec.srv_name)(
   }
 
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
 
   ResponderT * responder = static_cast<ResponderT *>(_allocator(sizeof(ResponderT)));
   if (!responder) {
@@ -404,8 +404,8 @@ send_request__@(spec.srv_name)(
   @(spec.pkg_name)::srv::typesupport_opensplice_cpp::convert_ros_message_to_dds(*ros_request, request.data());
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
 
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
@@ -424,8 +424,8 @@ take_request__@(spec.srv_name)(
   bool * taken)
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
   using ROSRequestT = @(spec.pkg_name)::srv::@(spec.srv_name)_Request;
 
   auto ros_request = static_cast<ROSRequestT *>(untyped_ros_request);
@@ -467,8 +467,8 @@ send_response__@(spec.srv_name)(
 
 
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
   auto responder = reinterpret_cast<ResponderT *>(untyped_responder);
 
   const char * error_string = responder->send_response(*request_header, response);
@@ -487,8 +487,8 @@ take_response__@(spec.srv_name)(
   auto ros_response = static_cast<ROSResponseT *>(untyped_ros_response);
 
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
   auto requester = reinterpret_cast<RequesterT *>(untyped_requester);
 
   rosidl_typesupport_opensplice_cpp::Sample<@(__dds_msg_type_prefix)_Response_> response;
@@ -511,8 +511,8 @@ const char *
 destroy_requester__@(spec.srv_name)(void * untyped_requester, void (*deallocator)(void *))
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
 
   auto requester = static_cast<RequesterT *>(untyped_requester);
   const char * teardown_status = requester->teardown();
@@ -537,8 +537,8 @@ const char *
 destroy_responder__@(spec.srv_name)(void * untyped_responder, void (*deallocator)(void *))
 {
   using ResponderT = rosidl_typesupport_opensplice_cpp::Responder<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_>;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_>;
   auto responder = static_cast<ResponderT *>(untyped_responder);
   const char * teardown_status = responder->teardown();
   try {
@@ -563,9 +563,9 @@ server_is_available__@(spec.srv_name)(
   void * requester, const rmw_node_t * node, bool * is_available)
 {
   using RequesterT = rosidl_typesupport_opensplice_cpp::Requester<
-      @(__dds_msg_type_prefix)_Request_,
-      @(__dds_msg_type_prefix)_Response_
-      >;
+    @(__dds_msg_type_prefix)_Request_,
+    @(__dds_msg_type_prefix)_Response_
+    >;
 
   auto typed_requester = reinterpret_cast<RequesterT *>(requester);
 
