@@ -53,23 +53,18 @@ bool
 process_topic_name(
   const char * topic_name,
   bool avoid_ros_namespace_conventions,
-  std::string & topic_str,
-  std::string & partition_str)
+  std::string & topic_str)
 {
   const std::string topic_name_ = topic_name;
   size_t pos;
 
-  pos = topic_name_.find_last_of('/');
-
-  partition_str.clear();
   if (!avoid_ros_namespace_conventions) {
-    partition_str = ros_topic_prefix;
-    if (0 != topic_name_.substr(0, pos).size() && topic_name_[0] != '/') {
-      partition_str += '/';
-    }
+    topic_str = std::string(ros_topic_prefix) + topic_name;
   }
-  partition_str += topic_name_.substr(0, pos);
-  topic_str = topic_name_.substr(pos + 1);
+  else{
+    topic_str = topic_name;
+  }
+
 
   return true;
 }

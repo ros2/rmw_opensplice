@@ -111,7 +111,6 @@ rmw_create_publisher(
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
   OpenSpliceStaticPublisherInfo * publisher_info = nullptr;
-  std::string partition_str;
   std::string topic_str;
 
   // Begin initializing elements.
@@ -122,15 +121,10 @@ rmw_create_publisher(
   }
 
   if (!process_topic_name(
-      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str, partition_str))
+      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str))
   {
     RMW_SET_ERROR_MSG("failed to process topic name");
     goto fail;
-  }
-
-  if (0 != partition_str.size()) {  // only set if not empty
-    publisher_qos.partition.name.length(1);
-    publisher_qos.partition.name[0] = partition_str.c_str();
   }
 
   dds_publisher = participant->create_publisher(publisher_qos, NULL, DDS::STATUS_MASK_NONE);
