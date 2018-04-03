@@ -60,11 +60,9 @@ process_topic_name(
 
   if (!avoid_ros_namespace_conventions) {
     topic_str = std::string(ros_topic_prefix) + topic_name;
-  }
-  else{
+  } else {
     topic_str = topic_name;
   }
-
 
   return true;
 }
