@@ -45,8 +45,8 @@ bool process_service_name(
   const char * service_name,
   bool avoid_ros_namespace_conventions,
   std::string & service_str,
-  std::string & request_partition_str,
-  std::string & response_partition_str);
+  std::string & request_str,
+  std::string & response_str);
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 
