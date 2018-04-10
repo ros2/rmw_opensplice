@@ -1,23 +1,23 @@
-_DEFAULT_OSPL_HOME=@OpenSplice_HOME@
+_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@
 
 # Give priority to the OSPL_HOME environment variable because the one detected at build time may
 # refer to an invalid path, e.g. for users using binaries.
 
 # Warn about changing the OpenSplice location
-if [ ! -z "$OSPL_HOME" -a "$OSPL_HOME" != "$_DEFAULT_OSPL_HOME" ]; then
+if [ ! -z "$OSPL_HOME" -a "$OSPL_HOME" != "$_BUILDTIME_OSPL_HOME" ]; then
   echo "[opensplice_cmake_module] OSPL_HOME environment variable is set to \"$OSPL_HOME\" which" \
-    "is different to what it was when the workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
+    "is different to what it was when the workspace was built: \"$_BUILDTIME_OSPL_HOME\"" 1>&2
 fi
 
 if [ -z "$OSPL_HOME" ]; then
   echo "[opensplice_cmake_module] OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the" \
-    "workspace was built: \"$_DEFAULT_OSPL_HOME\"" 1>&2
-  export OSPL_HOME=$_DEFAULT_OSPL_HOME
+    "workspace was built: \"$_BUILDTIME_OSPL_HOME\"" 1>&2
+  export OSPL_HOME=$_BUILDTIME_OSPL_HOME
 fi
 
 if [ ! -d "$OSPL_HOME" ]; then
   echo "[opensplice_cmake_module] Error: OSPL_HOME environment variable does not point to a valid directory: \"$OSPL_HOME\"" 1>&2
-  unset _DEFAULT_OSPL_HOME
+  unset _BUILDTIME_OSPL_HOME
   return
 fi
 
@@ -59,7 +59,7 @@ elif [ "$OSPL_URI" != "$_DEFAULT_OSPL_URI" ]; then
 fi
 
 unset _DEFAULT_OSPL_URI
-unset _DEFAULT_OSPL_HOME
+unset _BUILDTIME_OSPL_HOME
 
 export OSPL_INFOFILE="<stdout>"
 export OSPL_ERRORFILE="<stderr>"
