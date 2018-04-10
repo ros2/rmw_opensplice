@@ -1,24 +1,30 @@
 set "_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@/"
 
-:: Give priority to the OSPL_HOME environment variable because the one detected at build time may
-:: refer to an invalid path, e.g. for users using binaries.
-
-:: Warn about changing the OpenSplice location
-if "%OSPL_HOME%" NEQ "" (
-  if "%OSPL_HOME%" NEQ "%_BUILDTIME_OSPL_HOME%" (
-    echo [opensplice_cmake_module] OSPL_HOME environment variable is set to "%OSPL_HOME%" which is different to what it was when the workspace was built: "%_BUILDTIME_OSPL_HOME%" 1>&2
+:: Give priority to the OSPL_HOME value used when the workspace was built, if it's valid.
+:: If it's not valid, the current value of the OSPL_HOME environment variable will be used.
+:: The one detected at buildtime may refer to an invalid path for users using binaries, for example.
+if exist %_BUILDTIME_OSPL_HOME% (
+  :: Warn about unused environment variable.
+  if "%OSPL_HOME%" NEQ "" (
+    if "%OSPL_HOME%" NEQ "%_BUILDTIME_OSPL_HOME%" (
+      echo [opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [["%OSPL_HOME%"]] which is different to what it was set to when the workspace was built: [["%_BUILDTIME_OSPL_HOME%"]]. The latter will be used. Please be sure this is the config that you want." 1>&2
+    )
   )
-)
-
-if "%OSPL_HOME%" == "" (
-  echo [opensplice_cmake_module] OSPL_HOME environment variable not set. Using OSPL_HOME that was detected when the workspace was built: "%_BUILDTIME_OSPL_HOME%"
   set "OSPL_HOME=%_BUILDTIME_OSPL_HOME%"
 )
+else
+(
+  if "%OSPL_HOME%" == "" (
+    echo "[opensplice_cmake_module] Warning: OSPL_HOME value used when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] does not point to a valid directory, and the environment variable has not been overwritten. Support for opensplice will not be available." 1>&2
+    set "_BUILDTIME_OSPL_HOME="
+    goto :eof
+  )
 
-if not exist %OSPL_HOME% (
-  echo [opensplice_cmake_module] Error: OSPL_HOME environment variable does not point to a valid directory: "%OSPL_HOME%" 1>&2
-  set "_BUILDTIME_OSPL_HOME="
-  goto :eof
+  if not exist %OSPL_HOME% (
+    echo "[opensplice_cmake_module] Warning: neither the OSPL_HOME value used when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] nor the current OSPL_HOME environment variable [["%$OSPL_HOME%"]] point to a valid directory. Support for opensplice will not be available." 1>&2
+    set "_BUILDTIME_OSPL_HOME="
+    goto :eof
+  )
 )
 
 call "%OSPL_HOME%\release.bat" 1> nul
