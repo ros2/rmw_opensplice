@@ -1,12 +1,10 @@
 set "_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@/"
-set "_BUILDTIME_OSPL_HOME=%_BUILDTIME_OSPL_HOME:/=\%"  :: Replace forward slashes with backslashes
 
 :: Give priority to the OSPL_HOME environment variable because the one detected at build time may
 :: refer to an invalid path, e.g. for users using binaries.
 
 :: Warn about changing the OpenSplice location
 if "%OSPL_HOME%" NEQ "" (
-  set "OSPL_HOME=%OSPL_HOME:/=\%"  :: Replace forward slashes with backslashes
   if "%OSPL_HOME%" NEQ "%_BUILDTIME_OSPL_HOME%" (
     echo [opensplice_cmake_module] OSPL_HOME environment variable is set to "%OSPL_HOME%" which is different to what it was when the workspace was built: "%_BUILDTIME_OSPL_HOME%" 1>&2
   )
