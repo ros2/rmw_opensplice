@@ -1,4 +1,4 @@
-set "_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@/"
+set "_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@\"
 
 :: Give priority to the OSPL_HOME value used when the workspace was built, if it's valid.
 :: If it's not valid, the current value of the OSPL_HOME environment variable will be used.
