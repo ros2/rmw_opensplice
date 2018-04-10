@@ -11,9 +11,7 @@ if exist %_BUILDTIME_OSPL_HOME% (
     )
   )
   set "_OSPL_HOME_TO_USE=%_BUILDTIME_OSPL_HOME%"
-)
-else
-(
+) else (
   if "%OSPL_HOME%" == "" (
     echo "[opensplice_cmake_module] Warning: OSPL_HOME value used when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] does not point to a valid directory, and the environment variable has not been overwritten. Support for opensplice will not be available." 1>&2
     set "_BUILDTIME_OSPL_HOME="
