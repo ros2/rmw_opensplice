@@ -56,14 +56,12 @@ process_topic_name(
   std::string & topic_str)
 {
   const std::string topic_name_ = topic_name;
-  size_t pos;
-
+  topic_str.clear();
   if (!avoid_ros_namespace_conventions) {
-    topic_str = std::string(ros_topic_prefix) + topic_name;
+    topic_str = std::string(ros_topic_prefix) + topic_name_;
   } else {
-    topic_str = topic_name;
+    topic_str = topic_name_;
   }
-
   return true;
 }
 
@@ -76,23 +74,16 @@ process_service_name(
   std::string & response_str)
 {
   const std::string service_name_ = service_name;
-  size_t pos;
-
-  pos = service_name_.find_last_of('/');
-
   request_str.clear();
   response_str.clear();
+  service_str.clear();
   if (!avoid_ros_namespace_conventions) {
-    request_str = ros_service_request_prefix;
-    response_str = ros_service_response_prefix;
-    if (0 != service_name_.substr(0, pos).size() && service_name_[0] != '/') {
-      request_str += '/';
-      response_str += '/';
-    }
+    request_str = std::string(ros_service_request_prefix) + service_name_ + "Request";
+    response_str = std::string(ros_service_response_prefix) + service_name_ + "Reply";
+  } else {
+    request_str = service_name_ + "Request";
+    response_str = service_name_ + "Reply";
   }
-
-  request_str += service_name_;
-  response_str += service_name_;
   service_str = service_name_;
   return true;
 }

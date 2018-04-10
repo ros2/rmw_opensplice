@@ -108,8 +108,9 @@ public:
       estr = "process_service_name: failed";
       goto fail;
     }
-    request_topic_name = request_str + "Request";
-    response_topic_name = response_str + "Reply";
+
+    request_topic_name = request_str ;
+    response_topic_name = response_str ;
 
     content_filtered_topic_name = service_str +
       std::to_string(writer_guid_.first) + "_" + std::to_string(writer_guid_.second);
