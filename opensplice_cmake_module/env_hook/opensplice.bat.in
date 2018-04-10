@@ -10,7 +10,7 @@ if exist %_BUILDTIME_OSPL_HOME% (
       echo [opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [["%OSPL_HOME%"]] which is different to what it was set to when the workspace was built: [["%_BUILDTIME_OSPL_HOME%"]]. The latter will be used. Please be sure this is the config that you want." 1>&2
     )
   )
-  set "OSPL_HOME=%_BUILDTIME_OSPL_HOME%"
+  set "_OSPL_HOME_TO_USE=%_BUILDTIME_OSPL_HOME%"
 )
 else
 (
@@ -25,9 +25,10 @@ else
     set "_BUILDTIME_OSPL_HOME="
     goto :eof
   )
+  set "_OSPL_HOME_TO_USE=%_BUILDTIME_OSPL_HOME%"
 )
 
-call "%OSPL_HOME%\release.bat" 1> nul
+call "%_OSPL_HOME_TO_USE%\release.bat" 1> nul
 
 set "OSPL_URI=file://%AMENT_CURRENT_PREFIX%/share/opensplice_cmake_module/config/ros_ospl.xml"
 set "OSPL_INFOFILE=<stdout>"
@@ -38,3 +39,4 @@ set OSPL_VERBOSITY=2
 :: This is required because rmw_opensplice_cpp cannot work unless it is set.
 if "%ROS_DOMAIN_ID%"=="" set ROS_DOMAIN_ID=0
 set "_BUILDTIME_OSPL_HOME="
+set "_OSPL_HOME_TO_USE="
