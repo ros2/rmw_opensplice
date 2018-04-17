@@ -1,4 +1,7 @@
-set "OSPL_HOME=@OpenSplice_HOME@"
+if "%OSPL_HOME%" == "" (
+  set "OSPL_HOME=@OpenSplice_HOME@"	
+  echo OSPL_HOME variable not set. Assuming %OSPL_HOME%
+)
 
 call "%OSPL_HOME%\release.bat" 1> nul
 
