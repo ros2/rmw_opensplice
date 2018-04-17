@@ -1,25 +1,25 @@
 set "_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@\"
 
-:: Give priority to the OSPL_HOME value used when the workspace was built, if it's valid.
+:: Give priority to the OpenSplice installation found when the workspace was built, if it's valid.
 :: If it's not valid, the current value of the OSPL_HOME environment variable will be used.
-:: The one detected at buildtime may refer to an invalid path for users using binaries, for example.
+:: The one detected at buildtime may refer to an invalid path for users using "fat archive" binaries, for example.
 if exist %_BUILDTIME_OSPL_HOME% (
   :: Warn about unused environment variable.
   if "%OSPL_HOME%" NEQ "" (
     if "%OSPL_HOME%" NEQ "%_BUILDTIME_OSPL_HOME%" (
-      echo [opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [["%OSPL_HOME%"]] which is different to what it was set to when the workspace was built: [["%_BUILDTIME_OSPL_HOME%"]]. The latter will be used. Please be sure this is the config that you want." 1>&2
+      echo [opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [["%OSPL_HOME%"]]. When the workspace was built, OpenSplice was found at [["%_BUILDTIME_OSPL_HOME%"]], which is what will actually be used. Manually modify the environment now if this is not the configuration you want." 1>&2
     )
   )
   set "_OSPL_HOME_TO_USE=%_BUILDTIME_OSPL_HOME%"
 ) else (
   if "%OSPL_HOME%" == "" (
-    echo "[opensplice_cmake_module] Warning: OSPL_HOME value used when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] does not point to a valid directory, and the environment variable has not been overwritten. Support for opensplice will not be available." 1>&2
+    echo "[opensplice_cmake_module] Warning: The location at which OpenSplice was found when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] does not point to a valid directory, and the OSPL_HOME environment variable has not been set. Support for OpenSplice will not be available." 1>&2
     set "_BUILDTIME_OSPL_HOME="
     goto :eof
   )
 
   if not exist %OSPL_HOME% (
-    echo "[opensplice_cmake_module] Warning: neither the OSPL_HOME value used when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] nor the current OSPL_HOME environment variable [["%$OSPL_HOME%"]] point to a valid directory. Support for opensplice will not be available." 1>&2
+    echo "[opensplice_cmake_module] Warning: Neither the location at which OpenSplice was found when the workspace was built [["%_BUILDTIME_OSPL_HOME%"]] nor the OSPL_HOME environment variable [["%OSPL_HOME%"]] point to a valid directory. Support for OpenSplice will not be available." 1>&2
     set "_BUILDTIME_OSPL_HOME="
     goto :eof
   )
