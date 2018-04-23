@@ -7,7 +7,7 @@ if exist %_BUILDTIME_OSPL_HOME% (
   :: Warn about unused environment variable.
   if "%OSPL_HOME%" NEQ "" (
     if "%OSPL_HOME%" NEQ "%_BUILDTIME_OSPL_HOME%" (
-      echo [opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [["%OSPL_HOME%"]]. When the workspace was built, OpenSplice was found at [["%_BUILDTIME_OSPL_HOME%"]], which is what will actually be used. Manually modify the environment now if this is not the configuration you want." 1>&2
+      echo "[opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [["%OSPL_HOME%"]]. When the workspace was built, OpenSplice was found at [["%_BUILDTIME_OSPL_HOME%"]], which is what will actually be used. Manually modify the environment now if this is not the configuration you want." 1>&2
     )
   )
   set "_OSPL_HOME_TO_USE=%_BUILDTIME_OSPL_HOME%"
