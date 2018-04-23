@@ -23,7 +23,7 @@ if exist %_BUILDTIME_OSPL_HOME% (
     set "_BUILDTIME_OSPL_HOME="
     goto :eof
   )
-  set "_OSPL_HOME_TO_USE=%_BUILDTIME_OSPL_HOME%"
+  set "_OSPL_HOME_TO_USE=%OSPL_HOME%"
 )
 
 call "%_OSPL_HOME_TO_USE%\release.bat" 1> nul
