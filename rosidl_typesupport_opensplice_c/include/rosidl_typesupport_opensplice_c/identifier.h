@@ -17,7 +17,7 @@
 
 #include "rosidl_typesupport_opensplice_c/visibility_control.h"
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -25,7 +25,7 @@ extern "C"
 ROSIDL_TYPESUPPORT_OPENSPLICE_C_IMPORT
 extern const char * rosidl_typesupport_opensplice_c__identifier;
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif
 
