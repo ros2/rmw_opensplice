@@ -1,10 +1,44 @@
-export OSPL_HOME=@OpenSplice_HOME@
+_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@
+
+# Give priority to the OpenSplice installation found when the workspace was built, if it's valid.
+# If it's not valid, the current value of the OSPL_HOME environment variable will be used.
+# The one detected at buildtime may refer to an invalid path for users using "fat archive" binaries, for example.
+if [ -d "$_BUILDTIME_OSPL_HOME" ]; then
+  # Warn about unused environment variable.
+  if [ ! -z "$OSPL_HOME" -a "$OSPL_HOME" != "$_BUILDTIME_OSPL_HOME" ]; then
+    echo "[opensplice_cmake_module] Warning: OSPL_HOME environment variable is set to [[$OSPL_HOME]]." \
+      "When the workspace was built, OpenSplice was found at [[$_BUILDTIME_OSPL_HOME]]," \
+      "which is what will actually be used." \
+      "Manually modify the environment now if this is not the configuration you want." 1>&2
+  fi
+  _OSPL_HOME_TO_USE=$_BUILDTIME_OSPL_HOME
+else
+  if [ -z "$OSPL_HOME" ]; then
+    echo "[opensplice_cmake_module] Warning:"\
+      "The location at which OpenSplice was found when the workspace was built [[$_BUILDTIME_OSPL_HOME]]" \
+      "does not point to a valid directory, and the OSPL_HOME environment variable has not been set." \
+      "Support for OpenSplice will not be available." 1>&2
+    unset _BUILDTIME_OSPL_HOME
+    return
+  fi
+
+  if [ ! -d "$OSPL_HOME" ]; then
+    echo "[opensplice_cmake_module] Warning:" \
+      "Neither the location at which OpenSplice was found when the workspace was built [[$_BUILDTIME_OSPL_HOME]]" \
+      "nor the OSPL_HOME environment variable [[$OSPL_HOME]] point to a valid directory." \
+      "Support for OpenSplice will not be available." 1>&2
+    unset _BUILDTIME_OSPL_HOME
+    return
+  fi
+  _OSPL_HOME_TO_USE=$OSPL_HOME
+fi
+
 
 _DEFAULT_OSPL_URI="file://$AMENT_CURRENT_PREFIX/share/opensplice_cmake_module/config/ros_ospl.xml"
 
-if [ -f "$OSPL_HOME/release.com" ]; then
+if [ -f "$_OSPL_HOME_TO_USE/release.com" ]; then
   _ORIGINAL_OSPL_URI="$OSPL_URI"
-  . "$OSPL_HOME/release.com" > /dev/null
+  . "$_OSPL_HOME_TO_USE/release.com" > /dev/null
   if [ -n "$_ORIGINAL_OSPL_URI" ]; then
     # If the OSPL_URI was set before sourcing the release.com script, restore it.
     export OSPL_URI="$_ORIGINAL_OSPL_URI"
@@ -14,7 +48,7 @@ if [ -f "$OSPL_HOME/release.com" ]; then
   fi
   unset _ORIGINAL_OSPL_URI
 else
-  export OSPL_TMPL_PATH=$OSPL_HOME/etc/opensplice/idlpp
+  export OSPL_TMPL_PATH=$_OSPL_HOME_TO_USE/etc/opensplice/idlpp
   # detect if running on Darwin platform
   _UNAME=`uname -s`
   _IS_DARWIN=0
@@ -24,9 +58,9 @@ else
   unset _UNAME
 
   if [ $_IS_DARWIN -eq 0 ]; then
-    ament_prepend_unique_value LD_LIBRARY_PATH "$OSPL_HOME/lib"
+    ament_prepend_unique_value LD_LIBRARY_PATH "$_OSPL_HOME_TO_USE/lib"
   else
-    ament_prepend_unique_value DYLD_LIBRARY_PATH "$OSPL_HOME/lib"
+    ament_prepend_unique_value DYLD_LIBRARY_PATH "$_OSPL_HOME_TO_USE/lib"
   fi
   unset _IS_DARWIN
 fi
@@ -34,10 +68,12 @@ fi
 if [ -z "$OSPL_URI" ]; then
   export OSPL_URI="$_DEFAULT_OSPL_URI"
 elif [ "$OSPL_URI" != "$_DEFAULT_OSPL_URI" ]; then
-  echo "Warning: OSPL_URI was already set to [[$OSPL_URI]]. This will not override it to the default [[$_DEFAULT_OSPL_URI]]. Please make sure this is the config that you want." 1>&2
+  echo "[opensplice_cmake_module] Warning: OSPL_URI was already set to [[$OSPL_URI]]. This will not override it to the ROS default [[$_DEFAULT_OSPL_URI]]. Please make sure this is the config that you want." 1>&2
 fi
 
 unset _DEFAULT_OSPL_URI
+unset _BUILDTIME_OSPL_HOME
+unset _OSPL_HOME_TO_USE
 
 export OSPL_INFOFILE="<stdout>"
 export OSPL_ERRORFILE="<stderr>"
