@@ -22,7 +22,7 @@
 // Provides visibility macros like ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC.
 #include <rosidl_typesupport_opensplice_cpp/visibility_control.h>
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
