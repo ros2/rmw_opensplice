@@ -94,23 +94,18 @@ public:
     std::string service_str;
     std::string request_type_name = service_type_name_ + "_Request_";
     std::string request_topic_name;
-    std::string request_str;
     std::string response_type_name = service_type_name_ + "_Response_";
     std::string response_topic_name;
-    std::string response_str;
     std::string content_filtered_topic_name;
     const char * estr = nullptr;
 
     if (!process_service_name(
         service_name_.c_str(), avoid_ros_namespace_conventions, service_str,
-        request_str, response_str))
+        request_topic_name, response_topic_name))
     {
       estr = "process_service_name: failed";
       goto fail;
     }
-
-    request_topic_name = request_str;
-    response_topic_name = response_str;
 
     content_filtered_topic_name = service_str +
       std::to_string(writer_guid_.first) + "_" + std::to_string(writer_guid_.second);
