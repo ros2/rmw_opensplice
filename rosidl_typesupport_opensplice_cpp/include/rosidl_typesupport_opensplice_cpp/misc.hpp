@@ -38,16 +38,15 @@ ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 bool process_topic_name(
   const char * topic_name,
   bool avoid_ros_namespace_conventions,
-  std::string & topic_str,
-  std::string & partition_str);
+  std::string & topic_str);
 
 ROSIDL_TYPESUPPORT_OPENSPLICE_CPP_PUBLIC
 bool process_service_name(
   const char * service_name,
   bool avoid_ros_namespace_conventions,
   std::string & service_str,
-  std::string & request_partition_str,
-  std::string & response_partition_str);
+  std::string & request_str,
+  std::string & response_str);
 
 }  // namespace rosidl_typesupport_opensplice_cpp
 

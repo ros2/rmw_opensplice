@@ -53,24 +53,15 @@ bool
 process_topic_name(
   const char * topic_name,
   bool avoid_ros_namespace_conventions,
-  std::string & topic_str,
-  std::string & partition_str)
+  std::string & topic_str)
 {
   const std::string topic_name_ = topic_name;
-  size_t pos;
-
-  pos = topic_name_.find_last_of('/');
-
-  partition_str.clear();
+  topic_str.clear();
   if (!avoid_ros_namespace_conventions) {
-    partition_str = ros_topic_prefix;
-    if (0 != topic_name_.substr(0, pos).size() && topic_name_[0] != '/') {
-      partition_str += '/';
-    }
+    topic_str = std::string(ros_topic_prefix) + topic_name_;
+  } else {
+    topic_str = topic_name_;
   }
-  partition_str += topic_name_.substr(0, pos);
-  topic_str = topic_name_.substr(pos + 1);
-
   return true;
 }
 
@@ -79,28 +70,21 @@ process_service_name(
   const char * service_name,
   bool avoid_ros_namespace_conventions,
   std::string & service_str,
-  std::string & request_partition_str,
-  std::string & response_partition_str)
+  std::string & request_str,
+  std::string & response_str)
 {
   const std::string service_name_ = service_name;
-  size_t pos;
-
-  pos = service_name_.find_last_of('/');
-
-  request_partition_str.clear();
-  response_partition_str.clear();
+  request_str.clear();
+  response_str.clear();
+  service_str.clear();
   if (!avoid_ros_namespace_conventions) {
-    request_partition_str = ros_service_request_prefix;
-    response_partition_str = ros_service_response_prefix;
-    if (0 != service_name_.substr(0, pos).size() && service_name_[0] != '/') {
-      request_partition_str += '/';
-      response_partition_str += '/';
-    }
+    request_str = std::string(ros_service_request_prefix) + service_name_ + "Request";
+    response_str = std::string(ros_service_response_prefix) + service_name_ + "Reply";
+  } else {
+    request_str = service_name_ + "Request";
+    response_str = service_name_ + "Reply";
   }
-  request_partition_str += service_name_.substr(0, pos);
-  response_partition_str += service_name_.substr(0, pos);
-  service_str = service_name_.substr(pos + 1);
-
+  service_str = service_name_;
   return true;
 }
 

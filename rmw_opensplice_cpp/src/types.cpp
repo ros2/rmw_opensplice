@@ -223,11 +223,7 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
     std::string topic_name = "";
     if (info_seq[i].valid_data) {
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-        for (DDS::ULong j = 0; j < data_seq[i].partition.name.length(); ++j) {
-          topic_name += data_seq[i].partition.name[j];
-          topic_name += "/";
-        }
-        topic_name += data_seq[i].topic_name.in();
+        topic_name = data_seq[i].topic_name.in();
 
         add_information(
           info_seq[i], topic_name, data_seq[i].type_name.in(), PublisherEP);
@@ -280,11 +276,7 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
     std::string topic_name("");
     if (info_seq[i].valid_data) {
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-        for (DDS::ULong j = 0; j < data_seq[i].partition.name.length(); ++j) {
-          topic_name += data_seq[i].partition.name[j];
-          topic_name += "/";
-        }
-        topic_name += data_seq[i].topic_name.in();
+        topic_name = data_seq[i].topic_name.in();
 
         add_information(
           info_seq[i], topic_name, data_seq[i].type_name.in(), SubscriberEP);

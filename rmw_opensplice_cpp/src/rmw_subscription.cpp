@@ -114,7 +114,6 @@ rmw_create_subscription(
   DDS::ReadCondition * read_condition = nullptr;
   void * buf = nullptr;
   OpenSpliceStaticSubscriberInfo * subscriber_info = nullptr;
-  std::string partition_str;
   std::string topic_str;
 
   // Begin initializing elements.
@@ -124,15 +123,10 @@ rmw_create_subscription(
     goto fail;
   }
   if (!process_topic_name(
-      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str, partition_str))
+      topic_name, qos_profile->avoid_ros_namespace_conventions, topic_str))
   {
     RMW_SET_ERROR_MSG("failed to process topic name");
     goto fail;
-  }
-
-  if (0 != partition_str.size()) {  // only set if not empty
-    subscriber_qos.partition.name.length(1);
-    subscriber_qos.partition.name[0] = DDS::string_dup(partition_str.c_str());
   }
 
   dds_subscriber = participant->create_subscriber(subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
