@@ -62,4 +62,15 @@ rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
   }
   return RMW_RET_OK;
 }
+
+rmw_ret_t
+rmw_publish_serialized_message(
+  const rmw_publisher_t * publisher, const rmw_serialized_message_t * serialized_message)
+{
+  (void) publisher;
+  (void) serialized_message;
+
+  RMW_SET_ERROR_MSG("rmw_publish_serialized_message is not yet implemented");
+  return RMW_RET_ERROR;
+}
 }  // extern "C"
