@@ -114,4 +114,34 @@ rmw_take_with_info(
 
   return RMW_RET_OK;
 }
+
+rmw_ret_t
+rmw_take_serialized_message(
+  const rmw_subscription_t * subscription,
+  rmw_serialized_message_t * serialized_message,
+  bool * taken)
+{
+  (void) subscription;
+  (void) serialized_message;
+  (void) taken;
+
+  RMW_SET_ERROR_MSG("rmw_take_serialized_message is not yet implemented");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_take_serialized_message_with_info(
+  const rmw_subscription_t * subscription,
+  rmw_serialized_message_t * serialized_message,
+  bool * taken,
+  rmw_message_info_t * message_info)
+{
+  (void) subscription;
+  (void) serialized_message;
+  (void) taken;
+  (void) message_info;
+
+  RMW_SET_ERROR_MSG("rmw_take_serialized_message_with_info is not yet implemented");
+  return RMW_RET_ERROR;
+}
 }  // extern "C"
