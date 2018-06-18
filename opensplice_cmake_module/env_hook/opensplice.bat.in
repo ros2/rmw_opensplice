@@ -3,7 +3,7 @@ set "_BUILDTIME_OSPL_HOME=@OpenSplice_HOME@\"
 :: Give priority to the OpenSplice installation found when the workspace was built, if it's valid.
 :: If it's not valid, the current value of the OSPL_HOME environment variable will be used.
 :: The one detected at buildtime may refer to an invalid path for users using "fat archive" binaries, for example.
-if exist %_BUILDTIME_OSPL_HOME% (
+if exist "%_BUILDTIME_OSPL_HOME%\" (
   :: Warn about unused environment variable.
   if "%OSPL_HOME%" NEQ "" (
     if "%OSPL_HOME%" NEQ "%_BUILDTIME_OSPL_HOME%" (
