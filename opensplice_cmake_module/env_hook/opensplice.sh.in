@@ -71,6 +71,8 @@ elif [ "$OSPL_URI" != "$_DEFAULT_OSPL_URI" ]; then
   echo "[opensplice_cmake_module] Warning: OSPL_URI was already set to [[$OSPL_URI]]. This will not override it to the ROS default [[$_DEFAULT_OSPL_URI]]. Please make sure this is the config that you want." 1>&2
 fi
 
+export OSPL_HOME="$_OSPL_HOME_TO_USE"
+
 unset _DEFAULT_OSPL_URI
 unset _BUILDTIME_OSPL_HOME
 unset _OSPL_HOME_TO_USE
