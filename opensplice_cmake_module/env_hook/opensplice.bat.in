@@ -46,6 +46,8 @@ set OSPL_VERBOSITY=2
 :: This is required because rmw_opensplice_cpp cannot work unless it is set.
 if "%ROS_DOMAIN_ID%"=="" set ROS_DOMAIN_ID=0
 
+set "OSPL_HOME=%_OSPL_HOME_TO_USE%"
+
 set "_BUILDTIME_OSPL_HOME="
 set "_OSPL_HOME_TO_USE="
 set "_OSPL_ENV_SETUP_SCRIPT="
