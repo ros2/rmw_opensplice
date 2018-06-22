@@ -122,10 +122,11 @@ rmw_get_service_names_and_types(
       for (const auto & type : service_n_types.second) {
         size_t n = type.find(SAMPLE_PREFIX);
         if (std::string::npos == n) {
-          RMW_SET_ERROR_MSG_ALLOC(
-            "failed to convert DDS type name to ROS service type name: '"
-            SAMPLE_PREFIX "' not found",
-            *allocator)
+          char * error_msg = rcutils_format_string(
+            *allocator,
+            "failed to convert DDS type name to ROS service type name: '" SAMPLE_PREFIX
+            "' not found in type: '%s'", type.c_str());
+          RMW_SET_ERROR_MSG(error_msg)
           fail_cleanup();
           return RMW_RET_ERROR;
         }
