@@ -30,6 +30,7 @@
 #include "types.hpp"
 #include "demangle.hpp"
 
+#define SAMPLE_PREFIX "/Sample_"
 // The extern "C" here enforces that overloading is not used.
 extern "C"
 {
@@ -119,7 +120,13 @@ rmw_get_service_names_and_types(
       // Duplicate and store each type for the service
       size_t type_index = 0;
       for (const auto & type : service_n_types.second) {
-        char * type_name = rcutils_strdup(type.c_str(), *allocator);
+        size_t n = type.find(SAMPLE_PREFIX);
+        std::string stripped_type = type;
+        if (n < type.size() - strlen(SAMPLE_PREFIX)) {
+          stripped_type = std::string(type.substr(0, n + 1).c_str()) + \
+            std::string(type.substr(n + strlen(SAMPLE_PREFIX)).c_str());
+        }
+        char * type_name = rcutils_strdup(stripped_type.c_str(), *allocator);
         if (!type_name) {
           RMW_SET_ERROR_MSG_ALLOC("failed to allocate memory for type name", *allocator)
           fail_cleanup();
