@@ -127,6 +127,7 @@ rmw_get_service_names_and_types(
             "failed to convert DDS type name to ROS service type name: '" SAMPLE_PREFIX
             "' not found in type: '%s'", type.c_str());
           RMW_SET_ERROR_MSG(error_msg)
+          allocator->deallocate(error_msg, allocator->state);
           fail_cleanup();
           return RMW_RET_ERROR;
         }
