@@ -278,7 +278,8 @@ rmw_wait(
         // reset the subscriber handle
         subscriptions->subscribers[i] = 0;
       }
-      if (dds_wait_set->detach_condition(read_condition) != DDS::RETCODE_OK) {
+      DDS::ReturnCode_t detach_status = dds_wait_set->detach_condition(read_condition);
+      if (detach_status != DDS::RETCODE_OK && detach_status != DDS::RETCODE_PRECONDITION_NOT_MET) {
         RMW_SET_ERROR_MSG("failed to detach guard condition");
         return RMW_RET_ERROR;
       }
