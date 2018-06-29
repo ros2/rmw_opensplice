@@ -120,18 +120,13 @@ rmw_get_service_names_and_types(
       // Duplicate and store each type for the service
       size_t type_index = 0;
       for (const auto & type : service_n_types.second) {
+        // Strip the SAMPLE_PREFIX if it is found (e.g. from services using OpenSplice typesupport).
+        // It may not be found if services are detected using other typesupports.
         size_t n = type.find(SAMPLE_PREFIX);
-        if (std::string::npos == n) {
-          char * error_msg = rcutils_format_string(
-            *allocator,
-            "failed to convert DDS type name to ROS service type name: '" SAMPLE_PREFIX
-            "' not found in type: '%s'", type.c_str());
-          RMW_SET_ERROR_MSG(error_msg)
-          allocator->deallocate(error_msg, allocator->state);
-          fail_cleanup();
-          return RMW_RET_ERROR;
+        std::string stripped_type = type;
+        if (std::string::npos != n) {
+          stripped_type = type.substr(0, n + 1) + type.substr(n + strlen(SAMPLE_PREFIX));
         }
-        std::string stripped_type = type.substr(0, n + 1) + type.substr(n + strlen(SAMPLE_PREFIX));
         char * type_name = rcutils_strdup(stripped_type.c_str(), *allocator);
         if (!type_name) {
           RMW_SET_ERROR_MSG_ALLOC("failed to allocate memory for type name", *allocator)
