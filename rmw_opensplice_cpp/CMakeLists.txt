@@ -52,9 +52,9 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_client.cpp
   src/rmw_compare_gids_equal.cpp
   src/rmw_count.cpp
-  src/rmw_get_encoding_identifier.cpp
   src/rmw_get_gid_for_publisher.cpp
   src/rmw_get_implementation_identifier.cpp
+  src/rmw_get_serialization_format.cpp
   src/rmw_guard_condition.cpp
   src/rmw_init.cpp
   src/rmw_node.cpp
@@ -73,6 +73,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_trigger_guard_condition.cpp
   src/rmw_wait.cpp
   src/rmw_wait_set.cpp
+  src/serialization_format.cpp
   src/types.cpp
 )
 ament_target_dependencies(rmw_opensplice_cpp

@@ -1,4 +1,4 @@
-// Copyright 2014-2015 Open Source Robotics Foundation, Inc.
+// Copyright 2018 Open Source Robotics Foundation, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "identifier.hpp"
+#include "rmw/rmw.h"
 
-const char * opensplice_cpp_identifier = "rmw_opensplice_cpp";
+#include "serialization_format.hpp"
+
+// The extern "C" here enforces that overloading is not used.
+extern "C"
+{
+const char *
+rmw_get_serialization_format()
+{
+  return opensplice_cpp_serialization_format;
+}
+}  // extern "C"

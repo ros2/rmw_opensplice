@@ -12,16 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rmw/rmw.h"
+#ifndef SERIALIZATION_FORMAT_HPP_
+#define SERIALIZATION_FORMAT_HPP_
 
-#include "identifier.hpp"
+extern const char * opensplice_cpp_serialization_format;
 
-// The extern "C" here enforces that overloading is not used.
-extern "C"
-{
-const char *
-rmw_get_encoding_identifier()
-{
-  return opensplice_cpp_encoding_identifier;
-}
-}  // extern "C"
+#endif  // SERIALIZATION_FORMAT_HPP_
