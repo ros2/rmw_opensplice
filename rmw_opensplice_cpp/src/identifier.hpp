@@ -16,5 +16,6 @@
 #define IDENTIFIER_HPP_
 
 extern const char * opensplice_cpp_identifier;
+extern const char * opensplice_cpp_encoding_identifier;
 
 #endif  // IDENTIFIER_HPP_

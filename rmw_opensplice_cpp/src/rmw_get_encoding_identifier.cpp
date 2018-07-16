@@ -12,7 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rmw/rmw.h"
+
 #include "identifier.hpp"
 
-const char * opensplice_cpp_identifier = "rmw_opensplice_cpp";
-const char * opensplice_cpp_encoding_identifier = "cdr";
+// The extern "C" here enforces that overloading is not used.
+extern "C"
+{
+const char *
+rmw_get_encoding_identifier()
+{
+  return opensplice_cpp_encoding_identifier;
+}
+}  // extern "C"
