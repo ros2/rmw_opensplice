@@ -135,8 +135,12 @@ rmw_create_node(
     strlen(namespace_) + strlen("namespace=;") + 1;
   dp_factory->get_default_participant_qos(dpqos);
   dpqos.user_data.value.length(static_cast<DDS::ULong>(length));
-  snprintf(reinterpret_cast<char *>(dpqos.user_data.value.get_buffer(false)),
-    length, "name=%s;namespace=%s;", name, namespace_);
+  int written = snprintf(reinterpret_cast<char *>(dpqos.user_data.value.get_buffer(false)),
+      length, "name=%s;namespace=%s;", name, namespace_);
+  if (written < 0 || written > static_cast<int>(length) - 1) {
+    RMW_SET_ERROR_MSG("failed to populate user_data buffer");
+    return nullptr;
+  }
 
   participant = dp_factory->create_participant(
     domain, dpqos, NULL, DDS::STATUS_MASK_NONE);
