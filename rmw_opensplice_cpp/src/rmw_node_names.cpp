@@ -87,6 +87,7 @@ rmw_get_node_names(
   rcutils_ret_t rcutils_ret = rcutils_string_array_init(&node_list, length, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
+    rcutils_reset_error();
     return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
   }
 
@@ -94,6 +95,7 @@ rmw_get_node_names(
   rcutils_ret = rcutils_string_array_init(&ns_list, length, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
+    rcutils_reset_error();
     return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
   }
 
@@ -115,38 +117,14 @@ rmw_get_node_names(
           node_list.data[n] = rcutils_strndup(name.c_str(), name.size(), allocator);
           if (!node_list.data[n]) {
             RMW_SET_ERROR_MSG("could not allocate memory for node name")
-            rcutils_ret = rcutils_string_array_fini(&node_list);
-            if (rcutils_ret != RCUTILS_RET_OK) {
-              RCUTILS_LOG_ERROR_NAMED(
-                "rmw_opensplice_cpp",
-                "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-            }
-            rcutils_ret = rcutils_string_array_fini(&ns_list);
-            if (rcutils_ret != RCUTILS_RET_OK) {
-              RCUTILS_LOG_ERROR_NAMED(
-                "rmw_opensplice_cpp",
-                "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-            }
-            return RMW_RET_BAD_ALLOC;
+            goto fail;
           }
 
           std::string ns(ns_found->second.begin(), ns_found->second.end());
           ns_list.data[n] = rcutils_strndup(ns.c_str(), ns.size(), allocator);
           if (!ns_list.data[n]) {
             RMW_SET_ERROR_MSG("could not allocate memory for node name")
-            rcutils_ret = rcutils_string_array_fini(&node_list);
-            if (rcutils_ret != RCUTILS_RET_OK) {
-              RCUTILS_LOG_ERROR_NAMED(
-                "rmw_opensplice_cpp",
-                "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-            }
-            rcutils_ret = rcutils_string_array_fini(&ns_list);
-            if (rcutils_ret != RCUTILS_RET_OK) {
-              RCUTILS_LOG_ERROR_NAMED(
-                "rmw_opensplice_cpp",
-                "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-            }
-            return RMW_RET_BAD_ALLOC;
+            goto fail;
           }
           n++;
         }
@@ -160,40 +138,16 @@ rmw_get_node_names(
   // Allocate the node_names out-buffer according to the number of Node names
   rcutils_ret = rcutils_string_array_init(node_names, n, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    rmw_ret_t retcode = rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
     RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
-    rcutils_ret = rcutils_string_array_fini(&node_list);
-    if (rcutils_ret != RCUTILS_RET_OK) {
-      RCUTILS_LOG_ERROR_NAMED(
-        "rmw_opensplice_cpp",
-        "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-    }
-    rcutils_ret = rcutils_string_array_fini(&ns_list);
-    if (rcutils_ret != RCUTILS_RET_OK) {
-      RCUTILS_LOG_ERROR_NAMED(
-        "rmw_opensplice_cpp",
-        "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-    }
-    return retcode;
+    rcutils_reset_error();
+    goto fail;
   }
 
   rcutils_ret = rcutils_string_array_init(node_namespaces, n, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    rmw_ret_t retcode = rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
     RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
-    rcutils_ret = rcutils_string_array_fini(&node_list);
-    if (rcutils_ret != RCUTILS_RET_OK) {
-      RCUTILS_LOG_ERROR_NAMED(
-        "rmw_opensplice_cpp",
-        "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-    }
-    rcutils_ret = rcutils_string_array_fini(&ns_list);
-    if (rcutils_ret != RCUTILS_RET_OK) {
-      RCUTILS_LOG_ERROR_NAMED(
-        "rmw_opensplice_cpp",
-        "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-    }
-    return retcode;
+    rcutils_reset_error();
+    goto fail;
   }
 
   // Move the content from temporary list to the out-buffer and release temporary list.
@@ -201,25 +155,43 @@ rmw_get_node_names(
     node_names->data[i] = node_list.data[i];
     node_list.data[i] = NULL;
   }
-  rcutils_ret = rcutils_string_array_fini(&node_list);
-  if (rcutils_ret != RCUTILS_RET_OK) {
-    RCUTILS_LOG_ERROR_NAMED(
-      "rmw_opensplice_cpp",
-      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-  }
 
   // Move the content from temporary list to the out-buffer and release temporary list.
   for (auto i = 0; i < n; ++i) {
     node_namespaces->data[i] = ns_list.data[i];
     ns_list.data[i] = NULL;
   }
+
+  return RMW_RET_OK;
+fail:
   rcutils_ret = rcutils_string_array_fini(&ns_list);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_opensplice_cpp",
       "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
   }
-
-  return RMW_RET_OK;
+  rcutils_ret = rcutils_string_array_fini(&node_list);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rmw_opensplice_cpp",
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
+  }
+  rcutils_ret = rcutils_string_array_fini(node_names);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rmw_opensplice_cpp",
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
+  }
+  rcutils_ret = rcutils_string_array_fini(node_namespaces);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rmw_opensplice_cpp",
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
+  }
+  return RMW_RET_BAD_ALLOC;
 }
 }  // extern "C"
