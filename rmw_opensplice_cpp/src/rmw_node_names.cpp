@@ -33,13 +33,17 @@ extern "C"
 rmw_ret_t
 rmw_get_node_names(
   const rmw_node_t * node,
-  rcutils_string_array_t * node_names)
+  rcutils_string_array_t * node_names,
+  rcutils_string_array_t * node_namespaces)
 {
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
     return RMW_RET_ERROR;
   }
   if (rmw_check_zero_rmw_string_array(node_names) != RMW_RET_OK) {
+    return RMW_RET_ERROR;
+  }
+  if (rmw_check_zero_rmw_string_array(node_namespaces) != RMW_RET_OK) {
     return RMW_RET_ERROR;
   }
 
@@ -79,8 +83,22 @@ rmw_get_node_names(
 
   // allocate a temporary list for all Node names according to the maximum that can be expected.
   int length = handles.length();
-  rcutils_string_array_t list = rcutils_get_zero_initialized_string_array();
-  rcutils_ret_t rcutils_ret = rcutils_string_array_init(&list, length, &allocator);
+  rcutils_string_array_t node_list = rcutils_get_zero_initialized_string_array();
+  rcutils_ret_t rcutils_ret = rcutils_string_array_init(&node_list, length, &allocator);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
+    rcutils_reset_error();
+    return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
+  }
+
+  rcutils_string_array_t ns_list = rcutils_get_zero_initialized_string_array();
+  rcutils_ret = rcutils_string_array_init(&ns_list, length, &allocator);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
+    rcutils_reset_error();
+    return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
+  }
+
   int n = 0;
   for (auto i = 0; i < length; ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
@@ -91,19 +109,22 @@ rmw_get_node_names(
       if (buf) {
         std::vector<uint8_t> kv(buf, buf + pbtd.user_data.value.length());
         auto map = rmw::impl::cpp::parse_key_value(kv);
-        auto found = map.find("name");
-        if (found != map.end()) {
-          std::string name(found->second.begin(), found->second.end());
-          list.data[n] = rcutils_strndup(name.c_str(), name.size(), allocator);
-          if (!list.data[n]) {
+        auto name_found = map.find("name");
+        auto ns_found = map.find("namespace");
+
+        if (name_found != map.end() && ns_found != map.end()) {
+          std::string name(name_found->second.begin(), name_found->second.end());
+          node_list.data[n] = rcutils_strndup(name.c_str(), name.size(), allocator);
+          if (!node_list.data[n]) {
             RMW_SET_ERROR_MSG("could not allocate memory for node name")
-            rcutils_ret = rcutils_string_array_fini(&list);
-            if (rcutils_ret != RCUTILS_RET_OK) {
-              RCUTILS_LOG_ERROR_NAMED(
-                "rmw_opensplice_cpp",
-                "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-            }
-            return RMW_RET_BAD_ALLOC;
+            goto fail;
+          }
+
+          std::string ns(ns_found->second.begin(), ns_found->second.end());
+          ns_list.data[n] = rcutils_strndup(ns.c_str(), ns.size(), allocator);
+          if (!ns_list.data[n]) {
+            RMW_SET_ERROR_MSG("could not allocate memory for node name")
+            goto fail;
           }
           n++;
         }
@@ -117,28 +138,60 @@ rmw_get_node_names(
   // Allocate the node_names out-buffer according to the number of Node names
   rcutils_ret = rcutils_string_array_init(node_names, n, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    rmw_ret_t retcode = rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
     RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
-    rcutils_ret = rcutils_string_array_fini(&list);
-    if (rcutils_ret != RCUTILS_RET_OK) {
-      RCUTILS_LOG_ERROR_NAMED(
-        "rmw_opensplice_cpp",
-        "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
-    }
-    return retcode;
+    rcutils_reset_error();
+    goto fail;
+  }
+
+  rcutils_ret = rcutils_string_array_init(node_namespaces, n, &allocator);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RMW_SET_ERROR_MSG(rcutils_get_error_string_safe())
+    rcutils_reset_error();
+    goto fail;
   }
 
   // Move the content from temporary list to the out-buffer and release temporary list.
   for (auto i = 0; i < n; ++i) {
-    node_names->data[i] = list.data[i];
-    list.data[i] = NULL;
+    node_names->data[i] = node_list.data[i];
+    node_list.data[i] = NULL;
   }
-  rcutils_ret = rcutils_string_array_fini(&list);
+
+  // Move the content from temporary list to the out-buffer and release temporary list.
+  for (auto i = 0; i < n; ++i) {
+    node_namespaces->data[i] = ns_list.data[i];
+    ns_list.data[i] = NULL;
+  }
+
+  return RMW_RET_OK;
+fail:
+  rcutils_ret = rcutils_string_array_fini(&ns_list);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_opensplice_cpp",
       "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
   }
-  return RMW_RET_OK;
+  rcutils_ret = rcutils_string_array_fini(&node_list);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rmw_opensplice_cpp",
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
+  }
+  rcutils_ret = rcutils_string_array_fini(node_names);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rmw_opensplice_cpp",
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
+  }
+  rcutils_ret = rcutils_string_array_fini(node_namespaces);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RCUTILS_LOG_ERROR_NAMED(
+      "rmw_opensplice_cpp",
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+    rcutils_reset_error();
+  }
+  return RMW_RET_BAD_ALLOC;
 }
 }  // extern "C"
