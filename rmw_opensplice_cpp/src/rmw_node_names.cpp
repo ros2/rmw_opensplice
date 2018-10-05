@@ -168,28 +168,28 @@ fail:
   if (rcutils_ret != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_opensplice_cpp",
-      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe());
     rcutils_reset_error();
   }
   rcutils_ret = rcutils_string_array_fini(&node_list);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_opensplice_cpp",
-      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe());
     rcutils_reset_error();
   }
   rcutils_ret = rcutils_string_array_fini(node_names);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_opensplice_cpp",
-      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe());
     rcutils_reset_error();
   }
   rcutils_ret = rcutils_string_array_fini(node_namespaces);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR_NAMED(
       "rmw_opensplice_cpp",
-      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe())
+      "failed to cleanup during error handling: %s", rcutils_get_error_string_safe());
     rcutils_reset_error();
   }
   return RMW_RET_BAD_ALLOC;
