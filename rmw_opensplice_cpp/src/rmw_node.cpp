@@ -102,7 +102,7 @@ rmw_create_node(
 #ifdef _WIN32
   if (!ros_domain_id) {
     RMW_SET_ERROR_MSG("environment variable ROS_DOMAIN_ID is not set");
-    fprintf(stderr, "[rmw_opensplice_cpp]: error: %s\n", rmw_get_error_string_safe());
+    fprintf(stderr, "[rmw_opensplice_cpp]: error: %s\n", rmw_get_error_string().str);
     return nullptr;
   }
 #endif
@@ -300,7 +300,7 @@ fail:
   if (graph_guard_condition) {
     rmw_ret_t ret = rmw_destroy_guard_condition(graph_guard_condition);
     if (ret != RMW_RET_OK) {
-      fprintf(stderr, "failed to destroy guard condition: %s\n", rmw_get_error_string_safe());
+      fprintf(stderr, "failed to destroy guard condition: %s\n", rmw_get_error_string().str);
     }
   }
   if (node_info) {
@@ -391,7 +391,7 @@ rmw_destroy_node(rmw_node_t * node)
   if (node_info->graph_guard_condition) {
     rmw_ret_t ret = rmw_destroy_guard_condition(node_info->graph_guard_condition);
     if (ret != RMW_RET_OK) {
-      fprintf(stderr, "failed to destroy guard condition: %s\n", rmw_get_error_string_safe());
+      fprintf(stderr, "failed to destroy guard condition: %s\n", rmw_get_error_string().str);
     }
   }
 
