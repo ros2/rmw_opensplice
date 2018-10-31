@@ -86,7 +86,7 @@ rmw_get_node_names(
   rcutils_string_array_t node_list = rcutils_get_zero_initialized_string_array();
   rcutils_ret_t rcutils_ret = rcutils_string_array_init(&node_list, length, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    RMW_SET_ERROR_MSG(rcutils_get_error_string().str)
+    RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
     rcutils_reset_error();
     return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
   }
@@ -94,7 +94,7 @@ rmw_get_node_names(
   rcutils_string_array_t ns_list = rcutils_get_zero_initialized_string_array();
   rcutils_ret = rcutils_string_array_init(&ns_list, length, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    RMW_SET_ERROR_MSG(rcutils_get_error_string().str)
+    RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
     rcutils_reset_error();
     return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
   }
@@ -116,14 +116,14 @@ rmw_get_node_names(
           std::string name(name_found->second.begin(), name_found->second.end());
           node_list.data[n] = rcutils_strndup(name.c_str(), name.size(), allocator);
           if (!node_list.data[n]) {
-            RMW_SET_ERROR_MSG("could not allocate memory for node name")
+            RMW_SET_ERROR_MSG("could not allocate memory for node name");
             goto fail;
           }
 
           std::string ns(ns_found->second.begin(), ns_found->second.end());
           ns_list.data[n] = rcutils_strndup(ns.c_str(), ns.size(), allocator);
           if (!ns_list.data[n]) {
-            RMW_SET_ERROR_MSG("could not allocate memory for node name")
+            RMW_SET_ERROR_MSG("could not allocate memory for node name");
             goto fail;
           }
           n++;
@@ -138,14 +138,14 @@ rmw_get_node_names(
   // Allocate the node_names out-buffer according to the number of Node names
   rcutils_ret = rcutils_string_array_init(node_names, n, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    RMW_SET_ERROR_MSG(rcutils_get_error_string().str)
+    RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
     rcutils_reset_error();
     goto fail;
   }
 
   rcutils_ret = rcutils_string_array_init(node_namespaces, n, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    RMW_SET_ERROR_MSG(rcutils_get_error_string().str)
+    RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
     rcutils_reset_error();
     goto fail;
   }
