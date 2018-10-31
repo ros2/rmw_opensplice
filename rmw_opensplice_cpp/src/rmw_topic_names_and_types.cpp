@@ -106,7 +106,7 @@ rmw_get_topic_names_and_types(
       // Duplicate and store the topic_name
       char * topic_name = rcutils_strdup(demangle_topic(topic_n_types.first).c_str(), *allocator);
       if (!topic_name) {
-        RMW_SET_ERROR_MSG("failed to allocate memory for topic name")
+        RMW_SET_ERROR_MSG("failed to allocate memory for topic name");
         fail_cleanup();
         return RMW_RET_BAD_ALLOC;
       }
@@ -118,7 +118,7 @@ rmw_get_topic_names_and_types(
           topic_n_types.second.size(),
           allocator);
         if (rcutils_ret != RCUTILS_RET_OK) {
-          RMW_SET_ERROR_MSG(rcutils_get_error_string().str)
+          RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
           fail_cleanup();
           return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
         }
@@ -128,7 +128,7 @@ rmw_get_topic_names_and_types(
       for (const auto & type : topic_n_types.second) {
         char * type_name = rcutils_strdup(demangle_type(type).c_str(), *allocator);
         if (!type_name) {
-          RMW_SET_ERROR_MSG("failed to allocate memory for type name")
+          RMW_SET_ERROR_MSG("failed to allocate memory for type name");
           fail_cleanup();
           return RMW_RET_BAD_ALLOC;
         }

@@ -41,11 +41,11 @@ rmw_get_service_names_and_types(
   rmw_names_and_types_t * service_names_and_types)
 {
   if (!allocator) {
-    RMW_SET_ERROR_MSG("allocator is null")
+    RMW_SET_ERROR_MSG("allocator is null");
     return RMW_RET_INVALID_ARGUMENT;
   }
   if (!node) {
-    RMW_SET_ERROR_MSG("null node handle")
+    RMW_SET_ERROR_MSG("null node handle");
     return RMW_RET_INVALID_ARGUMENT;
   }
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
@@ -112,7 +112,7 @@ rmw_get_service_names_and_types(
           service_n_types.second.size(),
           allocator);
         if (rcutils_ret != RCUTILS_RET_OK) {
-          RMW_SET_ERROR_MSG(rcutils_get_error_string().str)
+          RMW_SET_ERROR_MSG(rcutils_get_error_string().str);
           fail_cleanup();
           return rmw_convert_rcutils_ret_to_rmw_ret(rcutils_ret);
         }
@@ -129,7 +129,7 @@ rmw_get_service_names_and_types(
         }
         char * type_name = rcutils_strdup(stripped_type.c_str(), *allocator);
         if (!type_name) {
-          RMW_SET_ERROR_MSG("failed to allocate memory for type name")
+          RMW_SET_ERROR_MSG("failed to allocate memory for type name");
           fail_cleanup();
           return RMW_RET_BAD_ALLOC;
         }
