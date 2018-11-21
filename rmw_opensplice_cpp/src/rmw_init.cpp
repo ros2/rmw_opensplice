@@ -108,4 +108,18 @@ rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
   }
   return RMW_RET_OK;
 }
+
+rmw_ret_t
+rmw_shutdown(rmw_context_t * context)
+{
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    context,
+    context->implementation_identifier,
+    opensplice_cpp_identifier,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context->impl, RMW_RET_INVALID_ARGUMENT);
+  *context = rmw_get_zero_initialized_context();
+  return RMW_RET_OK;
+}
 }  // extern "C"
