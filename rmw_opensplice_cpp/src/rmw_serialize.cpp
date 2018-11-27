@@ -95,7 +95,7 @@ rmw_deserialize(
   auto callbacks = static_cast<const message_type_support_callbacks_t *>(ts->data);
 
   const char * error_string = callbacks->deserialize(
-    serialized_message->buffer, serialized_message->buffer_length, ros_message);
+    serialized_message->buffer, (unsigned int)serialized_message->buffer_length, ros_message);
   if (error_string) {
     RMW_SET_ERROR_MSG((std::string("failed to deserialize message:") + error_string).c_str());
     return RMW_RET_ERROR;

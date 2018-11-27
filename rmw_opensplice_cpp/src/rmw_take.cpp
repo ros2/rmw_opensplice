@@ -171,7 +171,9 @@ take_serialized_sample(
   if (*taken) {
     DDS::CDRBlob & blob = sample.blob;
     auto buffer_size = blob.length();
-    auto ret = rmw_serialized_message_resize(serialized_message, buffer_size);
+    if (serialized_message->buffer_capacity < buffer_size) {
+      ret = rmw_serialized_message_resize(serialized_message, buffer_size);
+    }
     if (ret == RMW_RET_OK) {
       serialized_message->buffer_length = buffer_size;
       memcpy(serialized_message->buffer, blob.get_buffer(FALSE), buffer_size);

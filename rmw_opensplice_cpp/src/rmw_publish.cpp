@@ -145,7 +145,7 @@ rmw_publish_serialized_message(
   auto buffer = (unsigned char *)serialized_message->buffer;
   auto length = serialized_message->buffer_length;
 
-  sample.blob = DDS::CDRBlob(length, length, buffer, false);
+  sample.blob = DDS::CDRBlob(length, (DDS::ULong)length, buffer, false);
 
   DDS::ReturnCode_t status = cdr_writer.write_cdr(sample, DDS::HANDLE_NIL);
   if (status != DDS::RETCODE_OK) {
