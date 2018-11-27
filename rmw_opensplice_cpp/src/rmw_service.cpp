@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(_MSC_VER)
-# pragma warning(push)
-# pragma warning(disable: 4099)
-#endif
 #ifdef __clang__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wmismatched-tags"
 #endif
+#if defined(_MSC_VER)
+# pragma warning(push)
+# pragma warning(disable: 4099)
+#endif
 #include <ccpp_dds_dcps.h>
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 #ifdef __clang__
 # pragma GCC diagnostic pop
 #endif
 #include <dds_dcps.h>
-#if defined(_MSC_VER)
-# pragma warning(pop)
-#endif
 #include <string>
 
 #include "rosidl_typesupport_opensplice_c/identifier.h"
