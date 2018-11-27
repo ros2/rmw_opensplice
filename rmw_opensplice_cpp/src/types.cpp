@@ -315,6 +315,7 @@ void OpenSpliceSubscriberListener::on_subscription_matched(
   DDS::DataReader_ptr reader,
   const DDS::SubscriptionMatchedStatus & status)
 {
+  std::cerr << "OpenSplice Subscription Matched" << std::endl;
   (void) reader;
   current_count_ = status.current_count;
 }

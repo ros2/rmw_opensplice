@@ -284,7 +284,7 @@ rmw_subscription_count_matched_publishers(
 
   *publisher_count = info->listener->current_count();
 
-  return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
