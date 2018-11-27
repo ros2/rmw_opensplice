@@ -131,7 +131,18 @@ rmw_create_subscription(
     goto fail;
   }
 
-  dds_subscriber = participant->create_subscriber(subscriber_qos, NULL, DDS::STATUS_MASK_NONE);
+  listener_buf = rmw_allocate(sizeof(OpenSpliceSubscriberListener));
+  if (!listener_buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for subscriber listener");
+    goto fail;
+  }
+  // Use a placement new to construct the ConnextSubscriberListener in the preallocated buffer.
+  RMW_TRY_PLACEMENT_NEW(subscriber_listener, listener_buf, goto fail, OpenSpliceSubscriberListener,
+  )
+  listener_buf = nullptr;  // Only free the buffer pointer.
+
+  dds_subscriber = participant->create_subscriber(subscriber_qos, subscriber_listener,
+      DDS::SUBSCRIPTION_MATCHED_STATUS);
   if (!dds_subscriber) {
     RMW_SET_ERROR_MSG("failed to create subscriber");
     goto fail;
@@ -154,18 +165,8 @@ rmw_create_subscription(
     goto fail;
   }
 
-  listener_buf = rmw_allocate(sizeof(OpenSpliceSubscriberListener));
-  if (!listener_buf) {
-    RMW_SET_ERROR_MSG("failed to allocate memory for subscriber listener");
-    goto fail;
-  }
-  // Use a placement new to construct the ConnextSubscriberListener in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(subscriber_listener, listener_buf, goto fail, OpenSpliceSubscriberListener,
-  )
-  listener_buf = nullptr;  // Only free the buffer pointer.
-
   topic_reader = dds_subscriber->create_datareader(
-    topic, datareader_qos, subscriber_listener, DDS::STATUS_MASK_NONE);
+    topic, datareader_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic_reader) {
     RMW_SET_ERROR_MSG("failed to create topic reader");
     goto fail;

@@ -139,7 +139,7 @@ rmw_create_publisher(
   listener_buf = nullptr;  // Only free the buffer pointer.
 
   dds_publisher = participant->create_publisher(publisher_qos, publisher_listener,
-      DDS::STATUS_MASK_NONE);
+      DDS::PUBLICATION_MATCHED_STATUS);
   if (!dds_publisher) {
     RMW_SET_ERROR_MSG("failed to create publisher");
     goto fail;
