@@ -15,7 +15,14 @@
 #ifndef TYPES_HPP_
 #define TYPES_HPP_
 
+#ifdef __clang__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wmismatched-tags"
+#endif
 #include <ccpp_dds_dcps.h>
+#ifdef __clang__
+# pragma GCC diagnostic pop
+#endif
 #include <dds_dcps.h>
 
 #include <list>
