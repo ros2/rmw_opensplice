@@ -15,6 +15,10 @@
 #ifndef QOS_HPP_
 #define QOS_HPP_
 
+#if defined(_MSC_VER)
+# pragma warning(push)
+# pragma warning(disable: 4099)
+#endif
 #ifdef __clang__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wmismatched-tags"
@@ -25,6 +29,9 @@
 #endif
 #include <dds_dcps.h>
 #include <u_instanceHandle.h>
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 
 #include "rmw/rmw.h"
 

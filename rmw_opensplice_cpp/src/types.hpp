@@ -15,6 +15,10 @@
 #ifndef TYPES_HPP_
 #define TYPES_HPP_
 
+#if defined(_MSC_VER)
+# pragma warning(push)
+# pragma warning(disable: 4099)
+#endif
 #ifdef __clang__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wmismatched-tags"
@@ -24,6 +28,9 @@
 # pragma GCC diagnostic pop
 #endif
 #include <dds_dcps.h>
+#if defined(_MSC_VER)
+# pragma warning(pop)
+#endif
 
 #include <list>
 #include <map>
