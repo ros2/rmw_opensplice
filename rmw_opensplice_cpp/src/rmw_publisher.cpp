@@ -110,6 +110,8 @@ rmw_create_publisher(
   DDS::Topic * topic = nullptr;
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
+  void * listener_buf = nullptr;
+  OpenSplicePublisherListener * publisher_listener = nullptr;
   OpenSpliceStaticPublisherInfo * publisher_info = nullptr;
   std::string topic_str;
 
@@ -127,7 +129,17 @@ rmw_create_publisher(
     goto fail;
   }
 
-  dds_publisher = participant->create_publisher(publisher_qos, NULL, DDS::STATUS_MASK_NONE);
+  listener_buf = rmw_allocate(sizeof(OpenSplicePublisherListener));
+  if (!listener_buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for publisher listener");
+    goto fail;
+  }
+  // Use a placement new to construct the PublisherListener in the preallocated buffer.
+  RMW_TRY_PLACEMENT_NEW(publisher_listener, listener_buf, goto fail, OpenSplicePublisherListener, )
+  listener_buf = nullptr;  // Only free the buffer pointer.
+
+  dds_publisher = participant->create_publisher(publisher_qos, publisher_listener,
+      DDS::STATUS_MASK_NONE);
   if (!dds_publisher) {
     RMW_SET_ERROR_MSG("failed to create publisher");
     goto fail;
@@ -163,6 +175,8 @@ rmw_create_publisher(
   publisher_info->dds_publisher = dds_publisher;
   publisher_info->topic_writer = topic_writer;
   publisher_info->callbacks = callbacks;
+  publisher_info->listener = publisher_listener;
+  publisher_listener = nullptr;
   static_assert(
     sizeof(OpenSplicePublisherGID) <= RMW_GID_STORAGE_SIZE,
     "RMW_GID_STORAGE_SIZE insufficient to store the rmw_opensplice_cpp GID implemenation."
@@ -208,10 +222,55 @@ fail:
       fprintf(stderr, "%s\n", check_delete_topic(status));
     }
   }
+  if (publisher_listener) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      publisher_listener->~OpenSplicePublisherListener(), OpenSplicePublisherListener)
+    rmw_free(publisher_listener);
+  }
   if (publisher_info) {
+    if (publisher_info->listener) {
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        publisher_info->listener->~OpenSplicePublisherListener(), OpenSplicePublisherListener)
+      rmw_free(publisher_info->listener);
+      publisher_info->listener = nullptr;
+    }
     rmw_free(publisher_info);
   }
+  if (listener_buf) {
+    rmw_free(listener_buf);
+  }
+
   return nullptr;
+}
+
+rmw_ret_t
+rmw_publisher_count_matched_subscriptions(
+  const rmw_publisher_t * publisher,
+  size_t * subscription_count)
+{
+  if (!publisher) {
+    RMW_SET_ERROR_MSG("publisher handle is null");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  if (!subscription_count) {
+    RMW_SET_ERROR_MSG("subscription_count is null");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  auto info = static_cast<OpenSpliceStaticPublisherInfo *>(publisher->data);
+  if (info == nullptr) {
+    RMW_SET_ERROR_MSG("publisher internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  if (info->listener == nullptr) {
+    RMW_SET_ERROR_MSG("publisher internal listener is invalid");
+    return RMW_RET_ERROR;
+  }
+
+  *subscription_count = info->listener->current_count();
+
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -273,6 +332,14 @@ rmw_destroy_publisher(rmw_node_t * node, rmw_publisher_t * publisher)
         result = RMW_RET_ERROR;
       }
     }
+
+    if (publisher_info->listener) {
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        publisher_info->listener->~OpenSplicePublisherListener(), OpenSplicePublisherListener)
+      rmw_free(publisher_info->listener);
+      publisher_info->listener = nullptr;
+    }
+
     rmw_free(publisher_info);
   }
   if (publisher->topic_name) {

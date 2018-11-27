@@ -112,8 +112,10 @@ rmw_create_subscription(
   DDS::DataReaderQos datareader_qos;
   DDS::DataReader * topic_reader = nullptr;
   DDS::ReadCondition * read_condition = nullptr;
-  void * buf = nullptr;
+  void * info_buf = nullptr;
+  void * listener_buf = nullptr;
   OpenSpliceStaticSubscriberInfo * subscriber_info = nullptr;
+  OpenSpliceSubscriberListener * subscriber_listener = nullptr;
   std::string topic_str;
 
   // Begin initializing elements.
@@ -152,8 +154,18 @@ rmw_create_subscription(
     goto fail;
   }
 
+  listener_buf = rmw_allocate(sizeof(OpenSpliceSubscriberListener));
+  if (!listener_buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory for subscriber listener");
+    goto fail;
+  }
+  // Use a placement new to construct the ConnextSubscriberListener in the preallocated buffer.
+  RMW_TRY_PLACEMENT_NEW(subscriber_listener, listener_buf, goto fail, OpenSpliceSubscriberListener,
+  )
+  listener_buf = nullptr;  // Only free the buffer pointer.
+
   topic_reader = dds_subscriber->create_datareader(
-    topic, datareader_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic, datareader_qos, subscriber_listener, DDS::STATUS_MASK_NONE);
   if (!topic_reader) {
     RMW_SET_ERROR_MSG("failed to create topic reader");
     goto fail;
@@ -167,20 +179,22 @@ rmw_create_subscription(
   }
 
   // Allocate memory for the OpenSpliceStaticSubscriberInfo object.
-  buf = rmw_allocate(sizeof(OpenSpliceStaticSubscriberInfo));
-  if (!buf) {
+  info_buf = rmw_allocate(sizeof(OpenSpliceStaticSubscriberInfo));
+  if (!info_buf) {
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
   // Use a placement new to construct the instance in the preallocated buffer.
-  RMW_TRY_PLACEMENT_NEW(subscriber_info, buf, goto fail, OpenSpliceStaticSubscriberInfo, )
-  buf = nullptr;  // Only free the subscriber_info pointer; don't need the buf pointer anymore.
+  RMW_TRY_PLACEMENT_NEW(subscriber_info, info_buf, goto fail, OpenSpliceStaticSubscriberInfo, )
+  info_buf = nullptr;  // Only free the subscriber_info pointer; don't need the buf pointer anymore.
   subscriber_info->dds_topic = topic;
   subscriber_info->dds_subscriber = dds_subscriber;
   subscriber_info->topic_reader = topic_reader;
   subscriber_info->read_condition = read_condition;
   subscriber_info->callbacks = callbacks;
   subscriber_info->ignore_local_publications = ignore_local_publications;
+  subscriber_info->listener = subscriber_listener;
+  subscriber_listener = nullptr;
 
   subscription->implementation_identifier = opensplice_cpp_identifier;
   subscription->data = subscriber_info;
@@ -211,6 +225,11 @@ fail:
       }
     }
   }
+  if (subscriber_listener) {
+    RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+      subscriber_listener->~OpenSpliceSubscriberListener(), OpenSpliceSubscriberListener)
+    rmw_free(subscriber_listener);
+  }
   if (topic) {
     status = participant->delete_topic(topic);
     if (nullptr != check_delete_topic(status)) {
@@ -218,15 +237,54 @@ fail:
     }
   }
   if (subscriber_info) {
+    if (subscriber_info->listener) {
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        subscriber_info->listener->~OpenSpliceSubscriberListener(), OpenSpliceSubscriberListener)
+      rmw_free(subscriber_info->listener);
+      subscriber_info->listener = nullptr;
+    }
     rmw_free(subscriber_info);
   }
   if (subscription) {
     rmw_subscription_free(subscription);
   }
-  if (buf) {
-    rmw_free(buf);
+  if (info_buf) {
+    rmw_free(info_buf);
+  }
+  if (listener_buf) {
+    rmw_free(listener_buf);
   }
   return nullptr;
+}
+
+rmw_ret_t
+rmw_subscription_count_matched_publishers(
+  const rmw_subscription_t * subscription,
+  size_t * publisher_count)
+{
+  if (!subscription) {
+    RMW_SET_ERROR_MSG("subscription handle is null");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  if (!publisher_count) {
+    RMW_SET_ERROR_MSG("publisher_count is null");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  auto info = static_cast<OpenSpliceStaticSubscriberInfo *>(subscription->data);
+  if (info == nullptr) {
+    RMW_SET_ERROR_MSG("subscriber internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  if (info->listener == nullptr) {
+    RMW_SET_ERROR_MSG("subscriber internal listener is invalid");
+    return RMW_RET_ERROR;
+  }
+
+  *publisher_count = info->listener->current_count();
+
+  return RMW_RET_ERROR;
 }
 
 rmw_ret_t
@@ -300,6 +358,14 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
         result = RMW_RET_ERROR;
       }
     }
+
+    if (subscription_info->listener) {
+      RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(
+        subscription_info->listener->~OpenSpliceSubscriberListener(), OpenSpliceSubscriberListener)
+      rmw_free(subscription_info->listener);
+      subscription_info->listener = nullptr;
+    }
+
     rmw_free(subscription_info);
   }
   if (subscription->topic_name) {

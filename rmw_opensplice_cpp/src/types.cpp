@@ -297,3 +297,29 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
   builtin_reader->return_loan(data_seq, info_seq);
 }
+
+void OpenSplicePublisherListener::on_publication_matched(
+  DDS::DataWriter_ptr writer,
+  const DDS::PublicationMatchedStatus & status)
+{
+  (void) writer;
+  current_count_ = status.current_count;
+}
+
+size_t OpenSplicePublisherListener::current_count() const
+{
+  return current_count_;
+}
+
+void OpenSpliceSubscriberListener::on_subscription_matched(
+  DDS::DataReader_ptr reader,
+  const DDS::SubscriptionMatchedStatus & status)
+{
+  (void) reader;
+  current_count_ = status.current_count;
+}
+
+size_t OpenSpliceSubscriberListener::current_count() const
+{
+  return current_count_;
+}

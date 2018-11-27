@@ -18,6 +18,7 @@
 #include <ccpp_dds_dcps.h>
 #include <dds_dcps.h>
 
+#include <atomic>
 #include <list>
 #include <map>
 #include <mutex>
@@ -140,13 +141,67 @@ typedef struct OpenSplicePublisherGID
   DDS::InstanceHandle_t publication_handle;
 } OpenSplicePublisherGID;
 
+class OpenSplicePublisherListener : public DDS::PublisherListener
+{
+public:
+  virtual void on_publication_matched(
+    DDS::DataWriter_ptr writer,
+    const DDS::PublicationMatchedStatus & status);
+
+  virtual void on_offered_deadline_missed(
+    DDS::DataWriter_ptr,
+    const DDS::OfferedDeadlineMissedStatus &) {}
+  virtual void on_offered_incompatible_qos(
+    DDS::DataWriter_ptr,
+    const DDS::OfferedIncompatibleQosStatus &) {}
+  virtual void on_liveliness_lost(DDS::DataWriter_ptr, const DDS::LivelinessLostStatus &) {}
+
+  size_t current_count() const;
+
+private:
+  std::atomic<size_t> current_count_;
+};
+
 struct OpenSpliceStaticPublisherInfo
 {
   DDS::Topic * dds_topic;
   DDS::Publisher * dds_publisher;
   DDS::DataWriter * topic_writer;
+  OpenSplicePublisherListener * listener;
   const message_type_support_callbacks_t * callbacks;
   rmw_gid_t publisher_gid;
+};
+
+class OpenSpliceSubscriberListener : public DDS::SubscriberListener
+{
+public:
+  virtual void on_subscription_matched(
+    DDS::DataReader_ptr reader,
+    const DDS::SubscriptionMatchedStatus & status);
+
+  virtual void on_requested_deadline_missed(
+    DDS::DataReader_ptr,
+    const DDS::RequestedDeadlineMissedStatus &) {}
+  virtual void on_requested_incompatible_qos(
+    DDS::DataReader_ptr,
+    const DDS::RequestedIncompatibleQosStatus &) {}
+  virtual void on_sample_rejected(
+    DDS::DataReader_ptr,
+    const DDS::SampleRejectedStatus &) {}
+  virtual void on_liveliness_changed(
+    DDS::DataReader_ptr,
+    const DDS::LivelinessChangedStatus &)
+  {
+  }
+
+  virtual void on_data_available(DDS::DataReader_ptr) {}
+  virtual void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus &) {}
+  virtual void on_data_on_readers(DDS::Subscriber_ptr) {}
+
+  size_t current_count() const;
+
+private:
+  std::atomic<size_t> current_count_;
 };
 
 struct OpenSpliceStaticSubscriberInfo
@@ -155,6 +210,7 @@ struct OpenSpliceStaticSubscriberInfo
   DDS::Subscriber * dds_subscriber;
   DDS::DataReader * topic_reader;
   DDS::ReadCondition * read_condition;
+  OpenSpliceSubscriberListener * listener;
   const message_type_support_callbacks_t * callbacks;
   bool ignore_local_publications;
 };
