@@ -12,7 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifdef __clang__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wmismatched-tags"
+#endif
 #include <ccpp_dds_dcps.h>
+#ifdef __clang__
+# pragma GCC diagnostic pop
+#endif
 #include <dds_dcps.h>
 
 #include "rmw/error_handling.h"
