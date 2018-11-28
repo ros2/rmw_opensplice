@@ -178,7 +178,6 @@ public:
   virtual void on_subscription_matched(
     DDS::DataReader_ptr reader,
     const DDS::SubscriptionMatchedStatus & status);
-
   virtual void on_requested_deadline_missed(
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &) {}
