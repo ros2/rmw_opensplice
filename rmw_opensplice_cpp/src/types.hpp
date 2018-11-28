@@ -189,9 +189,7 @@ public:
     const DDS::SampleRejectedStatus &) {}
   virtual void on_liveliness_changed(
     DDS::DataReader_ptr,
-    const DDS::LivelinessChangedStatus &)
-  {
-  }
+    const DDS::LivelinessChangedStatus &) {}
 
   virtual void on_data_available(DDS::DataReader_ptr) {}
   virtual void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus &) {}
