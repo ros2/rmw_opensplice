@@ -142,10 +142,10 @@ rmw_publish_serialized_message(
 
   DDS::CDRSample sample;
 
-  auto buffer = (unsigned char *)serialized_message->buffer;
-  auto length = serialized_message->buffer_length;
+  unsigned char * buffer = static_cast<unsigned char *>(serialized_message->buffer);
+  unsigned int length = static_cast<unsigned int>(serialized_message->buffer_length);
 
-  sample.blob = DDS::CDRBlob(length, (DDS::ULong)length, buffer, false);
+  sample.blob = DDS::CDRBlob(length, length, buffer, false);
 
   DDS::ReturnCode_t status = cdr_writer.write_cdr(sample, DDS::HANDLE_NIL);
   if (status != DDS::RETCODE_OK) {
