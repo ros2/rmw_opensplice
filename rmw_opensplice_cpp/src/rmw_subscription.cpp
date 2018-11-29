@@ -359,6 +359,7 @@ rmw_destroy_subscription(rmw_node_t * node, rmw_subscription_t * subscription)
           result = RMW_RET_ERROR;
         }
       }
+
       DDS::ReturnCode_t status = participant->delete_subscriber(dds_subscriber);
       if (nullptr != check_delete_subscriber(status)) {
         RMW_SET_ERROR_MSG(check_delete_subscriber(status));
