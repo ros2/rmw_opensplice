@@ -38,9 +38,10 @@
 #include <mutex>
 #include <set>
 #include <string>
+#include "guid.hpp"
 
 #include "rmw/types.h"
-
+#include "topic_cache.h"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
@@ -88,6 +89,15 @@ public:
   void fill_service_names_and_types(
     std::map<std::string, std::set<std::string>> & services);
 
+  void fill_topic_names_and_types_by_guid(
+      bool no_demangle,
+      std::map<std::string, std::set<std::string>> & tnat,
+      GuidPrefix_t &guid);
+
+  void fill_service_names_and_types_by_guid(
+      std::map<std::string, std::set<std::string>> & services,
+      GuidPrefix_t &guid);
+
   size_t count_topic(const char * topic_name);
 
   enum EndPointType
@@ -97,26 +107,10 @@ public:
   };
 
 protected:
-  virtual void add_information(
-    const DDS::SampleInfo & sample_info,
-    const std::string & topic_name,
-    const std::string & type_name,
-    EndPointType end_point_type);
-  virtual void remove_information(
-    const DDS::SampleInfo & sample_info,
-    EndPointType end_point_type);
-
   std::mutex mutex_;
+  TopicCache<GuidPrefix_t> topic_cache;
 
 private:
-  struct TopicDescriptor
-  {
-    DDS::InstanceHandle_t instance_handle;
-    std::string name;
-    std::string type;
-  };
-  std::map<std::string, std::multiset<std::string>> topic_names_and_types_;
-  std::list<TopicDescriptor> topic_descriptors_;
   bool print_discovery_logging_;
 };
 

@@ -47,6 +47,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/demangle.cpp
   src/identifier.cpp
   src/namespace_prefix.cpp
+  src/names_and_types_helpers.h
   src/qos.cpp
   src/rmw_logging.cpp
   src/rmw_client.cpp
@@ -58,6 +59,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_guard_condition.cpp
   src/rmw_init.cpp
   src/rmw_node.cpp
+  src/rmw_node_info_and_types.cpp
   src/rmw_node_names.cpp
   src/rmw_publish.cpp
   src/rmw_publisher.cpp
