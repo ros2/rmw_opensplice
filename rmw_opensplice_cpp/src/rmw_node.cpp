@@ -43,21 +43,20 @@ extern "C"
 {
 rmw_node_t *
 rmw_create_node(
+  rmw_context_t * context,
   const char * name, const char * namespace_, size_t domain_id,
   const rmw_node_security_options_t * security_options)
 {
-  if (!name) {
-    RMW_SET_ERROR_MSG("name is null");
-    return nullptr;
-  }
-  if (!namespace_) {
-    RMW_SET_ERROR_MSG("namespace_ is null");
-    return nullptr;
-  }
-  if (!security_options) {
-    RMW_SET_ERROR_MSG("security_options is null");
-    return nullptr;
-  }
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, nullptr);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    init context,
+    context->implementation_identifier,
+    opensplice_cpp_identifier,
+    // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
+    return nullptr);
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(name, nullptr);
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(namespace_, nullptr);
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(security_options, nullptr);
   if (security_options->enforce_security) {
     RMW_SET_ERROR_MSG("OpenSplice doesn't support DDS Security");
     return nullptr;
@@ -203,7 +202,7 @@ rmw_create_node(
     goto fail;
   }
 
-  graph_guard_condition = rmw_create_guard_condition();
+  graph_guard_condition = rmw_create_guard_condition(context);
   if (!graph_guard_condition) {
     // error message already set
     goto fail;
