@@ -128,17 +128,18 @@ CustomDataReaderListener::fill_service_names_and_types(
 }
 
 void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
-    bool no_demangle,
-    std::map<std::string, std::set<std::string>> & tnat,
-    GuidPrefix_t &guid) {
+  bool no_demangle,
+  std::map<std::string, std::set<std::string>> & tnat,
+  GuidPrefix_t & guid)
+{
   std::lock_guard<std::mutex> lock(mutex_);
-  const auto& map = topic_cache.getParticipantToTopics().find(guid);
+  const auto & map = topic_cache.getParticipantToTopics().find(guid);
   if (map == topic_cache.getParticipantToTopics().end()) {
     return;
   }
-  for (auto& it : map->second) {
+  for (auto & it : map->second) {
     if (!no_demangle && (_get_ros_prefix_if_exists(it.first) !=
-                         rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
+      rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
     {
       continue;
     }
@@ -149,14 +150,15 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
 }
 
 void CustomDataReaderListener::fill_service_names_and_types_by_guid(
-    std::map<std::string, std::set<std::string>> & services,
-    GuidPrefix_t &guid) {
+  std::map<std::string, std::set<std::string>> & services,
+  GuidPrefix_t & guid)
+{
   std::lock_guard<std::mutex> lock(mutex_);
-  const auto& map = topic_cache.getParticipantToTopics().find(guid);
+  const auto & map = topic_cache.getParticipantToTopics().find(guid);
   if (map == topic_cache.getParticipantToTopics().end()) {
     return;
   }
-  for (auto& it : map->second) {
+  for (auto & it : map->second) {
     std::string service_name = _demangle_service_from_topic(it.first);
     if (!service_name.length()) {
       // not a service
@@ -277,18 +279,18 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
     if (info_seq[i].valid_data) {
-        GuidPrefix_t guid;
-        DDS_BuiltinTopicKey_to_GUID(&guid, data_seq[i].key);
-        std::lock_guard<std::mutex> lk(mutex_);
-        if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-            topic_name = data_seq[i].topic_name.in();
-            topic_cache.addTopic(guid, topic_name, data_seq[i].type_name.in());
-            print_discovery_logging("+", topic_name, data_seq[i].type_name.in(), SubscriberEP);
-        } else {
-            topic_cache.removeTopic(guid, topic_name, data_seq[i].type_name.in());
-        }
+      GuidPrefix_t guid;
+      DDS_BuiltinTopicKey_to_GUID(&guid, data_seq[i].key);
+      std::lock_guard<std::mutex> lk(mutex_);
+      if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        topic_name = data_seq[i].topic_name.in();
+        topic_cache.addTopic(guid, topic_name, data_seq[i].type_name.in());
+        print_discovery_logging("+", topic_name, data_seq[i].type_name.in(), SubscriberEP);
+      } else {
+        topic_cache.removeTopic(guid, topic_name, data_seq[i].type_name.in());
+      }
     } else {
-        //TODO: handle this case, is this allowed if the data is not valid?
+      //TODO: handle this case, is this allowed if the data is not valid?
     }
   }
 

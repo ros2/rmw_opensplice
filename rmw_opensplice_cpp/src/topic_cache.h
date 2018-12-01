@@ -36,7 +36,8 @@ template<typename GUID_t>
 class TopicCache
 {
 private:
-  typedef std::map<GUID_t, std::unordered_map<std::string, std::vector<std::string>>> ParticipantTopicMap;
+  typedef std::map<GUID_t,
+      std::unordered_map<std::string, std::vector<std::string>>> ParticipantTopicMap;
   typedef std::unordered_map<std::string, std::vector<std::string>> TopicToTypes;
 
   /**
@@ -59,7 +60,7 @@ private:
    *
    * @param topic_name
    */
-  void initializeTopic(const std::string &topic_name, TopicToTypes &topic_to_types)
+  void initializeTopic(const std::string & topic_name, TopicToTypes & topic_to_types)
   {
     if (topic_to_types.find(topic_name) == topic_to_types.end()) {
       topic_to_types[topic_name] = std::vector<std::string>();
@@ -72,8 +73,9 @@ private:
    * @param map
    * @param guid
    */
-  void initializeParticipantMap(ParticipantTopicMap &map,
-                                GUID_t guid)
+  void initializeParticipantMap(
+    ParticipantTopicMap & map,
+    GUID_t guid)
   {
     if (map.find(guid) == map.end()) {
       map[guid] = TopicToTypes();
@@ -84,7 +86,7 @@ public:
   /**
    * @return a map of topic name to the vector of topic types used.
    */
-  const TopicToTypes &getTopicToTypes() const
+  const TopicToTypes & getTopicToTypes() const
   {
     return topic_to_types_;
   }
@@ -92,7 +94,7 @@ public:
   /**
    * @return a map of participant guid to the vector of topic names used.
    */
-  const ParticipantTopicMap &getParticipantToTopics() const
+  const ParticipantTopicMap & getParticipantToTopics() const
   {
     return participant_to_topics_;
   }
@@ -105,9 +107,10 @@ public:
    * @param type_name
    * @return true if a change has been recorded
    */
-  bool addTopic(const GUID_t &guid,
-                const std::string &topic_name,
-                const std::string &type_name)
+  bool addTopic(
+    const GUID_t & guid,
+    const std::string & topic_name,
+    const std::string & type_name)
   {
     initializeTopic(topic_name, topic_to_types_);
     initializeParticipantMap(participant_to_topics_, guid);
@@ -133,9 +136,10 @@ public:
    * @param type_name
    * @return true if a change has been recorded
    */
-  bool removeTopic(const GUID_t &guid,
-                   const std::string &topic_name,
-                   const std::string &type_name)
+  bool removeTopic(
+    const GUID_t & guid,
+    const std::string & topic_name,
+    const std::string & type_name)
   {
     if (topic_to_types_.find(topic_name) == topic_to_types_.end()) {
       RCUTILS_LOG_DEBUG_NAMED(
@@ -145,7 +149,7 @@ public:
       return false;
     }
     {
-      auto &type_vec = topic_to_types_[topic_name];
+      auto & type_vec = topic_to_types_[topic_name];
       type_vec.erase(std::find(type_vec.begin(), type_vec.end(), type_name));
       if (type_vec.size() == 0) {
         topic_to_types_.erase(topic_name);
@@ -153,10 +157,11 @@ public:
     }
 
     auto guid_topics_pair = participant_to_topics_.find(guid);
-    if (guid_topics_pair != participant_to_topics_.end()
-        && guid_topics_pair->second.find(topic_name) != guid_topics_pair->second.end()) {
+    if (guid_topics_pair != participant_to_topics_.end() &&
+      guid_topics_pair->second.find(topic_name) != guid_topics_pair->second.end())
+    {
 
-      auto &type_vec = guid_topics_pair->second[topic_name];
+      auto & type_vec = guid_topics_pair->second[topic_name];
       type_vec.erase(std::find(type_vec.begin(), type_vec.end(), type_name));
       if (type_vec.size() == 0) {
         participant_to_topics_[guid].erase(topic_name);
@@ -175,26 +180,29 @@ public:
 };
 
 template<typename GUID_t>
-inline std::ostream &operator<<(std::ostream &ostream,
-                                const TopicCache<GUID_t> &topic_cache)
+inline std::ostream & operator<<(
+  std::ostream & ostream,
+  const TopicCache<GUID_t> & topic_cache)
 {
   std::stringstream map_ss;
   map_ss << "Participant Info: " << std::endl;
-  for (auto &elem : topic_cache.getParticipantToTopics()) {
+  for (auto & elem : topic_cache.getParticipantToTopics()) {
     std::ostringstream stream;
     stream << "  Topics: " << std::endl;
-    for (auto &types : elem.second) {
+    for (auto & types : elem.second) {
       stream << "    " << types.first << ": ";
-      std::copy(types.second.begin(), types.second.end(), std::ostream_iterator<std::string>(stream, ","));
+      std::copy(types.second.begin(), types.second.end(),
+        std::ostream_iterator<std::string>(stream, ","));
       stream << std::endl;
     }
     map_ss << elem.first << std::endl << stream.str();
   }
   std::stringstream topics_ss;
   topics_ss << "Cumulative TopicToTypes: " << std::endl;
-  for (auto &elem : topic_cache.getTopicToTypes()) {
+  for (auto & elem : topic_cache.getTopicToTypes()) {
     std::ostringstream stream;
-    std::copy(elem.second.begin(), elem.second.end(), std::ostream_iterator<std::string>(stream, ","));
+    std::copy(elem.second.begin(), elem.second.end(), std::ostream_iterator<std::string>(stream,
+      ","));
     topics_ss << "  " << elem.first << " : " << stream.str() << std::endl;
   }
   ostream << map_ss.str() << topics_ss.str();
@@ -206,15 +214,15 @@ class LockedObject : public T
 {
 private:
   mutable std::mutex cache_mutex_;
+
 public:
   /**
   * @return a reference to this object to lock.
   */
-  std::mutex &getMutex() const
+  std::mutex & getMutex() const
   {
     return cache_mutex_;
   }
 };
 
 #endif //RMW_FASTRTPS_CPP_TOPIC_CACHE_H
-

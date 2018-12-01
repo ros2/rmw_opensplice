@@ -29,10 +29,12 @@ extern "C"
 {
 
 bool
-is_node_match(DDS::UserDataQosPolicy &user_data_qos,
-              const char *node_name,
-              const char *node_namespace) {
-  uint8_t *buf = user_data_qos.value.get_buffer(false);
+is_node_match(
+  DDS::UserDataQosPolicy & user_data_qos,
+  const char * node_name,
+  const char * node_namespace)
+{
+  uint8_t * buf = user_data_qos.value.get_buffer(false);
   if (buf) {
     std::vector<uint8_t> kv(buf, buf + user_data_qos.value.length());
     auto map = rmw::impl::cpp::parse_key_value(kv);
@@ -42,16 +44,18 @@ is_node_match(DDS::UserDataQosPolicy &user_data_qos,
     if (name_found != map.end() && ns_found != map.end()) {
       std::string name(name_found->second.begin(), name_found->second.end());
       std::string ns(ns_found->second.begin(), ns_found->second.end());
-      return (strcmp(node_name, name.c_str()) == 0 && strcmp(node_namespace, ns.c_str()) == 0);
+      return strcmp(node_name, name.c_str()) == 0 && strcmp(node_namespace, ns.c_str()) == 0;
     }
   }
   return false;
 }
 rmw_ret_t
-get_key(OpenSpliceStaticNodeInfo *node_info,
-        const char *node_name,
-        const char *node_namespace,
-        GuidPrefix_t *key) {
+get_key(
+  OpenSpliceStaticNodeInfo * node_info,
+  const char * node_name,
+  const char * node_namespace,
+  GuidPrefix_t * key)
+{
   auto participant = node_info->participant;
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
@@ -75,7 +79,7 @@ get_key(OpenSpliceStaticNodeInfo *node_info,
     DDS::ParticipantBuiltinTopicData pbtd;
     auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
     if (dds_ret == DDS::RETCODE_OK) {
-      uint8_t *buf = pbtd.user_data.value.get_buffer(false);
+      uint8_t * buf = pbtd.user_data.value.get_buffer(false);
       if (buf) {
         std::vector<uint8_t> kv(buf, buf + pbtd.user_data.value.length());
         auto map = rmw::impl::cpp::parse_key_value(kv);
@@ -86,7 +90,8 @@ get_key(OpenSpliceStaticNodeInfo *node_info,
           std::string name(name_found->second.begin(), name_found->second.end());
           std::string ns(ns_found->second.begin(), ns_found->second.end());
           if (strcmp(node_name, name.c_str()) == 0 &&
-              strcmp(node_namespace, ns.c_str()) == 0) {
+            strcmp(node_namespace, ns.c_str()) == 0)
+          {
             DDS_BuiltinTopicKey_to_GUID(key, pbtd.key);
             return RMW_RET_OK;
           }
@@ -102,8 +107,10 @@ get_key(OpenSpliceStaticNodeInfo *node_info,
 }
 
 rmw_ret_t
-validate_names_and_namespace(const char *node_name,
-                             const char *node_namespace) {
+validate_names_and_namespace(
+  const char * node_name,
+  const char * node_namespace)
+{
   if (!node_name) {
     RMW_SET_ERROR_MSG("null node name");
     return RMW_RET_INVALID_ARGUMENT;
@@ -117,12 +124,13 @@ validate_names_and_namespace(const char *node_name,
 
 rmw_ret_t
 rmw_get_subscriber_names_and_types_by_node(
-  const rmw_node_t *node,
-  rcutils_allocator_t *allocator,
-  const char *node_name,
-  const char *node_namespace,
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  const char * node_name,
+  const char * node_namespace,
   bool no_demangle,
-  rmw_names_and_types_t *topic_names_and_types) {
+  rmw_names_and_types_t * topic_names_and_types)
+{
   rmw_ret_t ret = validate_node(node, allocator);
   if (ret != RMW_RET_OK) {
     return ret;
@@ -156,12 +164,13 @@ rmw_get_subscriber_names_and_types_by_node(
 
 rmw_ret_t
 rmw_get_publisher_names_and_types_by_node(
-  const rmw_node_t *node,
-  rcutils_allocator_t *allocator,
-  const char *node_name,
-  const char *node_namespace,
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  const char * node_name,
+  const char * node_namespace,
   bool no_demangle,
-  rmw_names_and_types_t *topic_names_and_types) {
+  rmw_names_and_types_t * topic_names_and_types)
+{
   rmw_ret_t ret = validate_node(node, allocator);
   if (ret != RMW_RET_OK) {
     return ret;
@@ -197,11 +206,12 @@ rmw_get_publisher_names_and_types_by_node(
 
 rmw_ret_t
 rmw_get_service_names_and_types_by_node(
-  const rmw_node_t *node,
-  rcutils_allocator_t *allocator,
-  const char *node_name,
-  const char *node_namespace,
-  rmw_names_and_types_t *service_names_and_types) {
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  const char * node_name,
+  const char * node_namespace,
+  rmw_names_and_types_t * service_names_and_types)
+{
   rmw_ret_t ret = validate_node(node, allocator);
   if (ret != RMW_RET_OK) {
     return ret;
@@ -235,4 +245,3 @@ rmw_get_service_names_and_types_by_node(
 }
 
 } //extern "C"
-

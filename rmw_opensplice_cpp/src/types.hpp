@@ -90,13 +90,13 @@ public:
     std::map<std::string, std::set<std::string>> & services);
 
   void fill_topic_names_and_types_by_guid(
-      bool no_demangle,
-      std::map<std::string, std::set<std::string>> & tnat,
-      GuidPrefix_t &guid);
+    bool no_demangle,
+    std::map<std::string, std::set<std::string>> & tnat,
+    GuidPrefix_t & guid);
 
   void fill_service_names_and_types_by_guid(
-      std::map<std::string, std::set<std::string>> & services,
-      GuidPrefix_t &guid);
+    std::map<std::string, std::set<std::string>> & services,
+    GuidPrefix_t & guid);
 
   size_t count_topic(const char * topic_name);
 
