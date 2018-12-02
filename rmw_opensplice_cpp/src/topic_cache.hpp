@@ -207,20 +207,4 @@ inline std::ostream & operator<<(
   return ostream;
 }
 
-template<class T>
-class LockedObject : public T
-{
-private:
-  mutable std::mutex cache_mutex_;
-
-public:
-  /**
-  * @return a reference to this object to lock.
-  */
-  std::mutex & getMutex() const
-  {
-    return cache_mutex_;
-  }
-};
-
 #endif  // TOPIC_CACHE_HPP_
