@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENSPLICE_CPP_GUID_HPP
-#define RMW_OPENSPLICE_CPP_GUID_HPP
+#ifndef GUID_HPP_
+#define GUID_HPP_
 
 #include <cstring>
 #include <iostream>
-#include <dds_dcps.h>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
-// TODO: This should all be in opensplice
+#include "dds_dcps.h"
+
+// TODO(ross-desmond): This should all be in opensplice
 typedef char octet;
 
 // http://www.eprosima.com/docs/fast-rtps/1.6.0/html/_guid_8h_source.html
@@ -102,7 +107,7 @@ inline std::ostream & operator<<(std::ostream & output, const GuidPrefix_t & gui
   return output << std::dec;
 }
 
-// TODO: big/little endian
+// TODO(ross-desmond): big/little endian
 inline void DDS_InstanceHandle_to_GUID(
   struct GuidPrefix_t * guid,
   DDS::InstanceHandle_t instanceHandle)
@@ -134,4 +139,4 @@ inline void DDS_BuiltinTopicKey_to_GUID(
 #endif
 }
 
-#endif //RMW_OPENSPLICE_CPP_GUID_HPP
+#endif  // GUID_HPP_

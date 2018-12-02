@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_FASTRTPS_CPP_TOPIC_CACHE_H
-#define RMW_FASTRTPS_CPP_TOPIC_CACHE_H
-
-#include "rcutils/logging_macros.h"
+#ifndef TOPIC_CACHE_HPP_
+#define TOPIC_CACHE_HPP_
 
 #include <algorithm>
-#include <unordered_map>
-#include <map>
-#include <utility>
-#include <set>
-#include <string>
-#include <vector>
-#include <sstream>
 #include <iterator>
+#include <map>
 #include <mutex>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include "rcutils/logging_macros.h"
 
 /**
  * Topic cache data structure. Manages relationships between participants and topics.
@@ -159,7 +159,6 @@ public:
     if (guid_topics_pair != participant_to_topics_.end() &&
       guid_topics_pair->second.find(topic_name) != guid_topics_pair->second.end())
     {
-
       auto & type_vec = guid_topics_pair->second[topic_name];
       type_vec.erase(std::find(type_vec.begin(), type_vec.end(), type_name));
       if (type_vec.size() == 0) {
@@ -224,4 +223,4 @@ public:
   }
 };
 
-#endif //RMW_FASTRTPS_CPP_TOPIC_CACHE_H
+#endif  // TOPIC_CACHE_HPP_

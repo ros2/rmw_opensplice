@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "names_and_types_helpers.h"
+#include <cstring>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "rmw/allocators.h"
 #include "rmw/convert_rcutils_ret_to_rmw_ret.h"
 #include "rmw/error_handling.h"
@@ -21,12 +26,12 @@
 #include "rmw/rmw.h"
 #include "rmw/impl/cpp/key_value.hpp"
 #include "rmw/sanity_checks.h"
+
+#include "names_and_types_helpers.hpp"
 #include "types.hpp"
-#include <cstring>
 
 extern "C"
 {
-
 bool
 is_node_match(
   DDS::UserDataQosPolicy & user_data_qos,
@@ -200,7 +205,6 @@ rmw_get_publisher_names_and_types_by_node(
     return rmw_ret;
   }
   return RMW_RET_OK;
-
 }
 
 rmw_ret_t
@@ -242,5 +246,4 @@ rmw_get_service_names_and_types_by_node(
   }
   return RMW_RET_OK;
 }
-
-} //extern "C"
+}  // extern "C"

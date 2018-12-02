@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RMW_OPENSPLICE_CPP_NAMES_AND_TYPES_HELPERS_H
-#define RMW_OPENSPLICE_CPP_NAMES_AND_TYPES_HELPERS_H
+#ifndef NAMES_AND_TYPES_HELPERS_HPP_
+#define NAMES_AND_TYPES_HELPERS_HPP_
 
 #define SAMPLE_PREFIX "/Sample_"
 
 #include <map>
+#include <set>
 #include <string>
 
 #include "identifier.hpp"
@@ -216,6 +217,6 @@ copy_services_to_names_and_types(
   }
   return RMW_RET_OK;
 }
+}  // extern "C"
 
-} // extern "C"
-#endif //RMW_OPENSPLICE_CPP_NAMES_AND_TYPES_HELPERS_H
+#endif  // NAMES_AND_TYPES_HELPERS_HPP_

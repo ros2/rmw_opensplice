@@ -30,7 +30,7 @@
 
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
 #include "identifier.hpp"
-#include "names_and_types_helpers.h"
+#include "names_and_types_helpers.hpp"
 #include "types.hpp"
 #include "demangle.hpp"
 

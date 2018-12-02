@@ -41,7 +41,7 @@
 #include "guid.hpp"
 
 #include "rmw/types.h"
-#include "topic_cache.h"
+#include "topic_cache.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 

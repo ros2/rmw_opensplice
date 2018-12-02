@@ -235,7 +235,7 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
         topic_cache.removeTopic(guid, topic_name, data_seq[i].type_name.in());
       }
     } else {
-      //TODO: handle this case, is this allowed if the data is not valid?
+      // TODO(ross-desmond): handle this case, is this allowed if the data is not valid?
     }
   }
 
@@ -290,7 +290,7 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
         topic_cache.removeTopic(guid, topic_name, data_seq[i].type_name.in());
       }
     } else {
-      //TODO: handle this case, is this allowed if the data is not valid?
+      // TODO(ross-desmond): handle this case, is this allowed if the data is not valid?
     }
   }
 

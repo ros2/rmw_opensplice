@@ -19,17 +19,17 @@
 #include "rcutils/allocator.h"
 #include "rcutils/logging_macros.h"
 #include "rcutils/strdup.h"
-#include "rmw/error_handling.h"
-#include "rmw/names_and_types.h"
-#include "rmw/get_service_names_and_types.h"
-#include "rmw/types.h"
 #include "rmw/convert_rcutils_ret_to_rmw_ret.h"
+#include "rmw/error_handling.h"
+#include "rmw/get_service_names_and_types.h"
 #include "rmw/impl/cpp/macros.hpp"
+#include "rmw/names_and_types.h"
+#include "rmw/types.h"
 
 #include "identifier.hpp"
 #include "types.hpp"
 #include "demangle.hpp"
-#include "names_and_types_helpers.h"
+#include "names_and_types_helpers.hpp"
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"
@@ -61,5 +61,4 @@ rmw_get_service_names_and_types(
   }
   return RMW_RET_OK;
 }
-
 }  // extern "C"
