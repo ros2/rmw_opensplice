@@ -47,7 +47,6 @@ add_library(rmw_opensplice_cpp SHARED
   src/demangle.cpp
   src/identifier.cpp
   src/namespace_prefix.cpp
-  src/names_and_types_helpers.h
   src/qos.cpp
   src/rmw_logging.cpp
   src/rmw_client.cpp
