@@ -227,7 +227,7 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
       GuidPrefix_t guid;
       DDS_BuiltinTopicKey_to_GUID(&guid, data_seq[i].key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-        std::lock_guard<std::mutex> lk(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         topic_name = data_seq[i].topic_name.in();
         topic_cache.addTopic(guid, topic_name, data_seq[i].type_name.in());
         print_discovery_logging("+", topic_name, data_seq[i].type_name.in(), PublisherEP);
@@ -281,7 +281,7 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
     if (info_seq[i].valid_data) {
       GuidPrefix_t guid;
       DDS_BuiltinTopicKey_to_GUID(&guid, data_seq[i].key);
-      std::lock_guard<std::mutex> lk(mutex_);
+      std::lock_guard<std::mutex> lock(mutex_);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();
         topic_cache.addTopic(guid, topic_name, data_seq[i].type_name.in());
