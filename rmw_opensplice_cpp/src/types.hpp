@@ -38,10 +38,11 @@
 #include <mutex>
 #include <set>
 #include <string>
+
 #include "guid.hpp"
+#include "topic_cache.hpp"
 
 #include "rmw/types.h"
-#include "topic_cache.hpp"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
@@ -63,6 +64,7 @@ public:
   void on_requested_deadline_missed(
     DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus &)
   {}
+
   void on_requested_incompatible_qos(
     DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus &)
   {}
@@ -106,8 +108,32 @@ public:
     SubscriberEP,
   };
 
+  /**
+   * Add topic pub/sub information to discovery cache.
+   *
+   * @param participant_guid the topic is related to
+   * @param topic_guid the topic reader/writer unique id
+   * @param topic_name the topic name
+   * @param topic_type the topic type
+   * @param endpoint_type the endpoint type of this topic instance
+   */
+  void add_information(
+    const GuidPrefix_t & participant_guid,
+    const GuidPrefix_t & topic_guid,
+    const std::string & topic_name,
+    const std::string & topic_type,
+    EndPointType endpoint_type);
+
+  /**
+   * Remove topic pub/sub information from the discovery cache.
+   * @param topic_guid the topic reader/writer unique id
+   */
+  void remove_information(const GuidPrefix_t & topic_guid);
+
 protected:
   std::mutex mutex_;
+
+  // The topic cache to handle relationship of readers, writers, and participants through discovery.
   TopicCache<GuidPrefix_t> topic_cache;
 
 private:

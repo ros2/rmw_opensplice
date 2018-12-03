@@ -15,6 +15,8 @@
 #ifndef GUID_HPP_
 #define GUID_HPP_
 
+#include <dds_dcps.h>
+
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -22,64 +24,61 @@
 #include <string>
 #include <vector>
 
-#include "dds_dcps.h"
-
 // TODO(ross-desmond): This should all be in opensplice
 typedef char octet;
 
-// http://www.eprosima.com/docs/fast-rtps/1.6.0/html/_guid_8h_source.html
+/**
+ * Structure to hold GUID information for DDS instances.
+ * http://www.eprosima.com/docs/fast-rtps/1.6.0/html/_guid_8h_source.html
+ *
+ */
 struct GuidPrefix_t
 {
-  static const unsigned int size = 12;
-  octet value[size];
+  static constexpr unsigned int kSize = 12;
+  octet value[kSize];
 
   GuidPrefix_t()
   {
-    memset(value, 0, size);
+    memset(value, 0, kSize);
   }
 
-  GuidPrefix_t(octet guid[size])
+  explicit GuidPrefix_t(octet guid[kSize])
   {
-    memcpy(value, guid, size);
+    memcpy(value, guid, kSize);
   }
 
   GuidPrefix_t(const GuidPrefix_t & g)
   {
-    memcpy(value, g.value, size);
+    memcpy(value, g.value, kSize);
   }
 
   GuidPrefix_t(GuidPrefix_t && g)
   {
-    memmove(value, g.value, size);
+    memmove(value, g.value, kSize);
   }
 
   GuidPrefix_t & operator=(const GuidPrefix_t & guidpre)
   {
-    memcpy(value, guidpre.value, size);
+    memcpy(value, guidpre.value, kSize);
     return *this;
   }
 
   GuidPrefix_t & operator=(GuidPrefix_t && guidpre)
   {
-    memmove(value, guidpre.value, size);
+    memmove(value, guidpre.value, kSize);
     return *this;
-  }
-
-  static GuidPrefix_t unknown()
-  {
-    return GuidPrefix_t();
   }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS_PUBLIC
 
   bool operator==(const GuidPrefix_t & prefix) const
   {
-    return memcmp(value, prefix.value, size) == 0;
+    return memcmp(value, prefix.value, kSize) == 0;
   }
 
   bool operator!=(const GuidPrefix_t & prefix) const
   {
-    return memcmp(value, prefix.value, size) != 0;
+    return memcmp(value, prefix.value, kSize) != 0;
   }
 
 #endif
@@ -101,18 +100,28 @@ inline std::ostream & operator<<(std::ostream & output, const GuidPrefix_t & gui
 {
   output << std::hex;
   for (uint8_t i = 0; i < 11; ++i) {
-    output << (int) guiP.value[i] << ".";
+    output << static_cast<int>(guiP.value[i]) << ".";
   }
-  output << (int) guiP.value[11];
+  output << static_cast<int>(guiP.value[11]);
   return output << std::dec;
 }
 
-// TODO(ross-desmond): big/little endian
+// TODO(ross-desmond): check this with opensplice source code to ensure compatibility
+/**
+ * Convert an instance handle to a guid.
+ *
+ * @param guid [out] the resulting guid
+ * @param domain_id to prepend to the guid
+ * @param instance_handle to append to the guid
+ */
 inline void DDS_InstanceHandle_to_GUID(
   struct GuidPrefix_t * guid,
-  DDS::InstanceHandle_t instanceHandle)
+  DDS::DomainId_t domain_id,
+  DDS::InstanceHandle_t instance_handle)
 {
-  memcpy(guid->value, (char *) &instanceHandle, guid->size);
+  memcpy(guid->value, reinterpret_cast<char *>(&domain_id), sizeof(DDS::DomainId_t));
+  memcpy(guid->value + sizeof(DDS::DomainId_t),
+    reinterpret_cast<char *>(&instance_handle), sizeof(DDS::InstanceHandle_t));
 }
 
 inline void DDS_BuiltinTopicKey_to_GUID(
@@ -121,16 +130,16 @@ inline void DDS_BuiltinTopicKey_to_GUID(
 {
 #if BIG_ENDIAN
   /* Big Endian */
-  memcpy(guid->value, (octet *) buitinTopicKey, guid->size);
+  memcpy(guid->value, reinterpret_cast<octet *>(buitinTopicKey), GuidPrefix_t::kSize);
 #else
   /* Little Endian */
   int i;
   octet * guidElement;
-  octet * topicKeyBuffer = (octet *)buitinTopicKey;
+  octet * topicKeyBuffer = reinterpret_cast<octet *>(buitinTopicKey);
   octet * keyBufferElement;
   for (i = 0; i < 3; ++i) {
     octet * guidElement = &guid->value[i * 3];
-    octet * keyBufferElement = (DDS_Octet *)(&buitinTopicKey[i * 3]);
+    octet * keyBufferElement = reinterpret_cast<octet *>(&buitinTopicKey[i * 3]);
     guidElement[0] = keyBufferElement[2];
     guidElement[1] = keyBufferElement[1];
     guidElement[2] = keyBufferElement[0];

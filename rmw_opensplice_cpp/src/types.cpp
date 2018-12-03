@@ -71,23 +71,14 @@ size_t
 CustomDataReaderListener::count_topic(const char * topic_name)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  auto it = std::find_if(
-    topic_cache.getTopicToTypes().begin(),
-    topic_cache.getTopicToTypes().end(),
+  auto count = std::count_if(
+    topic_cache.GetTopicGuidToInfo().begin(),
+    topic_cache.GetTopicGuidToInfo().end(),
     [&](auto tnt) -> bool {
-      auto fqdn = _demangle_if_ros_topic(tnt.first);
-      if (fqdn == topic_name) {
-        return true;
-      }
-      return false;
+      auto fqdn = _demangle_if_ros_topic(tnt.second.name);
+      return fqdn == topic_name;
     });
-  size_t count;
-  if (it == topic_cache.getTopicToTypes().end()) {
-    count = 0;
-  } else {
-    count = it->second.size();
-  }
-  return count;
+  return (size_t) count;
 }
 
 void
@@ -96,15 +87,13 @@ CustomDataReaderListener::fill_topic_names_and_types(
   std::map<std::string, std::set<std::string>> & tnat)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  for (auto it : topic_cache.getTopicToTypes()) {
-    if (!no_demangle && (_get_ros_prefix_if_exists(it.first) !=
+  for (auto it : topic_cache.GetTopicGuidToInfo()) {
+    if (!no_demangle && (_get_ros_prefix_if_exists(it.second.name) !=
       rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
     {
       continue;
     }
-    for (auto & jt : it.second) {
-      tnat[it.first].insert(jt);
-    }
+    tnat[it.second.name].insert(it.second.type);
   }
 }
 
@@ -112,17 +101,15 @@ void
 CustomDataReaderListener::fill_service_names_and_types(
   std::map<std::string, std::set<std::string>> & services)
 {
-  for (auto it : topic_cache.getTopicToTypes()) {
-    std::string service_name = _demangle_service_from_topic(it.first);
+  for (auto it : topic_cache.GetTopicGuidToInfo()) {
+    std::string service_name = _demangle_service_from_topic(it.second.name);
     if (!service_name.length()) {
       // not a service
       continue;
     }
-    for (auto & itt : it.second) {
-      std::string service_type = _demangle_service_type_only(itt);
-      if (service_type.length()) {
-        services[service_name].insert(service_type);
-      }
+    std::string service_type = _demangle_service_type_only(it.second.type);
+    if (service_type.length()) {
+      services[service_name].insert(service_type);
     }
   }
 }
@@ -130,35 +117,39 @@ CustomDataReaderListener::fill_service_names_and_types(
 void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
   bool no_demangle,
   std::map<std::string, std::set<std::string>> & tnat,
-  GuidPrefix_t & guid)
+  GuidPrefix_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  const auto & map = topic_cache.getParticipantToTopics().find(guid);
-  if (map == topic_cache.getParticipantToTopics().end()) {
+  const auto & map = topic_cache.GetTopicTypesByGuid(participant_guid);
+  if (map.size() == 0) {
+    RCUTILS_LOG_DEBUG_NAMED(
+      "rmw_opensplice_cpp",
+      "No topics for participant_guid");
     return;
   }
-  for (auto & it : map->second) {
+  for (auto & it : map) {
     if (!no_demangle && (_get_ros_prefix_if_exists(it.first) !=
       rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
     {
       continue;
     }
-    for (auto & jt : it.second) {
-      tnat[it.first].insert(jt);
-    }
+    tnat[it.first].insert(it.second.begin(), it.second.end());
   }
 }
 
 void CustomDataReaderListener::fill_service_names_and_types_by_guid(
   std::map<std::string, std::set<std::string>> & services,
-  GuidPrefix_t & guid)
+  GuidPrefix_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  const auto & map = topic_cache.getParticipantToTopics().find(guid);
-  if (map == topic_cache.getParticipantToTopics().end()) {
+  const auto & map = topic_cache.GetTopicTypesByGuid(participant_guid);
+  if (map.size() == 0) {
+    RCUTILS_LOG_DEBUG_NAMED(
+      "rmw_opensplice_cpp",
+      "No services for participant_guid");
     return;
   }
-  for (auto & it : map->second) {
+  for (auto & it : map) {
     std::string service_name = _demangle_service_from_topic(it.first);
     if (!service_name.length()) {
       // not a service
@@ -194,6 +185,22 @@ print_discovery_logging(
   }
 }
 
+void CustomDataReaderListener::add_information(
+  const GuidPrefix_t & participant_guid,
+  const GuidPrefix_t & topic_guid,
+  const std::string & topic_name,
+  const std::string & topic_type,
+  const EndPointType endpoint_type)
+{
+  topic_cache.AddTopic(participant_guid, topic_guid, topic_name, topic_type);
+  print_discovery_logging("+", topic_name, topic_type, endpoint_type);
+}
+
+void CustomDataReaderListener::remove_information(const GuidPrefix_t & topic_guid)
+{
+  topic_cache.RemoveTopic(topic_guid);
+}
+
 CustomPublisherListener::CustomPublisherListener(rmw_guard_condition_t * graph_guard_condition)
 : graph_guard_condition_(graph_guard_condition)
 {
@@ -223,18 +230,20 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
+    GuidPrefix_t topic_guid;
+    DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
     if (info_seq[i].valid_data) {
-      GuidPrefix_t guid;
-      DDS_BuiltinTopicKey_to_GUID(&guid, data_seq[i].key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();
-        topic_cache.addTopic(guid, topic_name, data_seq[i].type_name.in());
-        print_discovery_logging("+", topic_name, data_seq[i].type_name.in(), PublisherEP);
+        GuidPrefix_t participant_guid;
+        DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
+        add_information(participant_guid, topic_guid, topic_name,
+          data_seq[i].type_name.in(), PublisherEP);
       } else {
-        topic_cache.removeTopic(guid, topic_name, data_seq[i].type_name.in());
+        remove_information(topic_guid);
       }
     } else {
-      // TODO(ross-desmond): handle this case, is this allowed if the data is not valid?
+      remove_information(topic_guid);
     }
   }
 
@@ -277,18 +286,21 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
+    GuidPrefix_t topic_guid;
+    DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
     if (info_seq[i].valid_data) {
-      GuidPrefix_t guid;
-      DDS_BuiltinTopicKey_to_GUID(&guid, data_seq[i].key);
+      std::string topic_name = "";
+      GuidPrefix_t participant_guid;
+      DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();
-        topic_cache.addTopic(guid, topic_name, data_seq[i].type_name.in());
-        print_discovery_logging("+", topic_name, data_seq[i].type_name.in(), SubscriberEP);
+        add_information(participant_guid, topic_guid, topic_name,
+          data_seq[i].type_name.in(), SubscriberEP);
       } else {
-        topic_cache.removeTopic(guid, topic_name, data_seq[i].type_name.in());
+        remove_information(topic_guid);
       }
     } else {
-      // TODO(ross-desmond): handle this case, is this allowed if the data is not valid?
+      remove_information(topic_guid);
     }
   }
 

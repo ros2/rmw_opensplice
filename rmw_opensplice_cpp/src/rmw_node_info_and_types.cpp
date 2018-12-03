@@ -27,6 +27,8 @@
 #include "rmw/impl/cpp/key_value.hpp"
 #include "rmw/sanity_checks.h"
 
+#include "rcutils/logging_macros.h"
+
 #include "names_and_types_helpers.hpp"
 #include "types.hpp"
 
@@ -68,8 +70,10 @@ get_key(
 
   DDS::DomainParticipantQos dpqos;
   auto dds_ret = participant->get_qos(dpqos);
+  // @todo: ross-desmond implement self discovery
   if (dds_ret == DDS::RETCODE_OK && is_node_match(dpqos.user_data, node_name, node_namespace)) {
-    DDS_InstanceHandle_to_GUID(key, node_info->participant->get_instance_handle());
+    DDS_InstanceHandle_to_GUID(key,
+      node_info->participant->get_domain_id(), node_info->participant->get_instance_handle());
     return RMW_RET_OK;
   }
 
@@ -81,7 +85,7 @@ get_key(
 
   for (DDS::ULong i = 0; i < handles.length(); ++i) {
     DDS::ParticipantBuiltinTopicData pbtd;
-    auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
+    dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
     if (dds_ret == DDS::RETCODE_OK) {
       uint8_t * buf = pbtd.user_data.value.get_buffer(false);
       if (buf) {
@@ -93,6 +97,9 @@ get_key(
         if (name_found != map.end() && ns_found != map.end()) {
           std::string name(name_found->second.begin(), name_found->second.end());
           std::string ns(ns_found->second.begin(), ns_found->second.end());
+          RCUTILS_LOG_WARN_NAMED(
+            "rmw_opensplice_cpp",
+            "Found node %s", name.c_str());
           if (strcmp(node_name, name.c_str()) == 0 &&
             strcmp(node_namespace, ns.c_str()) == 0)
           {
@@ -123,7 +130,7 @@ validate_names_and_namespace(
     RMW_SET_ERROR_MSG("null node namespace");
     return RMW_RET_INVALID_ARGUMENT;
   }
-  return RMW_RET_ERROR;
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
