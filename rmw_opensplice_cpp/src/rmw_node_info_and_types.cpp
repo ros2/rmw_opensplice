@@ -97,7 +97,7 @@ get_key(
         if (name_found != map.end() && ns_found != map.end()) {
           std::string name(name_found->second.begin(), name_found->second.end());
           std::string ns(ns_found->second.begin(), ns_found->second.end());
-          RCUTILS_LOG_WARN_NAMED(
+          RCUTILS_LOG_DEBUG_NAMED(
             "rmw_opensplice_cpp",
             "Found node %s", name.c_str());
           if (strcmp(node_name, name.c_str()) == 0 &&
