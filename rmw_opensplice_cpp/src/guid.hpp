@@ -86,7 +86,7 @@ struct GuidPrefix_t
 
 inline bool operator<(const GuidPrefix_t & g1, const GuidPrefix_t & g2)
 {
-  for (uint8_t i = 0; i < 12; ++i) {
+  for (uint8_t i = 0; i < GuidPrefix_t::kSize; ++i) {
     if (g1.value[i] < g2.value[i]) {
       return true;
     } else if (g1.value[i] > g2.value[i]) {
@@ -99,10 +99,10 @@ inline bool operator<(const GuidPrefix_t & g1, const GuidPrefix_t & g2)
 inline std::ostream & operator<<(std::ostream & output, const GuidPrefix_t & guiP)
 {
   output << std::hex;
-  for (uint8_t i = 0; i < 11; ++i) {
+  for (uint8_t i = 0; i < GuidPrefix_t::kSize - 1; ++i) {
     output << static_cast<int>(guiP.value[i]) << ".";
   }
-  output << static_cast<int>(guiP.value[11]);
+  output << static_cast<int>(guiP.value[GuidPrefix_t::kSize - 1]);
   return output << std::dec;
 }
 

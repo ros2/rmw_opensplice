@@ -127,8 +127,11 @@ public:
   /**
    * Remove topic pub/sub information from the discovery cache.
    * @param topic_guid the topic reader/writer unique id
+   * @param endpoint_type the endpoint type of this topic instance
    */
-  void remove_information(const GuidPrefix_t & topic_guid);
+  void remove_information(
+    const GuidPrefix_t & topic_guid,
+    const EndPointType endpoint_type);
 
 protected:
   std::mutex mutex_;

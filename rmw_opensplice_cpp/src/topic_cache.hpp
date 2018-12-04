@@ -15,7 +15,6 @@
 #ifndef TOPIC_CACHE_HPP_
 #define TOPIC_CACHE_HPP_
 
-
 #include <utility>
 #include <set>
 #include <string>
@@ -25,7 +24,6 @@
 #include <algorithm>
 #include <mutex>
 #include "rcutils/logging_macros.h"
-
 
 /**
  * Topics to types.
@@ -39,7 +37,7 @@ typedef std::map<std::string, std::set<std::string>> TopicsTypes;
 template<typename GUID_t>
 class TopicCache
 {
-private:
+public:
   /**
    * Relevant Topic information for building relationship cache.
    */
@@ -55,40 +53,9 @@ private:
   typedef std::map<GUID_t, TopicInfo> TopicGuidToInfo;
 
   /**
-   * Map of topic guid to topic info.
-   * Topics here are represented as one to many, DDS XTypes 1.2
-   * specifies application code 'generally' uses a 1-1 relationship.
-   * However, generic services such as logger and monitor, can discover
-   * multiple types on the same topic.
-   *
-   */
-  TopicGuidToInfo topic_guid_to_info_;
-
-  /**
-   * Map of participant GUIDS to a set of topic-type.
-   */
-  ParticipantToTopicGuidMap participant_to_topic_guids_;
-
-  /**
-   * Helper function to initialize the set inside a participant map.
-   *
-   * @param map
-   * @param participant_guid
-   */
-  void InitializeParticipantMap(
-    ParticipantToTopicGuidMap & map,
-    const GUID_t & participant_guid)
-  {
-    if (map.find(participant_guid) == map.end()) {
-      map[participant_guid] = std::multiset<GUID_t>();
-    }
-  }
-
-public:
-  /**
    * @return a map of topic name to the vector of topic types used.
    */
-  const TopicGuidToInfo & GetTopicGuidToInfo() const
+  const TopicGuidToInfo & getTopicGuidToInfo() const
   {
     return topic_guid_to_info_;
   }
@@ -96,7 +63,7 @@ public:
   /**
    * @return a map of participant guid to the vector of topic names used.
    */
-  const ParticipantToTopicGuidMap & GetParticipantToTopicGuidMap() const
+  const ParticipantToTopicGuidMap & getParticipantToTopicGuidMap() const
   {
     return participant_to_topic_guids_;
   }
@@ -109,13 +76,13 @@ public:
    * @param type_name
    * @return true if a change has been recorded
    */
-  bool AddTopic(
+  bool addTopic(
     const GUID_t & participant_guid,
     const GUID_t & topic_guid,
     const std::string & topic_name,
     const std::string & type_name)
   {
-    InitializeParticipantMap(participant_to_topic_guids_, participant_guid);
+    initializeParticipantMap(participant_to_topic_guids_, participant_guid);
     if (rcutils_logging_logger_is_enabled_for("rmw_opensplice_shared_cpp",
       RCUTILS_LOG_SEVERITY_DEBUG))
     {
@@ -133,12 +100,31 @@ public:
   }
 
   /**
+   * Get topic info based on the topic guid
+   * @param topic_guid to search
+   * @param topic_info [out] result
+   * @return true if it exists
+   */
+  bool getTopic(const GUID_t & topic_guid, TopicInfo & topic_info) const
+  {
+    auto topic_info_it = topic_guid_to_info_.find(topic_guid);
+    if (topic_info_it == topic_guid_to_info_.end()) {
+      RCUTILS_LOG_DEBUG_NAMED(
+        "rmw_opensplice_shared_cpp",
+        "topic not available.");
+      return false;
+    }
+    topic_info = topic_info_it->second;
+    return true;
+  }
+
+  /**
    * Remove a topic based on discovery.
    *
    * @param guid
    * @return true if a change has been recorded
    */
-  bool RemoveTopic(const GUID_t & topic_guid)
+  bool removeTopic(const GUID_t & topic_guid)
   {
     auto topic_info_it = topic_guid_to_info_.find(topic_guid);
     if (topic_info_it == topic_guid_to_info_.end()) {
@@ -154,7 +140,7 @@ public:
     auto participant_guid = topic_info_it->second.participant_guid;
     auto participant_to_topic_guid = participant_to_topic_guids_.find(participant_guid);
     if (participant_to_topic_guid == participant_to_topic_guids_.end()) {
-      RCUTILS_LOG_DEBUG_NAMED(
+      RCUTILS_LOG_WARN_NAMED(
         "rmw_opensplice_shared_cpp",
         "Unable to remove topic,"
         " participant guid does not exist for topic name '%s' with type '%s'",
@@ -164,7 +150,7 @@ public:
 
     auto topic_guid_to_remove = participant_to_topic_guid->second.find(topic_guid);
     if (topic_guid_to_remove == participant_to_topic_guid->second.end()) {
-      RCUTILS_LOG_DEBUG_NAMED(
+      RCUTILS_LOG_WARN_NAMED(
         "rmw_opensplice_shared_cpp",
         "Unable to remove topic, "
         "topic guid does not exist in participant guid: topic name '%s' with type '%s'",
@@ -186,7 +172,7 @@ public:
    * @param participant_guid to find topic types
    * @return topic types corresponding to that guid
    */
-  TopicsTypes GetTopicTypesByGuid(const GUID_t & participant_guid)
+  TopicsTypes getTopicTypesByGuid(const GUID_t & participant_guid)
   {
     TopicsTypes topics_types;
     const auto participant_to_topic_guids =
@@ -208,6 +194,37 @@ public:
       topics_types[topic_name].insert(topic_info->second.type);
     }
     return topics_types;
+  }
+
+private:
+  /**
+   * Map of topic guid to topic info.
+   * Topics here are represented as one to many, DDS XTypes 1.2
+   * specifies application code 'generally' uses a 1-1 relationship.
+   * However, generic services such as logger and monitor, can discover
+   * multiple types on the same topic.
+   *
+   */
+  TopicGuidToInfo topic_guid_to_info_;
+
+  /**
+   * Map of participant GUIDS to a set of topic-type.
+   */
+  ParticipantToTopicGuidMap participant_to_topic_guids_;
+
+  /**
+   * Helper function to initialize the set inside a participant map.
+   *
+   * @param map
+   * @param participant_guid
+   */
+  void initializeParticipantMap(
+    ParticipantToTopicGuidMap & map,
+    const GUID_t & participant_guid)
+  {
+    if (map.find(participant_guid) == map.end()) {
+      map[participant_guid] = std::multiset<GUID_t>();
+    }
   }
 };
 
