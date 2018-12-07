@@ -98,7 +98,7 @@ rmw_create_client(
   const char * error_string = nullptr;
   DDS::DataReader * response_datareader = nullptr;
   DDS::ReadCondition * read_condition = nullptr;
-  void * requester = nullptr;
+  DDS::DataWriter * request_datawriter = nullptr;
   OpenSpliceStaticClientInfo * client_info = nullptr;
   // Begin initializing elements.
   client = rmw_client_allocate();
@@ -117,22 +117,30 @@ rmw_create_client(
 
   error_string = callbacks->create_requester(
     participant, service_name,
-    reinterpret_cast<void **>(&requester),
+    reinterpret_cast<void **>(&request_datawriter),
     reinterpret_cast<void **>(&response_datareader),
     reinterpret_cast<const void *>(&datareader_qos),
     reinterpret_cast<const void *>(&datawriter_qos),
     qos_profile->avoid_ros_namespace_conventions,
     &rmw_allocate);
+  // @todo: ross-desmond
+  // Discovery for built in topics goes here
+  // -- instance handles are a difference size than keys are...
+  // They are most likely the middle 8 Bytes
+  // defining system:local ids and leaving out domain since it may be assumed.
+  // However this is not defined in reference manuals and will need to be checked.
+
   if (error_string) {
-    RMW_SET_ERROR_MSG((std::string("failed to create requester: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to create request_datawriter: ") +
+      error_string).c_str());
     goto fail;
   }
-  if (!requester) {
-    RMW_SET_ERROR_MSG("failed to create requester: requester is null");
+  if (!request_datawriter) {
+    RMW_SET_ERROR_MSG("failed to create request_datawriter: request_datawriter is null");
     goto fail;
   }
   if (!response_datareader) {
-    RMW_SET_ERROR_MSG("failed to create requester: response_datareader is null");
+    RMW_SET_ERROR_MSG("failed to create request_datawriter: response_datareader is null");
     goto fail;
   }
 
@@ -149,7 +157,7 @@ rmw_create_client(
     RMW_SET_ERROR_MSG("failed to allocate memory");
     goto fail;
   }
-  client_info->requester_ = requester;
+  client_info->requester_ = request_datawriter;
   client_info->callbacks_ = callbacks;
   client_info->response_datareader_ = response_datareader;
   client_info->read_condition_ = read_condition;
@@ -172,11 +180,11 @@ fail:
     }
   }
 
-  if (requester) {
-    const char * error_string = callbacks->destroy_requester(requester, &rmw_free);
+  if (request_datawriter) {
+    const char * error_string = callbacks->destroy_requester(request_datawriter, &rmw_free);
     if (error_string) {
       std::stringstream ss;
-      ss << "failed to destroy requester: " << error_string << ", at: " <<
+      ss << "failed to destroy request_datawriter: " << error_string << ", at: " <<
         __FILE__ << ":" << __LINE__ << '\n';
       (std::cerr << ss.str()).flush();
     }
@@ -233,7 +241,8 @@ rmw_destroy_client(rmw_node_t * node, rmw_client_t * client)
 
   const char * error_string = callbacks->destroy_requester(client_info->requester_, &rmw_free);
   if (error_string) {
-    RMW_SET_ERROR_MSG((std::string("failed to destroy requester: ") + error_string).c_str());
+    RMW_SET_ERROR_MSG((std::string("failed to destroy request_datawriter: ") +
+      error_string).c_str());
     return RMW_RET_ERROR;
   }
   if (client->service_name) {

@@ -39,8 +39,10 @@
 #include <set>
 #include <string>
 
-#include "rmw/types.h"
+#include "guid.hpp"
+#include "topic_cache.hpp"
 
+#include "rmw/types.h"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
 
@@ -62,6 +64,7 @@ public:
   void on_requested_deadline_missed(
     DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus &)
   {}
+
   void on_requested_incompatible_qos(
     DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus &)
   {}
@@ -88,6 +91,15 @@ public:
   void fill_service_names_and_types(
     std::map<std::string, std::set<std::string>> & services);
 
+  void fill_topic_names_and_types_by_guid(
+    bool no_demangle,
+    std::map<std::string, std::set<std::string>> & tnat,
+    GuidPrefix_t & guid);
+
+  void fill_service_names_and_types_by_guid(
+    std::map<std::string, std::set<std::string>> & services,
+    GuidPrefix_t & guid);
+
   size_t count_topic(const char * topic_name);
 
   enum EndPointType
@@ -96,27 +108,38 @@ public:
     SubscriberEP,
   };
 
-protected:
-  virtual void add_information(
-    const DDS::SampleInfo & sample_info,
+  /**
+   * Add topic pub/sub information to discovery cache.
+   *
+   * @param participant_guid the topic is related to
+   * @param topic_guid the topic reader/writer unique id
+   * @param topic_name the topic name
+   * @param topic_type the topic type
+   * @param endpoint_type the endpoint type of this topic instance
+   */
+  void add_information(
+    const GuidPrefix_t & participant_guid,
+    const GuidPrefix_t & topic_guid,
     const std::string & topic_name,
-    const std::string & type_name,
-    EndPointType end_point_type);
-  virtual void remove_information(
-    const DDS::SampleInfo & sample_info,
-    EndPointType end_point_type);
+    const std::string & topic_type,
+    EndPointType endpoint_type);
 
+  /**
+   * Remove topic pub/sub information from the discovery cache.
+   * @param topic_guid the topic reader/writer unique id
+   * @param endpoint_type the endpoint type of this topic instance
+   */
+  void remove_information(
+    const GuidPrefix_t & topic_guid,
+    const EndPointType endpoint_type);
+
+protected:
   std::mutex mutex_;
 
+  // The topic cache to handle relationship of readers, writers, and participants through discovery.
+  TopicCache<GuidPrefix_t> topic_cache;
+
 private:
-  struct TopicDescriptor
-  {
-    DDS::InstanceHandle_t instance_handle;
-    std::string name;
-    std::string type;
-  };
-  std::map<std::string, std::multiset<std::string>> topic_names_and_types_;
-  std::list<TopicDescriptor> topic_descriptors_;
   bool print_discovery_logging_;
 };
 

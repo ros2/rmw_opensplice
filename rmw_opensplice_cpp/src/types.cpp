@@ -71,23 +71,14 @@ size_t
 CustomDataReaderListener::count_topic(const char * topic_name)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  auto it = std::find_if(
-    topic_names_and_types_.begin(),
-    topic_names_and_types_.end(),
+  auto count = std::count_if(
+    topic_cache.getTopicGuidToInfo().begin(),
+    topic_cache.getTopicGuidToInfo().end(),
     [&](auto tnt) -> bool {
-      auto fqdn = _demangle_if_ros_topic(tnt.first);
-      if (fqdn == topic_name) {
-        return true;
-      }
-      return false;
+      auto fqdn = _demangle_if_ros_topic(tnt.second.name);
+      return fqdn == topic_name;
     });
-  size_t count;
-  if (it == topic_names_and_types_.end()) {
-    count = 0;
-  } else {
-    count = it->second.size();
-  }
-  return count;
+  return (size_t) count;
 }
 
 void
@@ -96,15 +87,13 @@ CustomDataReaderListener::fill_topic_names_and_types(
   std::map<std::string, std::set<std::string>> & tnat)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  for (auto it : topic_names_and_types_) {
-    if (!no_demangle && (_get_ros_prefix_if_exists(it.first) !=
+  for (auto it : topic_cache.getTopicGuidToInfo()) {
+    if (!no_demangle && (_get_ros_prefix_if_exists(it.second.name) !=
       rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
     {
       continue;
     }
-    for (auto & jt : it.second) {
-      tnat[it.first].insert(jt);
-    }
+    tnat[it.second.name].insert(it.second.type);
   }
 }
 
@@ -112,8 +101,55 @@ void
 CustomDataReaderListener::fill_service_names_and_types(
   std::map<std::string, std::set<std::string>> & services)
 {
+  for (auto it : topic_cache.getTopicGuidToInfo()) {
+    std::string service_name = _demangle_service_from_topic(it.second.name);
+    if (!service_name.length()) {
+      // not a service
+      continue;
+    }
+    std::string service_type = _demangle_service_type_only(it.second.type);
+    if (service_type.length()) {
+      services[service_name].insert(service_type);
+    }
+  }
+}
+
+void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
+  bool no_demangle,
+  std::map<std::string, std::set<std::string>> & tnat,
+  GuidPrefix_t & participant_guid)
+{
   std::lock_guard<std::mutex> lock(mutex_);
-  for (auto it : topic_names_and_types_) {
+  const auto & map = topic_cache.getTopicTypesByGuid(participant_guid);
+  if (map.size() == 0) {
+    RCUTILS_LOG_DEBUG_NAMED(
+      "rmw_opensplice_cpp",
+      "No topics for participant_guid");
+    return;
+  }
+  for (auto & it : map) {
+    if (!no_demangle && (_get_ros_prefix_if_exists(it.first) !=
+      rosidl_typesupport_opensplice_cpp::get_ros_topic_prefix()))
+    {
+      continue;
+    }
+    tnat[it.first].insert(it.second.begin(), it.second.end());
+  }
+}
+
+void CustomDataReaderListener::fill_service_names_and_types_by_guid(
+  std::map<std::string, std::set<std::string>> & services,
+  GuidPrefix_t & participant_guid)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  const auto & map = topic_cache.getTopicTypesByGuid(participant_guid);
+  if (map.size() == 0) {
+    RCUTILS_LOG_DEBUG_NAMED(
+      "rmw_opensplice_cpp",
+      "No services for participant_guid");
+    return;
+  }
+  for (auto & it : map) {
     std::string service_name = _demangle_service_from_topic(it.first);
     if (!service_name.length()) {
       // not a service
@@ -149,48 +185,30 @@ print_discovery_logging(
   }
 }
 
-void
-CustomDataReaderListener::add_information(
-  const DDS::SampleInfo & sample_info,
+void CustomDataReaderListener::add_information(
+  const GuidPrefix_t & participant_guid,
+  const GuidPrefix_t & topic_guid,
   const std::string & topic_name,
-  const std::string & type_name,
-  EndPointType end_point_type)
+  const std::string & topic_type,
+  const EndPointType endpoint_type)
 {
-  // store topic name and type name
-  auto & topic_types = topic_names_and_types_[topic_name];
-  topic_types.insert(type_name);
-  // store mapping to instance handle
-  TopicDescriptor topic_descriptor;
-  topic_descriptor.instance_handle = sample_info.instance_handle;
-  topic_descriptor.name = topic_name;
-  topic_descriptor.type = type_name;
-  topic_descriptors_.push_back(topic_descriptor);
+  topic_cache.addTopic(participant_guid, topic_guid, topic_name, topic_type);
   if (print_discovery_logging_) {
-    print_discovery_logging("+", topic_name, type_name, end_point_type);
+    print_discovery_logging("+", topic_name, topic_type, endpoint_type);
   }
 }
 
-void
-CustomDataReaderListener::remove_information(
-  const DDS::SampleInfo & sample_info,
-  EndPointType end_point_type)
+void CustomDataReaderListener::remove_information(
+  const GuidPrefix_t & topic_guid,
+  const EndPointType endpoint_type)
 {
-  // find entry by instance handle
-  for (auto it = topic_descriptors_.begin(); it != topic_descriptors_.end(); ++it) {
-    if (it->instance_handle == sample_info.instance_handle) {
-      if (print_discovery_logging_) {
-        print_discovery_logging("-", it->name, it->type, end_point_type);
-      }
-      // remove entries
-      auto & topic_types = topic_names_and_types_[it->name];
-      topic_types.erase(topic_types.find(it->type));
-      if (topic_types.empty()) {
-        topic_names_and_types_.erase(it->name);
-      }
-      topic_descriptors_.erase(it);
-      break;
+  if (print_discovery_logging_) {
+    TopicCache<GuidPrefix_t>::TopicInfo topic_info;
+    if (topic_cache.getTopic(topic_guid, topic_info)) {
+      print_discovery_logging("-", topic_info.name, topic_info.type, endpoint_type);
     }
   }
+  topic_cache.removeTopic(topic_guid);
 }
 
 CustomPublisherListener::CustomPublisherListener(rmw_guard_condition_t * graph_guard_condition)
@@ -206,6 +224,7 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
     DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
 
   DDS::PublicationBuiltinTopicDataSeq data_seq;
+
   DDS::SampleInfoSeq info_seq;
   DDS::ReturnCode_t retcode = builtin_reader->take(
     data_seq, info_seq, DDS::LENGTH_UNLIMITED,
@@ -221,17 +240,16 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
-    if (info_seq[i].valid_data) {
-      if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
-        topic_name = data_seq[i].topic_name.in();
-
-        add_information(
-          info_seq[i], topic_name, data_seq[i].type_name.in(), PublisherEP);
-      } else {
-        remove_information(info_seq[i], PublisherEP);
-      }
+    GuidPrefix_t topic_guid;
+    DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
+    if (info_seq[i].valid_data && info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+      topic_name = data_seq[i].topic_name.in();
+      GuidPrefix_t participant_guid;
+      DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
+      add_information(participant_guid, topic_guid, topic_name,
+        data_seq[i].type_name.in(), PublisherEP);
     } else {
-      remove_information(info_seq[i], PublisherEP);
+      remove_information(topic_guid, PublisherEP);
     }
   }
 
@@ -273,18 +291,23 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
   }
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
-    std::string topic_name("");
+    std::string topic_name = "";
+    GuidPrefix_t topic_guid;
+
+    DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
     if (info_seq[i].valid_data) {
+      std::string topic_name = "";
+      GuidPrefix_t participant_guid;
+      DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();
-
-        add_information(
-          info_seq[i], topic_name, data_seq[i].type_name.in(), SubscriberEP);
+        add_information(participant_guid, topic_guid, topic_name,
+          data_seq[i].type_name.in(), SubscriberEP);
       } else {
-        remove_information(info_seq[i], SubscriberEP);
+        remove_information(topic_guid, SubscriberEP);
       }
     } else {
-      remove_information(info_seq[i], SubscriberEP);
+      remove_information(topic_guid, SubscriberEP);
     }
   }
 
