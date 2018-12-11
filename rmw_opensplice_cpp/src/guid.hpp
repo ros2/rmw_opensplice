@@ -134,9 +134,7 @@ inline void DDS_BuiltinTopicKey_to_GUID(
 #else
   /* Little Endian */
   int i;
-  octet * guidElement;
   octet * topicKeyBuffer = reinterpret_cast<octet *>(buitinTopicKey);
-  octet * keyBufferElement;
   for (i = 0; i < 3; ++i) {
     octet * guidElement = &guid->value[i * 3];
     octet * keyBufferElement = reinterpret_cast<octet *>(&buitinTopicKey[i * 3]);
