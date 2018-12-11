@@ -81,7 +81,7 @@ __get_key(
   OpenSpliceStaticNodeInfo * node_info,
   const char * node_name,
   const char * node_namespace,
-  GuidPrefix_t & key)
+  DDS::InstanceHandle_t & key)
 {
   auto participant = node_info->participant;
   if (!participant) {
@@ -93,8 +93,7 @@ __get_key(
   auto dds_ret = participant->get_qos(dpqos);
   // @todo: ross-desmond implement self discovery
   if (dds_ret == DDS::RETCODE_OK && __is_node_match(dpqos.user_data, node_name, node_namespace)) {
-    DDS_InstanceHandle_to_GUID(&key,
-      node_info->participant->get_domain_id(), node_info->participant->get_instance_handle());
+    key = node_info->participant->get_instance_handle();
     return RMW_RET_OK;
   }
 
@@ -177,7 +176,7 @@ rmw_get_subscriber_names_and_types_by_node(
   }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
-  GuidPrefix_t key;
+  DDS::InstanceHandle_t key;
   auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
@@ -217,7 +216,7 @@ rmw_get_publisher_names_and_types_by_node(
   }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
-  GuidPrefix_t key;
+  DDS::InstanceHandle_t key;
   auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
@@ -257,7 +256,7 @@ rmw_get_service_names_and_types_by_node(
   }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
-  GuidPrefix_t key;
+  DDS::InstanceHandle_t key;
   auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;

@@ -117,7 +117,7 @@ CustomDataReaderListener::fill_service_names_and_types(
 void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
   bool no_demangle,
   std::map<std::string, std::set<std::string>> & tnat,
-  GuidPrefix_t & participant_guid)
+  DDS::InstanceHandle_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.getTopicTypesByGuid(participant_guid);
@@ -139,7 +139,7 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
 
 void CustomDataReaderListener::fill_service_names_and_types_by_guid(
   std::map<std::string, std::set<std::string>> & services,
-  GuidPrefix_t & participant_guid)
+  DDS::InstanceHandle_t & participant_guid)
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.getTopicTypesByGuid(participant_guid);
@@ -186,8 +186,8 @@ print_discovery_logging(
 }
 
 void CustomDataReaderListener::add_information(
-  const GuidPrefix_t & participant_guid,
-  const GuidPrefix_t & topic_guid,
+  const DDS::InstanceHandle_t & participant_guid,
+  const DDS::InstanceHandle_t & topic_guid,
   const std::string & topic_name,
   const std::string & topic_type,
   const EndPointType endpoint_type)
@@ -199,11 +199,11 @@ void CustomDataReaderListener::add_information(
 }
 
 void CustomDataReaderListener::remove_information(
-  const GuidPrefix_t & topic_guid,
+  const DDS::InstanceHandle_t & topic_guid,
   const EndPointType endpoint_type)
 {
   if (print_discovery_logging_) {
-    TopicCache<GuidPrefix_t>::TopicInfo topic_info;
+    TopicCache<DDS::InstanceHandle_t>::TopicInfo topic_info;
     if (topic_cache.getTopic(topic_guid, topic_info)) {
       print_discovery_logging("-", topic_info.name, topic_info.type, endpoint_type);
     }
@@ -240,11 +240,11 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
-    GuidPrefix_t topic_guid;
+    DDS::InstanceHandle_t topic_guid;
     DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
     if (info_seq[i].valid_data && info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
       topic_name = data_seq[i].topic_name.in();
-      GuidPrefix_t participant_guid;
+      DDS::InstanceHandle_t participant_guid;
       DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       add_information(participant_guid, topic_guid, topic_name,
         data_seq[i].type_name.in(), PublisherEP);
@@ -292,12 +292,12 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
-    GuidPrefix_t topic_guid;
+    DDS::InstanceHandle_t topic_guid;
 
     DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
     if (info_seq[i].valid_data) {
       std::string topic_name = "";
-      GuidPrefix_t participant_guid;
+      DDS::InstanceHandle_t participant_guid;
       DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();

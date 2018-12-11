@@ -94,11 +94,11 @@ public:
   void fill_topic_names_and_types_by_guid(
     bool no_demangle,
     std::map<std::string, std::set<std::string>> & tnat,
-    GuidPrefix_t & guid);
+    DDS::InstanceHandle_t & guid);
 
   void fill_service_names_and_types_by_guid(
     std::map<std::string, std::set<std::string>> & services,
-    GuidPrefix_t & guid);
+    DDS::InstanceHandle_t & guid);
 
   size_t count_topic(const char * topic_name);
 
@@ -118,8 +118,8 @@ public:
    * @param endpoint_type the endpoint type of this topic instance
    */
   void add_information(
-    const GuidPrefix_t & participant_guid,
-    const GuidPrefix_t & topic_guid,
+    const DDS::InstanceHandle_t & participant_guid,
+    const DDS::InstanceHandle_t & topic_guid,
     const std::string & topic_name,
     const std::string & topic_type,
     EndPointType endpoint_type);
@@ -130,14 +130,14 @@ public:
    * @param endpoint_type the endpoint type of this topic instance
    */
   void remove_information(
-    const GuidPrefix_t & topic_guid,
+    const DDS::InstanceHandle_t & topic_guid,
     const EndPointType endpoint_type);
 
 protected:
   std::mutex mutex_;
 
   // The topic cache to handle relationship of readers, writers, and participants through discovery.
-  TopicCache<GuidPrefix_t> topic_cache;
+  TopicCache<DDS::InstanceHandle_t> topic_cache;
 
 private:
   bool print_discovery_logging_;
