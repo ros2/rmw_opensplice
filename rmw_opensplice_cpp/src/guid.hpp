@@ -17,13 +17,6 @@
 
 #include <dds_dcps.h>
 
-#include <cstring>
-#include <iostream>
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-
 
 inline void DDS_BuiltinTopicKey_to_GUID(
   DDS::InstanceHandle_t * guid,
