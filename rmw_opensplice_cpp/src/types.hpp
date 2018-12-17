@@ -91,14 +91,14 @@ public:
   void fill_service_names_and_types(
     std::map<std::string, std::set<std::string>> & services);
 
-  void fill_topic_names_and_types_by_guid(
+  void fill_topic_names_and_types_by_participant(
     bool no_demangle,
     std::map<std::string, std::set<std::string>> & tnat,
-    DDS::InstanceHandle_t & guid);
+    DDS::InstanceHandle_t & participant);
 
-  void fill_service_names_and_types_by_guid(
+  void fill_service_names_and_types_by_participant(
     std::map<std::string, std::set<std::string>> & services,
-    DDS::InstanceHandle_t & guid);
+    DDS::InstanceHandle_t & participant);
 
   size_t count_topic(const char * topic_name);
 
@@ -111,26 +111,26 @@ public:
   /**
    * Add topic pub/sub information to discovery cache.
    *
-   * @param participant_guid the topic is related to
-   * @param topic_guid the topic reader/writer unique id
+   * @param participant the topic is related to
+   * @param topic the topic reader/writer unique id
    * @param topic_name the topic name
    * @param topic_type the topic type
    * @param endpoint_type the endpoint type of this topic instance
    */
   void add_information(
-    const DDS::InstanceHandle_t & participant_guid,
-    const DDS::InstanceHandle_t & topic_guid,
+    const DDS::InstanceHandle_t & participant,
+    const DDS::InstanceHandle_t & topic,
     const std::string & topic_name,
     const std::string & topic_type,
     EndPointType endpoint_type);
 
   /**
    * Remove topic pub/sub information from the discovery cache.
-   * @param topic_guid the topic reader/writer unique id
+   * @param topic the topic reader/writer unique id
    * @param endpoint_type the endpoint type of this topic instance
    */
   void remove_information(
-    const DDS::InstanceHandle_t & topic_guid,
+    const DDS::InstanceHandle_t & topic,
     const EndPointType endpoint_type);
 
 protected:

@@ -72,7 +72,7 @@ __is_node_match(
  * @param node_info to discover nodes
  * @param node_name to match
  * @param node_namespace to match
- * @param key [out] guid key that matches the node name and namespace
+ * @param key [out] key (an InstanceHandle) that matches the node name and namespace
  *
  * @return RMW_RET_OK if success, ERROR otherwise
  */
@@ -123,7 +123,7 @@ __get_key(
           if (strcmp(node_name, name.c_str()) == 0 &&
             strcmp(node_namespace, ns.c_str()) == 0)
           {
-            DDS_BuiltinTopicKey_to_GUID(&key, pbtd.key);
+            DDS_BuiltinTopicKey_to_InstanceHandle(&key, pbtd.key);
             return RMW_RET_OK;
           }
         }
@@ -183,7 +183,7 @@ rmw_get_subscriber_names_and_types_by_node(
   }
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->subscriber_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
+  node_info->subscriber_listener->fill_topic_names_and_types_by_participant(no_demangle, topics, key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
@@ -224,7 +224,7 @@ rmw_get_publisher_names_and_types_by_node(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->publisher_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
+  node_info->publisher_listener->fill_topic_names_and_types_by_participant(no_demangle, topics, key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
@@ -264,7 +264,7 @@ rmw_get_service_names_and_types_by_node(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->subscriber_listener->fill_service_names_and_types_by_guid(services, key);
+  node_info->subscriber_listener->fill_service_names_and_types_by_participant(services, key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_services_to_names_and_types(services, allocator, service_names_and_types);
