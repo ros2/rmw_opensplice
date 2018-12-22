@@ -183,7 +183,8 @@ rmw_get_subscriber_names_and_types_by_node(
   }
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->subscriber_listener->fill_topic_names_and_types_by_participant(no_demangle, topics, key);
+  node_info->subscriber_listener->fill_topic_names_and_types_by_participant(no_demangle, topics,
+    key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
@@ -224,7 +225,8 @@ rmw_get_publisher_names_and_types_by_node(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->publisher_listener->fill_topic_names_and_types_by_participant(no_demangle, topics, key);
+  node_info->publisher_listener->fill_topic_names_and_types_by_participant(no_demangle, topics,
+    key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
