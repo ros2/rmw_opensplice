@@ -70,6 +70,8 @@ rmw_get_node_names(
     RMW_SET_ERROR_MSG("participant handle is null");
     return RMW_RET_ERROR;
   }
+  DDS::Subscriber_ptr sub;
+  DDS::DataReader_ptr reader;
 
   DDS::InstanceHandleSeq handles;
   if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
@@ -134,6 +136,11 @@ rmw_get_node_names(
       return RMW_RET_ERROR;
     }
   }
+
+  // workaround for "ros2 node list" printing out non-alive nodes
+  sub = participant->get_builtin_subscriber();
+  reader = sub->lookup_datareader("DCPSParticipant");
+  sub->delete_datareader(reader);
 
   // Allocate the node_names out-buffer according to the number of Node names
   rcutils_ret = rcutils_string_array_init(node_names, n, &allocator);
