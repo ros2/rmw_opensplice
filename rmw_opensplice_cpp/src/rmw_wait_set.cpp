@@ -50,7 +50,7 @@ rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
     context->implementation_identifier,
     opensplice_cpp_identifier,
     // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
-    return NULL);
+    return nullptr);
 
   rmw_wait_set_t * wait_set = rmw_wait_set_allocate();
   OpenSpliceWaitSetInfo * wait_set_info = nullptr;
