@@ -121,7 +121,7 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_participant(
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.getTopicTypesByGuid(participant);
-  if (map.size() == 0) {
+  if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
       "rmw_opensplice_cpp",
       "No topics for participant");
@@ -143,7 +143,7 @@ void CustomDataReaderListener::fill_service_names_and_types_by_participant(
 {
   std::lock_guard<std::mutex> lock(mutex_);
   const auto & map = topic_cache.getTopicTypesByGuid(participant);
-  if (map.size() == 0) {
+  if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
       "rmw_opensplice_cpp",
       "No services for participant");
@@ -240,12 +240,11 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
-    DDS::InstanceHandle_t topic;
-    DDS_BuiltinTopicKey_to_InstanceHandle(&topic, data_seq[i].key);
+    DDS::InstanceHandle_t topic = DDS_BuiltinTopicKey_to_InstanceHandle(data_seq[i].key);
     if (info_seq[i].valid_data && info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
       topic_name = data_seq[i].topic_name.in();
-      DDS::InstanceHandle_t participant;
-      DDS_BuiltinTopicKey_to_InstanceHandle(&participant, data_seq[i].participant_key);
+      DDS::InstanceHandle_t participant = DDS_BuiltinTopicKey_to_InstanceHandle(
+        data_seq[i].participant_key);
       add_information(participant, topic, topic_name,
         data_seq[i].type_name.in(), PublisherEP);
     } else {
@@ -291,14 +290,11 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
   }
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
-    std::string topic_name = "";
-    DDS::InstanceHandle_t topic;
-
-    DDS_BuiltinTopicKey_to_InstanceHandle(&topic, data_seq[i].key);
+    DDS::InstanceHandle_t topic = DDS_BuiltinTopicKey_to_InstanceHandle(data_seq[i].key);
     if (info_seq[i].valid_data) {
       std::string topic_name = "";
-      DDS::InstanceHandle_t participant;
-      DDS_BuiltinTopicKey_to_InstanceHandle(&participant, data_seq[i].participant_key);
+      DDS::InstanceHandle_t participant = DDS_BuiltinTopicKey_to_InstanceHandle(
+        data_seq[i].participant_key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();
         add_information(participant, topic, topic_name,

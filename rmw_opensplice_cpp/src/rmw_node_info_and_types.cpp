@@ -123,7 +123,7 @@ __get_key(
           if (strcmp(node_name, name.c_str()) == 0 &&
             strcmp(node_namespace, ns.c_str()) == 0)
           {
-            DDS_BuiltinTopicKey_to_InstanceHandle(&key, pbtd.key);
+            key = DDS_BuiltinTopicKey_to_InstanceHandle(pbtd.key);
             return RMW_RET_OK;
           }
         }

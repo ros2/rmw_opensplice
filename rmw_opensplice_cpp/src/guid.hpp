@@ -18,18 +18,17 @@
 #include <dds_dcps.h>
 
 
-inline void DDS_BuiltinTopicKey_to_InstanceHandle(
-  DDS::InstanceHandle_t * instance,
-  DDS::BuiltinTopicKey_t buitinTopicKey)
+inline DDS::InstanceHandle_t DDS_BuiltinTopicKey_to_InstanceHandle(
+  DDS::BuiltinTopicKey_t builtinTopicKey)
 {
   v_builtinTopicKey gid;
 
   // the following logic came from copyInTopicKey() in opensplice source code
-  gid.systemId = buitinTopicKey[0];
-  gid.localId = buitinTopicKey[1];
-  gid.serial = buitinTopicKey[2];
+  gid.systemId = builtinTopicKey[0];
+  gid.localId = builtinTopicKey[1];
+  gid.serial = builtinTopicKey[2];
 
-  *instance = u_instanceHandleFromGID(gid);
+  return u_instanceHandleFromGID(gid);
 }
 
 #endif  // GUID_HPP_
