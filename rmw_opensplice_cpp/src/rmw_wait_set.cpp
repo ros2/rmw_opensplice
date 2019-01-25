@@ -42,8 +42,16 @@
 extern "C"
 {
 rmw_wait_set_t *
-rmw_create_wait_set(size_t max_conditions)
+rmw_create_wait_set(rmw_context_t * context, size_t max_conditions)
 {
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, NULL);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    init context,
+    context->implementation_identifier,
+    opensplice_cpp_identifier,
+    // TODO(wjwwood): replace this with RMW_RET_INCORRECT_RMW_IMPLEMENTATION when refactored
+    return nullptr);
+
   rmw_wait_set_t * wait_set = rmw_wait_set_allocate();
   OpenSpliceWaitSetInfo * wait_set_info = nullptr;
 
