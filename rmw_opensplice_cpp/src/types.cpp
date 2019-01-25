@@ -114,17 +114,17 @@ CustomDataReaderListener::fill_service_names_and_types(
   }
 }
 
-void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
+void CustomDataReaderListener::fill_topic_names_and_types_by_participant(
   bool no_demangle,
   std::map<std::string, std::set<std::string>> & tnat,
-  GuidPrefix_t & participant_guid)
+  DDS::InstanceHandle_t & participant)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  const auto & map = topic_cache.getTopicTypesByGuid(participant_guid);
-  if (map.size() == 0) {
+  const auto & map = topic_cache.getTopicTypesByGuid(participant);
+  if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
       "rmw_opensplice_cpp",
-      "No topics for participant_guid");
+      "No topics for participant");
     return;
   }
   for (auto & it : map) {
@@ -137,16 +137,16 @@ void CustomDataReaderListener::fill_topic_names_and_types_by_guid(
   }
 }
 
-void CustomDataReaderListener::fill_service_names_and_types_by_guid(
+void CustomDataReaderListener::fill_service_names_and_types_by_participant(
   std::map<std::string, std::set<std::string>> & services,
-  GuidPrefix_t & participant_guid)
+  DDS::InstanceHandle_t & participant)
 {
   std::lock_guard<std::mutex> lock(mutex_);
-  const auto & map = topic_cache.getTopicTypesByGuid(participant_guid);
-  if (map.size() == 0) {
+  const auto & map = topic_cache.getTopicTypesByGuid(participant);
+  if (map.empty()) {
     RCUTILS_LOG_DEBUG_NAMED(
       "rmw_opensplice_cpp",
-      "No services for participant_guid");
+      "No services for participant");
     return;
   }
   for (auto & it : map) {
@@ -186,29 +186,29 @@ print_discovery_logging(
 }
 
 void CustomDataReaderListener::add_information(
-  const GuidPrefix_t & participant_guid,
-  const GuidPrefix_t & topic_guid,
+  const DDS::InstanceHandle_t & participant,
+  const DDS::InstanceHandle_t & topic,
   const std::string & topic_name,
   const std::string & topic_type,
   const EndPointType endpoint_type)
 {
-  topic_cache.addTopic(participant_guid, topic_guid, topic_name, topic_type);
+  topic_cache.addTopic(participant, topic, topic_name, topic_type);
   if (print_discovery_logging_) {
     print_discovery_logging("+", topic_name, topic_type, endpoint_type);
   }
 }
 
 void CustomDataReaderListener::remove_information(
-  const GuidPrefix_t & topic_guid,
+  const DDS::InstanceHandle_t & topic,
   const EndPointType endpoint_type)
 {
   if (print_discovery_logging_) {
-    TopicCache<GuidPrefix_t>::TopicInfo topic_info;
-    if (topic_cache.getTopic(topic_guid, topic_info)) {
+    TopicCache<DDS::InstanceHandle_t>::TopicInfo topic_info;
+    if (topic_cache.getTopic(topic, topic_info)) {
       print_discovery_logging("-", topic_info.name, topic_info.type, endpoint_type);
     }
   }
-  topic_cache.removeTopic(topic_guid);
+  topic_cache.removeTopic(topic);
 }
 
 CustomPublisherListener::CustomPublisherListener(rmw_guard_condition_t * graph_guard_condition)
@@ -240,16 +240,15 @@ CustomPublisherListener::on_data_available(DDS::DataReader * reader)
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
     std::string topic_name = "";
-    GuidPrefix_t topic_guid;
-    DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
+    DDS::InstanceHandle_t topic = DDS_BuiltinTopicKey_to_InstanceHandle(data_seq[i].key);
     if (info_seq[i].valid_data && info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
       topic_name = data_seq[i].topic_name.in();
-      GuidPrefix_t participant_guid;
-      DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
-      add_information(participant_guid, topic_guid, topic_name,
+      DDS::InstanceHandle_t participant = DDS_BuiltinTopicKey_to_InstanceHandle(
+        data_seq[i].participant_key);
+      add_information(participant, topic, topic_name,
         data_seq[i].type_name.in(), PublisherEP);
     } else {
-      remove_information(topic_guid, PublisherEP);
+      remove_information(topic, PublisherEP);
     }
   }
 
@@ -291,23 +290,20 @@ CustomSubscriberListener::on_data_available(DDS::DataReader * reader)
   }
 
   for (DDS::ULong i = 0; i < data_seq.length(); ++i) {
-    std::string topic_name = "";
-    GuidPrefix_t topic_guid;
-
-    DDS_BuiltinTopicKey_to_GUID(&topic_guid, data_seq[i].key);
+    DDS::InstanceHandle_t topic = DDS_BuiltinTopicKey_to_InstanceHandle(data_seq[i].key);
     if (info_seq[i].valid_data) {
       std::string topic_name = "";
-      GuidPrefix_t participant_guid;
-      DDS_BuiltinTopicKey_to_GUID(&participant_guid, data_seq[i].participant_key);
+      DDS::InstanceHandle_t participant = DDS_BuiltinTopicKey_to_InstanceHandle(
+        data_seq[i].participant_key);
       if (info_seq[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
         topic_name = data_seq[i].topic_name.in();
-        add_information(participant_guid, topic_guid, topic_name,
+        add_information(participant, topic, topic_name,
           data_seq[i].type_name.in(), SubscriberEP);
       } else {
-        remove_information(topic_guid, SubscriberEP);
+        remove_information(topic, SubscriberEP);
       }
     } else {
-      remove_information(topic_guid, SubscriberEP);
+      remove_information(topic, SubscriberEP);
     }
   }
 
