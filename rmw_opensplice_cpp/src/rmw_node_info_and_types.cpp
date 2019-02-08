@@ -72,7 +72,7 @@ __is_node_match(
  * @param node_info to discover nodes
  * @param node_name to match
  * @param node_namespace to match
- * @param key [out] guid key that matches the node name and namespace
+ * @param key [out] key (an InstanceHandle) that matches the node name and namespace
  *
  * @return RMW_RET_OK if success, ERROR otherwise
  */
@@ -81,7 +81,7 @@ __get_key(
   OpenSpliceStaticNodeInfo * node_info,
   const char * node_name,
   const char * node_namespace,
-  GuidPrefix_t & key)
+  DDS::InstanceHandle_t & key)
 {
   auto participant = node_info->participant;
   if (!participant) {
@@ -93,8 +93,7 @@ __get_key(
   auto dds_ret = participant->get_qos(dpqos);
   // @todo: ross-desmond implement self discovery
   if (dds_ret == DDS::RETCODE_OK && __is_node_match(dpqos.user_data, node_name, node_namespace)) {
-    DDS_InstanceHandle_to_GUID(&key,
-      node_info->participant->get_domain_id(), node_info->participant->get_instance_handle());
+    key = node_info->participant->get_instance_handle();
     return RMW_RET_OK;
   }
 
@@ -124,7 +123,7 @@ __get_key(
           if (strcmp(node_name, name.c_str()) == 0 &&
             strcmp(node_namespace, ns.c_str()) == 0)
           {
-            DDS_BuiltinTopicKey_to_GUID(&key, pbtd.key);
+            key = DDS_BuiltinTopicKey_to_InstanceHandle(pbtd.key);
             return RMW_RET_OK;
           }
         }
@@ -177,14 +176,15 @@ rmw_get_subscriber_names_and_types_by_node(
   }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
-  GuidPrefix_t key;
+  DDS::InstanceHandle_t key;
   auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
   }
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->subscriber_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
+  node_info->subscriber_listener->fill_topic_names_and_types_by_participant(no_demangle, topics,
+    key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
@@ -217,7 +217,7 @@ rmw_get_publisher_names_and_types_by_node(
   }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
-  GuidPrefix_t key;
+  DDS::InstanceHandle_t key;
   auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
@@ -225,7 +225,8 @@ rmw_get_publisher_names_and_types_by_node(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> topics;
-  node_info->publisher_listener->fill_topic_names_and_types_by_guid(no_demangle, topics, key);
+  node_info->publisher_listener->fill_topic_names_and_types_by_participant(no_demangle, topics,
+    key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_topics_names_and_types(topics, allocator, no_demangle, topic_names_and_types);
@@ -257,7 +258,7 @@ rmw_get_service_names_and_types_by_node(
   }
 
   auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
-  GuidPrefix_t key;
+  DDS::InstanceHandle_t key;
   auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
   if (get_guid_err != RMW_RET_OK) {
     return get_guid_err;
@@ -265,7 +266,7 @@ rmw_get_service_names_and_types_by_node(
 
   // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->subscriber_listener->fill_service_names_and_types_by_guid(services, key);
+  node_info->subscriber_listener->fill_service_names_and_types_by_participant(services, key);
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_services_to_names_and_types(services, allocator, service_names_and_types);
