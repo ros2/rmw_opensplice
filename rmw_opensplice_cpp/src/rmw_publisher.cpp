@@ -124,6 +124,7 @@ rmw_create_publisher(
   DDS::Topic * topic = nullptr;
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
+  void * info_buf = nullptr;
   void * listener_buf = nullptr;
   OpenSplicePublisherListener * publisher_listener = nullptr;
   OpenSpliceStaticPublisherInfo * publisher_info = nullptr;
@@ -183,8 +184,15 @@ rmw_create_publisher(
     goto fail;
   }
 
-  publisher_info = static_cast<OpenSpliceStaticPublisherInfo *>(
+  info_buf = static_cast<OpenSpliceStaticPublisherInfo *>(
     rmw_allocate(sizeof(OpenSpliceStaticPublisherInfo)));
+
+  if (!info_buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail;
+  }
+
+  RMW_TRY_PLACEMENT_NEW(publisher_info, info_buf, goto fail, OpenSpliceStaticPublisherInfo, )
   publisher_info->dds_topic = topic;
   publisher_info->dds_publisher = dds_publisher;
   publisher_info->topic_writer = topic_writer;

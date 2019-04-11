@@ -45,6 +45,7 @@
 #include "rmw/types.h"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
+#include "opensplice_static_event_info.hpp"
 
 RMW_LOCAL
 std::string
@@ -199,7 +200,7 @@ private:
   std::atomic<size_t> current_count_;
 };
 
-struct OpenSpliceStaticPublisherInfo
+struct OpenSpliceStaticPublisherInfo : public OpenSpliceStaticEventInfo
 {
   DDS::Topic * dds_topic;
   DDS::Publisher * dds_publisher;
@@ -207,6 +208,9 @@ struct OpenSpliceStaticPublisherInfo
   OpenSplicePublisherListener * listener;
   const message_type_support_callbacks_t * callbacks;
   rmw_gid_t publisher_gid;
+
+  rmw_ret_t get_status(const DDS::StatusMask mask, void * event) override;
+  DDS::Entity * get_entity() override;
 };
 
 class OpenSpliceSubscriberListener : public DDS::SubscriberListener
@@ -238,7 +242,7 @@ private:
   std::atomic<size_t> current_count_;
 };
 
-struct OpenSpliceStaticSubscriberInfo
+struct OpenSpliceStaticSubscriberInfo : public OpenSpliceStaticEventInfo
 {
   DDS::Topic * dds_topic;
   DDS::Subscriber * dds_subscriber;
@@ -247,6 +251,9 @@ struct OpenSpliceStaticSubscriberInfo
   OpenSpliceSubscriberListener * listener;
   const message_type_support_callbacks_t * callbacks;
   bool ignore_local_publications;
+
+  rmw_ret_t get_status(const DDS::StatusMask mask, void * event) override;
+  DDS::Entity * get_entity() override;
 };
 
 struct OpenSpliceStaticClientInfo
