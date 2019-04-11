@@ -355,7 +355,6 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
         DDS::LivelinessLostStatus liveliness_lost;
         DDS::ReturnCode_t dds_return_code =
           topic_writer->get_liveliness_lost_status(liveliness_lost);
-
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;
@@ -365,7 +364,6 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
           static_cast<rmw_liveliness_lost_status_t *>(event);
         rmw_liveliness_lost->total_count = liveliness_lost.total_count;
         rmw_liveliness_lost->total_count_change = liveliness_lost.total_count_change;
-
         break;
       }
     case DDS::OFFERED_DEADLINE_MISSED_STATUS:
@@ -373,7 +371,6 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
         DDS::OfferedDeadlineMissedStatus offered_deadline_missed;
         DDS::ReturnCode_t dds_return_code = topic_writer
           ->get_offered_deadline_missed_status(offered_deadline_missed);
-
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;
@@ -384,7 +381,6 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
         rmw_offered_deadline_missed->total_count = offered_deadline_missed.total_count;
         rmw_offered_deadline_missed->total_count_change =
           offered_deadline_missed.total_count_change;
-
         break;
       }
     default:
@@ -408,7 +404,6 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         DDS::LivelinessChangedStatus liveliness_changed;
         DDS::ReturnCode_t dds_return_code = topic_reader
           ->get_liveliness_changed_status(liveliness_changed);
-
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;
@@ -421,7 +416,6 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         rmw_liveliness_changed_status->alive_count_change = liveliness_changed.alive_count_change;
         rmw_liveliness_changed_status->not_alive_count_change =
           liveliness_changed.not_alive_count_change;
-
         break;
       }
     case DDS::REQUESTED_DEADLINE_MISSED_STATUS:
@@ -429,7 +423,6 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         DDS::RequestedDeadlineMissedStatus requested_deadline_missed;
         DDS::ReturnCode_t dds_return_code = topic_reader
           ->get_requested_deadline_missed_status(requested_deadline_missed);
-
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;
@@ -440,7 +433,6 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         rmw_requested_deadline_missed_status->total_count = requested_deadline_missed.total_count;
         rmw_requested_deadline_missed_status->total_count_change =
           requested_deadline_missed.total_count_change;
-
         break;
       }
     default:
