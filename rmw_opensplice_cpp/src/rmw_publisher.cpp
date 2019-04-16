@@ -44,6 +44,7 @@
 #include "identifier.hpp"
 #include "qos.hpp"
 #include "types.hpp"
+#include "event_converter.hpp"
 #include "typesupport_macros.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;
@@ -360,6 +361,28 @@ rmw_publisher_get_actual_qos(
   qos->depth = static_cast<size_t>(dds_qos.history.depth);
 
   return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_publisher_assert_liveliness(const rmw_publisher_t * publisher)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<OpenSpliceStaticPublisherInfo *>(publisher->data);
+  if (nullptr == info) {
+    RMW_SET_ERROR_MSG("publisher internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  if (nullptr == info->topic_writer) {
+    RMW_SET_ERROR_MSG("publisher internal datawriter is invalid");
+    return RMW_RET_ERROR;
+  }
+
+  rmw_ret_t result = check_dds_ret_code(info->topic_writer->assert_liveliness());
+  if (RMW_RET_OK != result) {
+    RMW_SET_ERROR_MSG("failed to assert liveliness of datawriter");
+  }
+  return result;
 }
 
 rmw_ret_t
