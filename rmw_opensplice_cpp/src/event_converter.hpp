@@ -23,14 +23,14 @@
  * @param event_t
  * @return
  */
-DDS::StatusKind get_status_kind_from_rmw(const rmw_event_type_t & event_t);
+DDS::StatusKind get_status_kind_from_rmw(const rmw_event_type_t event_t);
 
 /// @brief Return true if the input RMW event has a corresponding DDS_StatusKind.
 /**
  * @param event_t input rmw event to check
  * @return true if there is an RMW to DDS_StatusKind mapping, false otherwise
  */
-bool is_event_supported(const rmw_event_type_t & event_t);
+bool is_event_supported(const rmw_event_type_t event_t);
 
 /// @brief Assign the input DDS return code to its corresponding RMW return code.
 /**
@@ -38,6 +38,6 @@ bool is_event_supported(const rmw_event_type_t & event_t);
   * @return to_return the corresponding rmw_ret_t that maps to the input DDS_ReturnCode_t. By
   * default RMW_RET_ERROR is returned if no corresponding rmw_ret_t is not defined.
   */
-rmw_ret_t check_dds_ret_code(const DDS::ReturnCode_t & dds_return_code);
+rmw_ret_t check_dds_ret_code(const DDS::ReturnCode_t dds_return_code);
 
 #endif  // EVENT_CONVERTER_HPP_
