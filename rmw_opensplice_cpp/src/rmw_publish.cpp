@@ -68,8 +68,9 @@ report_serialize_publish_error(
 }
 
 rmw_ret_t
-rmw_publish(const rmw_publisher_t * publisher, const void * ros_message)
+rmw_publish(const rmw_publisher_t * publisher, const void * ros_message, rmw_publisher_allocation_t * allocation)
 {
+  (void) allocation;
   if (!publisher) {
     RMW_SET_ERROR_MSG("publisher handle is null");
     return RMW_RET_ERROR;
