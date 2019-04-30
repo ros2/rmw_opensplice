@@ -35,9 +35,9 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
+#include "event_converter.hpp"
 #include "identifier.hpp"
 #include "types.hpp"
-#include "event_converter.hpp"
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"

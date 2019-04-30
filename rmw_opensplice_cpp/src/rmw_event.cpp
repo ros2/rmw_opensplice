@@ -21,13 +21,13 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
+#include "event_converter.hpp"
 #include "identifier.hpp"
 #include "types.hpp"
-#include "event_converter.hpp"
 
 extern "C"
 {
-// @brief Take an event from the event handle and store it in event_info.
+/// Take an event from the event handle and store it in event_info.
 /*
  * Take an event from the event handle.
  *

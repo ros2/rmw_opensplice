@@ -41,10 +41,10 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
+#include "event_converter.hpp"
 #include "identifier.hpp"
 #include "qos.hpp"
 #include "types.hpp"
-#include "event_converter.hpp"
 #include "typesupport_macros.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;

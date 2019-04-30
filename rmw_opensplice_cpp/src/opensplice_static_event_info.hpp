@@ -20,18 +20,19 @@
 
 typedef struct OpenSpliceStaticEventInfo
 {
-  // @brief Get the status for a particular status mask.
+  /// Get the status for a particular status mask.
   /**
    * Return the corresponding RMW status given the input DDS_StatusMask and its corresponding event.
-   * @param mask input DDS_StatusMask
-   * @param event
-   * @return
+   * \param mask input DDS_StatusMask
+   * \param event to fill
+   * \return `RMW_RET_OK` if the event was filled or
+   * \return `RMW_RET_UNSUPPORTED` if the status mask is unsupported
    */
   virtual rmw_ret_t get_status(const DDS::StatusMask mask, void * event) = 0;
 
-  // @brief Get dds entity for events.
+  /// Get dds entity for events.
   /**
-   * @return the entity for which events are retrieved from.
+   * \return the entity for which events are retrieved from.
    */
   virtual DDS::Entity * get_entity() = 0;
 } OpenSpliceStaticEventInfo;

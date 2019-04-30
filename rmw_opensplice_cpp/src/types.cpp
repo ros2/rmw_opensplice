@@ -22,10 +22,12 @@
 #include <vector>
 
 #include "rmw/error_handling.h"
+
 #include "rosidl_typesupport_opensplice_cpp/misc.hpp"
+
 #include "demangle.hpp"
-#include "namespace_prefix.hpp"
 #include "event_converter.hpp"
+#include "namespace_prefix.hpp"
 
 std::string
 create_type_name(
@@ -402,8 +404,8 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
     case DDS::LIVELINESS_CHANGED_STATUS:
       {
         DDS::LivelinessChangedStatus liveliness_changed;
-        DDS::ReturnCode_t dds_return_code = topic_reader
-          ->get_liveliness_changed_status(liveliness_changed);
+        DDS::ReturnCode_t dds_return_code =
+          topic_reader->get_liveliness_changed_status(liveliness_changed);
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;
@@ -421,8 +423,8 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
     case DDS::REQUESTED_DEADLINE_MISSED_STATUS:
       {
         DDS::RequestedDeadlineMissedStatus requested_deadline_missed;
-        DDS::ReturnCode_t dds_return_code = topic_reader
-          ->get_requested_deadline_missed_status(requested_deadline_missed);
+        DDS::ReturnCode_t dds_return_code =
+          topic_reader->get_requested_deadline_missed_status(requested_deadline_missed);
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;

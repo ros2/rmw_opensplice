@@ -34,8 +34,8 @@
 
 #include "rmw/allocators.h"
 #include "rmw/error_handling.h"
-#include "rmw/impl/cpp/macros.hpp"
 #include "rmw/event.h"
+#include "rmw/impl/cpp/macros.hpp"
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 

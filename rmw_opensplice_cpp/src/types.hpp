@@ -40,12 +40,12 @@
 #include <string>
 
 #include "guid.hpp"
+#include "opensplice_static_event_info.hpp"
 #include "topic_cache.hpp"
 
 #include "rmw/types.h"
 #include "rosidl_typesupport_opensplice_cpp/message_type_support.h"
 #include "rosidl_typesupport_opensplice_cpp/service_type_support.h"
-#include "opensplice_static_event_info.hpp"
 
 RMW_LOCAL
 std::string
