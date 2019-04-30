@@ -35,8 +35,8 @@ bool is_event_supported(const rmw_event_type_t event_t);
 /// Assign the input DDS return code to its corresponding RMW return code.
 /**
   * \param dds_return_code input DDS return code
-  * \return to_return the corresponding rmw_ret_t that maps to the input DDS_ReturnCode_t. By
-  *         default RMW_RET_ERROR is returned if no corresponding rmw_ret_t is not defined.
+  * \return to_return the corresponding rmw_ret_t that maps to the input DDS_ReturnCode_t.
+  *   By default RMW_RET_ERROR is returned if no corresponding rmw_ret_t is not defined.
   */
 rmw_ret_t check_dds_ret_code(const DDS::ReturnCode_t dds_return_code);
 

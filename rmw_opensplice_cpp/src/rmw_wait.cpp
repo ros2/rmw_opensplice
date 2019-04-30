@@ -280,7 +280,7 @@ rmw_wait(
   }
   if (!status_conditions.empty()) {
     // enable a status condition for each event
-    for (auto * status_condition : status_conditions) {
+    for (auto status_condition : status_conditions) {
       rmw_ret_t rmw_status = check_attach_condition_error(
         dds_wait_set->attach_condition(status_condition));
       if (rmw_status != RMW_RET_OK) {

@@ -362,7 +362,7 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
           return from_dds;
         }
 
-        rmw_liveliness_lost_status_t * rmw_liveliness_lost =
+        auto rmw_liveliness_lost =
           static_cast<rmw_liveliness_lost_status_t *>(event);
         rmw_liveliness_lost->total_count = liveliness_lost.total_count;
         rmw_liveliness_lost->total_count_change = liveliness_lost.total_count_change;
@@ -371,14 +371,14 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
     case DDS::OFFERED_DEADLINE_MISSED_STATUS:
       {
         DDS::OfferedDeadlineMissedStatus offered_deadline_missed;
-        DDS::ReturnCode_t dds_return_code = topic_writer
-          ->get_offered_deadline_missed_status(offered_deadline_missed);
+        DDS::ReturnCode_t dds_return_code =
+          topic_writer->get_offered_deadline_missed_status(offered_deadline_missed);
         rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
         if (from_dds != RMW_RET_OK) {
           return from_dds;
         }
 
-        rmw_offered_deadline_missed_status_t * rmw_offered_deadline_missed =
+        auto rmw_offered_deadline_missed =
           static_cast<rmw_offered_deadline_missed_status_t *>(event);
         rmw_offered_deadline_missed->total_count = offered_deadline_missed.total_count;
         rmw_offered_deadline_missed->total_count_change =
@@ -411,7 +411,7 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
           return from_dds;
         }
 
-        rmw_liveliness_changed_status_t * rmw_liveliness_changed_status =
+        auto rmw_liveliness_changed_status =
           static_cast<rmw_liveliness_changed_status_t *>(event);
         rmw_liveliness_changed_status->alive_count = liveliness_changed.alive_count;
         rmw_liveliness_changed_status->not_alive_count = liveliness_changed.not_alive_count;
@@ -430,7 +430,7 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
           return from_dds;
         }
 
-        rmw_requested_deadline_missed_status_t * rmw_requested_deadline_missed_status =
+        auto rmw_requested_deadline_missed_status =
           static_cast<rmw_requested_deadline_missed_status_t *>(event);
         rmw_requested_deadline_missed_status->total_count = requested_deadline_missed.total_count;
         rmw_requested_deadline_missed_status->total_count_change =
