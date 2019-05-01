@@ -131,8 +131,10 @@ take_serialized_sample(
   rmw_serialized_message_t * serialized_message,
   bool ignore_local_publications,
   bool * taken,
-  DDS::InstanceHandle_t * sending_publication_handle)
+  DDS::InstanceHandle_t * sending_publication_handle,
+  rmw_subscription_allocation_t * allocation)
 {
+  (void) allocation;
   rmw_ret_t ret = RMW_RET_OK;
   DDS::CDRSample sample;
   DDS::SampleInfo info;
@@ -198,9 +200,6 @@ take_serialized_message(
   DDS::InstanceHandle_t * sending_publication_handle,
   rmw_subscription_allocation_t * allocation)
 {
-  // Unused in current implementation.
-  (void) allocation;
-
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
     return RMW_RET_ERROR;
@@ -239,7 +238,8 @@ take_serialized_message(
     serialized_message,
     subscriber_info->ignore_local_publications,
     taken,
-    sending_publication_handle);
+    sending_publication_handle,
+    allocation);
 }
 
 // The extern "C" here enforces that overloading is not used.
