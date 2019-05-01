@@ -32,7 +32,9 @@ take(
   DDS::InstanceHandle_t * sending_publication_handle,
   rmw_subscription_allocation_t * allocation)
 {
+  // Unused in current implementation.
   (void) allocation;
+
   // Note: gid is allowed to be nullptr, if unused.
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
@@ -193,8 +195,12 @@ take_serialized_message(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_message,
   bool * taken,
-  DDS::InstanceHandle_t * sending_publication_handle)
+  DDS::InstanceHandle_t * sending_publication_handle,
+  rmw_subscription_allocation_t * allocation)
 {
+  // Unused in current implementation.
+  (void) allocation;
+
   if (!subscription) {
     RMW_SET_ERROR_MSG("subscription handle is null");
     return RMW_RET_ERROR;
@@ -281,9 +287,10 @@ rmw_ret_t
 rmw_take_serialized_message(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_message,
-  bool * taken)
+  bool * taken,
+  rmw_subscription_allocation_t * allocation)
 {
-  return take_serialized_message(subscription, serialized_message, taken, nullptr);
+  return take_serialized_message(subscription, serialized_message, taken, nullptr, allocation);
 }
 
 rmw_ret_t
@@ -291,7 +298,8 @@ rmw_take_serialized_message_with_info(
   const rmw_subscription_t * subscription,
   rmw_serialized_message_t * serialized_message,
   bool * taken,
-  rmw_message_info_t * message_info)
+  rmw_message_info_t * message_info,
+  rmw_subscription_allocation_t * allocation)
 {
   if (!message_info) {
     RMW_SET_ERROR_MSG("message info is null");
@@ -299,7 +307,7 @@ rmw_take_serialized_message_with_info(
   }
   DDS::InstanceHandle_t sending_publication_handle;
   auto ret = take_serialized_message(
-    subscription, serialized_message, taken, &sending_publication_handle);
+    subscription, serialized_message, taken, &sending_publication_handle, allocation);
   if (ret != RMW_RET_OK) {
     // Error string is already set.
     return RMW_RET_ERROR;
