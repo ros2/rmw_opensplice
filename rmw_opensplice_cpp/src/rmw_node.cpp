@@ -35,6 +35,7 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
+#include "event_converter.hpp"
 #include "identifier.hpp"
 #include "types.hpp"
 
@@ -415,6 +416,28 @@ rmw_destroy_node(rmw_node_t * node)
   rmw_free(const_cast<char *>(node->namespace_));
   node->namespace_ = nullptr;
   rmw_node_free(node);
+  return result;
+}
+
+rmw_ret_t
+rmw_node_assert_liveliness(const rmw_node_t * node)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  if (nullptr == node_info) {
+    RMW_SET_ERROR_MSG("node info handle is null");
+    return RMW_RET_ERROR;
+  }
+  if (nullptr == node_info->participant) {
+    RMW_SET_ERROR_MSG("node internal participant is invalid");
+    return RMW_RET_ERROR;
+  }
+
+  rmw_ret_t result = check_dds_ret_code(node_info->participant->assert_liveliness());
+  if (RMW_RET_OK != result) {
+    RMW_SET_ERROR_MSG("failed to assert liveliness of participant");
+  }
   return result;
 }
 

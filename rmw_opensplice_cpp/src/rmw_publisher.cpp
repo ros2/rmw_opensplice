@@ -41,6 +41,7 @@
 #include "rmw/rmw.h"
 #include "rmw/types.h"
 
+#include "event_converter.hpp"
 #include "identifier.hpp"
 #include "qos.hpp"
 #include "types.hpp"
@@ -147,6 +148,7 @@ rmw_create_publisher(
   DDS::Topic * topic = nullptr;
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
+  void * info_buf = nullptr;
   void * listener_buf = nullptr;
   OpenSplicePublisherListener * publisher_listener = nullptr;
   OpenSpliceStaticPublisherInfo * publisher_info = nullptr;
@@ -206,8 +208,15 @@ rmw_create_publisher(
     goto fail;
   }
 
-  publisher_info = static_cast<OpenSpliceStaticPublisherInfo *>(
+  info_buf = static_cast<OpenSpliceStaticPublisherInfo *>(
     rmw_allocate(sizeof(OpenSpliceStaticPublisherInfo)));
+
+  if (!info_buf) {
+    RMW_SET_ERROR_MSG("failed to allocate memory");
+    goto fail;
+  }
+
+  RMW_TRY_PLACEMENT_NEW(publisher_info, info_buf, goto fail, OpenSpliceStaticPublisherInfo, )
   publisher_info->dds_topic = topic;
   publisher_info->dds_publisher = dds_publisher;
   publisher_info->topic_writer = topic_writer;
@@ -375,6 +384,28 @@ rmw_publisher_get_actual_qos(
   qos->depth = static_cast<size_t>(dds_qos.history.depth);
 
   return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_publisher_assert_liveliness(const rmw_publisher_t * publisher)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
+
+  auto info = static_cast<OpenSpliceStaticPublisherInfo *>(publisher->data);
+  if (nullptr == info) {
+    RMW_SET_ERROR_MSG("publisher internal data is invalid");
+    return RMW_RET_ERROR;
+  }
+  if (nullptr == info->topic_writer) {
+    RMW_SET_ERROR_MSG("publisher internal datawriter is invalid");
+    return RMW_RET_ERROR;
+  }
+
+  rmw_ret_t result = check_dds_ret_code(info->topic_writer->assert_liveliness());
+  if (RMW_RET_OK != result) {
+    RMW_SET_ERROR_MSG("failed to assert liveliness of datawriter");
+  }
+  return result;
 }
 
 rmw_ret_t
