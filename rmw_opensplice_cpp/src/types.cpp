@@ -30,12 +30,9 @@
 #include "namespace_prefix.hpp"
 
 std::string
-create_type_name(
-  const message_type_support_callbacks_t * callbacks,
-  const std::string & sep)
+create_type_name(const message_type_support_callbacks_t * callbacks)
 {
-  return std::string(callbacks->package_name) +
-         "::" + sep + "::dds_::" + callbacks->message_name + "_";
+  return std::string(callbacks->message_namespace) + "::dds_::" + callbacks->message_name + "_";
 }
 
 CustomDataReaderListener::CustomDataReaderListener()
