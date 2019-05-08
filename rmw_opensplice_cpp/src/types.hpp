@@ -49,9 +49,7 @@
 
 RMW_LOCAL
 std::string
-create_type_name(
-  const message_type_support_callbacks_t * callbacks,
-  const std::string & sep);
+create_type_name(const message_type_support_callbacks_t * callbacks);
 
 // The extern "C" here enforces that overloading is not used.
 extern "C"

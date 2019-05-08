@@ -126,7 +126,7 @@ rmw_create_subscription(
     RMW_SET_ERROR_MSG("callbacks handle is null");
     return NULL;
   }
-  std::string type_name = create_type_name(callbacks, "msg");
+  std::string type_name = create_type_name(callbacks);
 
   const char * error_string = callbacks->register_type(participant, type_name.c_str());
   if (error_string) {
