@@ -142,7 +142,8 @@ _demangle_service_type_only(const std::string & dds_type_name)
       ", report this: '%s'", dds_type_name.c_str());
     return "";
   }
-  // everything checks out, reformat it from '[namespace::]dds_::<type><suffix>' to '[namespace/]<type>'
+  // everything checks out, reformat it from '[namespace::]dds_::<type><suffix>'
+  // to '[namespace/]<type>'
   std::string type_namespace = dds_type_name.substr(0, ns_substring_position);
   type_namespace = std::regex_replace(type_namespace, std::regex("::"), "/");
   size_t start = ns_substring_position + ns_substring.length();
