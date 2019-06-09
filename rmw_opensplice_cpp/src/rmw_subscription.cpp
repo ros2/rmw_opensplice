@@ -350,11 +350,6 @@ rmw_subscription_get_actual_qos(
     return RMW_RET_ERROR;
   }
 
-  if (!data_reader) {
-    RMW_SET_ERROR_MSG("subscription internal dds subscriber is invalid");
-    return RMW_RET_ERROR;
-  }
-
   dds_qos_to_rmw_qos(dds_qos, qos);
 
   return RMW_RET_OK;

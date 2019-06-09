@@ -344,11 +344,6 @@ rmw_publisher_get_actual_qos(
     return RMW_RET_ERROR;
   }
 
-  if (!data_writer) {
-    RMW_SET_ERROR_MSG("publisher internal dds publisher is invalid");
-    return RMW_RET_ERROR;
-  }
-
   dds_qos_to_rmw_qos(dds_qos, qos);
 
   return RMW_RET_OK;
