@@ -47,4 +47,10 @@ bool get_datawriter_qos(
   const rmw_qos_profile_t & qos_profile,
   DDS::DataWriterQos & datawriter_qos);
 
+template<typename AttributeT>
+void
+dds_qos_to_rmw_qos(
+  const AttributeT & dds_qos,
+  rmw_qos_profile_t * qos);
+
 #endif  // QOS_HPP_
