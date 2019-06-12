@@ -97,7 +97,8 @@ public:
 
   void fill_service_names_and_types_by_participant(
     std::map<std::string, std::set<std::string>> & services,
-    DDS::InstanceHandle_t & participant);
+    DDS::InstanceHandle_t & participant,
+    const std::string & suffix);
 
   size_t count_topic(const char * topic_name);
 

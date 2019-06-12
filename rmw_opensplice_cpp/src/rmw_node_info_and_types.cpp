@@ -264,9 +264,53 @@ rmw_get_service_names_and_types_by_node(
     return get_guid_err;
   }
 
-  // combine publisher and subscriber information
   std::map<std::string, std::set<std::string>> services;
-  node_info->subscriber_listener->fill_service_names_and_types_by_participant(services, key);
+  node_info->subscriber_listener->fill_service_names_and_types_by_participant(
+    services,
+    key,
+    "Request");
+
+  rmw_ret_t rmw_ret;
+  rmw_ret = copy_services_to_names_and_types(services, allocator, service_names_and_types);
+  if (rmw_ret != RMW_RET_OK) {
+    return rmw_ret;
+  }
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+rmw_get_client_names_and_types_by_node(
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  const char * node_name,
+  const char * node_namespace,
+  rmw_names_and_types_t * service_names_and_types)
+{
+  rmw_ret_t ret = validate_node(node, allocator);
+  if (ret != RMW_RET_OK) {
+    return ret;
+  }
+  ret = rmw_names_and_types_check_zero(service_names_and_types);
+  if (ret != RMW_RET_OK) {
+    return ret;
+  }
+  ret = validate_names_and_namespace(node_name, node_namespace);
+  if (ret != RMW_RET_OK) {
+    return ret;
+  }
+
+  auto node_info = static_cast<OpenSpliceStaticNodeInfo *>(node->data);
+  DDS::InstanceHandle_t key;
+  auto get_guid_err = __get_key(node_info, node_name, node_namespace, key);
+  if (get_guid_err != RMW_RET_OK) {
+    return get_guid_err;
+  }
+
+  std::map<std::string, std::set<std::string>> services;
+  node_info->subscriber_listener->fill_service_names_and_types_by_participant(
+    services,
+    key,
+    "Reply");
 
   rmw_ret_t rmw_ret;
   rmw_ret = copy_services_to_names_and_types(services, allocator, service_names_and_types);
