@@ -83,6 +83,8 @@ __get_key(
   const char * node_namespace,
   DDS::InstanceHandle_t & key)
 {
+  DDS::DataReader_var loopup_datareader;
+  DDS::ReturnCode_t status;
   auto participant = node_info->participant;
   if (!participant) {
     RMW_SET_ERROR_MSG("participant handle is null");
@@ -97,42 +99,69 @@ __get_key(
     return RMW_RET_OK;
   }
 
-  DDS::InstanceHandleSeq handles;
-  if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("unable to fetch discovered participants.");
+  // Use opensplice get_discovered_participants will get a list of participants including
+  // alive or disposed. However, we don't want the disposed participants. So we use a datareader
+  // to read instance alive samples from the built-in topic: "DCPSParticipant", to retrive the
+  // alive node info from userdata.
+  // Reference: https://github.com/ADLINK-IST/opensplice/issues/79#issuecomment-456367434
+
+  auto builtinSubscriber = participant->get_builtin_subscriber();
+  loopup_datareader = builtinSubscriber->lookup_datareader("DCPSParticipant");
+  auto participantReader =
+    DDS::ParticipantBuiltinTopicDataDataReader::_narrow(loopup_datareader.in());
+
+  DDS::ParticipantBuiltinTopicDataSeq data;
+  DDS::SampleInfoSeq info;
+
+  DDS::Duration_t wait_for_historical_data_timeout = {1, 0};
+
+  // Make sure all historical data is delivered in the DataReader
+  participantReader->wait_for_historical_data(wait_for_historical_data_timeout);
+
+  // Take samples from DCPSParticipant topic
+  status = participantReader->read(data, info, DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+  if (status != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("unable to discover participants.");
     return RMW_RET_ERROR;
   }
 
-  for (DDS::ULong i = 0; i < handles.length(); ++i) {
-    DDS::ParticipantBuiltinTopicData pbtd;
-    dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
-    if (dds_ret == DDS::RETCODE_OK) {
-      uint8_t * buf = pbtd.user_data.value.get_buffer(false);
-      if (buf) {
-        std::vector<uint8_t> kv(buf, buf + pbtd.user_data.value.length());
-        auto map = rmw::impl::cpp::parse_key_value(kv);
-        auto name_found = map.find("name");
-        auto ns_found = map.find("namespace");
+  bool node_found = false;
+  for (DDS::ULong i = 0; i < data.length(); ++i) {
+    if (info[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+      uint8_t * buf = data[i].user_data.value.get_buffer(false);
+      if (buf == nullptr) {
+        continue;
+      }
+      std::vector<uint8_t> kv(buf, buf + data[i].user_data.value.length());
+      auto map = rmw::impl::cpp::parse_key_value(kv);
+      auto name_found = map.find("name");
+      auto ns_found = map.find("namespace");
 
-        if (name_found != map.end() && ns_found != map.end()) {
-          std::string name(name_found->second.begin(), name_found->second.end());
-          std::string ns(ns_found->second.begin(), ns_found->second.end());
-          RCUTILS_LOG_DEBUG_NAMED(
-            "rmw_opensplice_cpp",
-            "Found node %s", name.c_str());
-          if (strcmp(node_name, name.c_str()) == 0 &&
-            strcmp(node_namespace, ns.c_str()) == 0)
-          {
-            key = DDS_BuiltinTopicKey_to_InstanceHandle(pbtd.key);
-            return RMW_RET_OK;
-          }
+      if (name_found != map.end() && ns_found != map.end()) {
+        std::string name(name_found->second.begin(), name_found->second.end());
+        std::string ns(ns_found->second.begin(), ns_found->second.end());
+        RCUTILS_LOG_DEBUG_NAMED(
+          "rmw_opensplice_cpp",
+          "Found node %s", name.c_str());
+        if (strcmp(node_name, name.c_str()) == 0 &&
+          strcmp(node_namespace, ns.c_str()) == 0)
+        {
+          key = DDS_BuiltinTopicKey_to_InstanceHandle(data[i].key);
+          node_found = true;
+          break;
         }
       }
-    } else {
-      RMW_SET_ERROR_MSG("unable to fetch discovered participants data.");
-      return RMW_RET_ERROR;
     }
   }
+
+  participantReader->return_loan(data, info);
+
+  if (node_found == true) {
+    return RMW_RET_OK;
+  }
+
   RMW_SET_ERROR_MSG("unable to match node_name/namespace with discovered nodes.");
   return RMW_RET_ERROR;
 }

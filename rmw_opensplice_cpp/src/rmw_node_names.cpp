@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "rcutils/types/string_array.h"
 #include "rcutils/logging_macros.h"
@@ -36,6 +37,8 @@ rmw_get_node_names(
   rcutils_string_array_t * node_names,
   rcutils_string_array_t * node_namespaces)
 {
+  DDS::DataReader_var loopup_datareader;
+  DDS::ReturnCode_t status;
   if (!node) {
     RMW_SET_ERROR_MSG("node handle is null");
     return RMW_RET_ERROR;
@@ -71,18 +74,37 @@ rmw_get_node_names(
     return RMW_RET_ERROR;
   }
 
-  DDS::InstanceHandleSeq handles;
-  if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
-    RMW_SET_ERROR_MSG("unable to fetch discovered participants.");
+  // Use opensplice get_discovered_participants will get a list of participants including
+  // alive or disposed. However, we don't want the disposed participants. So we use a datareader
+  // to read instance alive samples from the built-in topic: "DCPSParticipant", to retrive the
+  // alive node info from userdata.
+  // Reference: https://github.com/ADLINK-IST/opensplice/issues/79#issuecomment-456367434
+
+  auto builtinSubscriber = participant->get_builtin_subscriber();
+  loopup_datareader = builtinSubscriber->lookup_datareader("DCPSParticipant");
+  auto participantReader =
+    DDS::ParticipantBuiltinTopicDataDataReader::_narrow(loopup_datareader.in());
+
+  DDS::ParticipantBuiltinTopicDataSeq data;
+  DDS::SampleInfoSeq info;
+
+  DDS::Duration_t wait_for_historical_data_timeout = {1, 0};
+
+  // Make sure all historical data is delivered in the DataReader
+  participantReader->wait_for_historical_data(wait_for_historical_data_timeout);
+
+  // Take samples from DCPSParticipant topic
+  status = participantReader->read(data, info, DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+  if (status != DDS::RETCODE_OK) {
+    RMW_SET_ERROR_MSG("unable to discover participants.");
     return RMW_RET_ERROR;
   }
 
-  // Collect all Node names from the list of instances
-
   rcutils_allocator_t allocator = rcutils_get_default_allocator();
 
-  // allocate a temporary list for all Node names according to the maximum that can be expected.
-  int length = handles.length();
+  int length = data.length();
   rcutils_string_array_t node_list = rcutils_get_zero_initialized_string_array();
   rcutils_ret_t rcutils_ret = rcutils_string_array_init(&node_list, length, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
@@ -100,40 +122,36 @@ rmw_get_node_names(
   }
 
   int n = 0;
-  for (auto i = 0; i < length; ++i) {
-    DDS::ParticipantBuiltinTopicData pbtd;
-
-    auto dds_ret = participant->get_discovered_participant_data(pbtd, handles[i]);
-    if (dds_ret == DDS::RETCODE_OK) {
-      uint8_t * buf = pbtd.user_data.value.get_buffer(false);
-      if (buf) {
-        std::vector<uint8_t> kv(buf, buf + pbtd.user_data.value.length());
-        auto map = rmw::impl::cpp::parse_key_value(kv);
-        auto name_found = map.find("name");
-        auto ns_found = map.find("namespace");
-
-        if (name_found != map.end() && ns_found != map.end()) {
-          std::string name(name_found->second.begin(), name_found->second.end());
-          node_list.data[n] = rcutils_strndup(name.c_str(), name.size(), allocator);
-          if (!node_list.data[n]) {
-            RMW_SET_ERROR_MSG("could not allocate memory for node name");
-            goto fail;
-          }
-
-          std::string ns(ns_found->second.begin(), ns_found->second.end());
-          ns_list.data[n] = rcutils_strndup(ns.c_str(), ns.size(), allocator);
-          if (!ns_list.data[n]) {
-            RMW_SET_ERROR_MSG("could not allocate memory for node name");
-            goto fail;
-          }
-          n++;
-        }
+  for (auto i = 0; i < length; i++) {
+    if (info[i].instance_state == DDS::ALIVE_INSTANCE_STATE) {
+      uint8_t * buf = data[i].user_data.value.get_buffer(false);
+      if (buf == nullptr) {
+        continue;
       }
-    } else {
-      RMW_SET_ERROR_MSG("unable to fetch discovered participants data.");
-      return RMW_RET_ERROR;
+      std::vector<uint8_t> kv(buf, buf + data[i].user_data.value.length());
+      auto map = rmw::impl::cpp::parse_key_value(kv);
+      auto name_found = map.find("name");
+      auto ns_found = map.find("namespace");
+      if (name_found != map.end() && ns_found != map.end()) {
+        std::string name(name_found->second.begin(), name_found->second.end());
+        node_list.data[n] = rcutils_strndup(name.c_str(), name.size(), allocator);
+        if (!node_list.data[n]) {
+          RMW_SET_ERROR_MSG("could not allocate memory for node name");
+          goto fail;
+        }
+
+        std::string ns(ns_found->second.begin(), ns_found->second.end());
+        ns_list.data[n] = rcutils_strndup(ns.c_str(), ns.size(), allocator);
+        if (!ns_list.data[n]) {
+          RMW_SET_ERROR_MSG("could not allocate memory for node name");
+          goto fail;
+        }
+        n++;
+      }
     }
   }
+
+  participantReader->return_loan(data, info);
 
   // Allocate the node_names out-buffer according to the number of Node names
   rcutils_ret = rcutils_string_array_init(node_names, n, &allocator);
