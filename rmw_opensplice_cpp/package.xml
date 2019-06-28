@@ -15,6 +15,7 @@
   <buildtool_export_depend>opensplice_cmake_module</buildtool_export_depend>
   <buildtool_export_depend>rosidl_cmake</buildtool_export_depend>
 
+  <build_depend>rcpputils</build_depend>
   <build_depend>rcutils</build_depend>
   <build_depend>libopensplice69</build_depend>
   <build_depend>rmw</build_depend>
