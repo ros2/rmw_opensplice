@@ -35,7 +35,6 @@ find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
 
 ament_export_dependencies(
-  rcpputils
   rcutils
   rmw
   rosidl_generator_c
