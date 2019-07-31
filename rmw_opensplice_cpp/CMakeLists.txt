@@ -28,6 +28,7 @@ if(NOT rosidl_typesupport_opensplice_cpp_FOUND OR NOT rosidl_typesupport_openspl
   return()
 endif()
 
+find_package(rcpputils REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(rmw REQUIRED)
 find_package(rosidl_generator_c REQUIRED)
@@ -80,6 +81,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/types.cpp
 )
 ament_target_dependencies(rmw_opensplice_cpp
+  "rcpputils"
   "rcutils"
   "rmw"
   "rosidl_generator_c"
