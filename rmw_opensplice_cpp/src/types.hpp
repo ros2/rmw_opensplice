@@ -249,7 +249,6 @@ struct OpenSpliceStaticSubscriberInfo : public OpenSpliceStaticEventInfo
   DDS::ReadCondition * read_condition;
   OpenSpliceSubscriberListener * listener;
   const message_type_support_callbacks_t * callbacks;
-  bool ignore_local_publications;
 
   rmw_ret_t get_status(const DDS::StatusMask mask, void * event) override;
   DDS::Entity * get_entity() override;
