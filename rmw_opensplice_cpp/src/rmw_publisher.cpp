@@ -252,6 +252,7 @@ rmw_create_publisher(
   memcpy(const_cast<char *>(publisher->topic_name), topic_name, strlen(topic_name) + 1);
   publisher->options = *publisher_options;
 
+  publisher->can_loan_messages = false;
   return publisher;
 fail:
   if (publisher) {
@@ -376,6 +377,32 @@ rmw_publisher_assert_liveliness(const rmw_publisher_t * publisher)
     RMW_SET_ERROR_MSG("failed to assert liveliness of datawriter");
   }
   return result;
+}
+
+rmw_ret_t
+rmw_borrow_loaned_message(
+  const rmw_publisher_t * publisher,
+  const rosidl_message_type_support_t * type_support,
+  void ** ros_message)
+{
+  (void) publisher;
+  (void) type_support;
+  (void) ros_message;
+
+  RMW_SET_ERROR_MSG("rmw_borrow_loaned_message not implemented for rmw_opensplice_cpp");
+  return RMW_RET_ERROR;
+}
+
+rmw_ret_t
+rmw_return_loaned_message(
+  const rmw_publisher_t * publisher,
+  void * loaned_message)
+{
+  (void) publisher;
+  (void) loaned_message;
+
+  RMW_SET_ERROR_MSG("rmw_return_loaned_message not implemented for rmw_opensplice_cpp");
+  return RMW_RET_OK;
 }
 
 rmw_ret_t
