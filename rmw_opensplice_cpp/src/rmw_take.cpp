@@ -74,7 +74,7 @@ take(
 
   const char * error_string = callbacks->take(
     topic_reader,
-    subscriber_info->ignore_local_publications,
+    subscription->options.ignore_local_publications,
     ros_message, taken, sending_publication_handle);
   // If no data was taken, that's not captured as an error here, but instead taken is set to false.
   if (error_string) {
@@ -236,7 +236,7 @@ take_serialized_message(
   return take_serialized_sample(
     subscriber_info,
     serialized_message,
-    subscriber_info->ignore_local_publications,
+    subscription->options.ignore_local_publications,
     taken,
     sending_publication_handle,
     allocation);
