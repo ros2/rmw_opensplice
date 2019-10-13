@@ -19,7 +19,7 @@ find_package(OpenSplice MODULE QUIET)
 
 if(NOT OpenSplice_FOUND)
   message(STATUS
-    "Could not find PrismTech OpenSplice - skipping rmw_opensplice_cpp")
+    "Could not find ADLINK OpenSplice - skipping rmw_opensplice_cpp")
   set(rmw_opensplice_cpp_FOUND FALSE)
 else()
   list(APPEND rmw_opensplice_cpp_DEFINITIONS ${OpenSplice_DEFINITIONS})

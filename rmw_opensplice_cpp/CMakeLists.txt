@@ -16,7 +16,7 @@ find_package(opensplice_cmake_module REQUIRED)
 find_package(OpenSplice MODULE)
 if(NOT OpenSplice_FOUND)
   ament_package()
-  message(WARNING "Could not find PrismTech OpenSplice - skipping '${PROJECT_NAME}'")
+  message(WARNING "Could not find ADLINK OpenSplice - skipping '${PROJECT_NAME}'")
   return()
 endif()
 
