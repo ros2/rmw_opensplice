@@ -178,6 +178,6 @@ rmw_publish_loaned_message(
   (void) allocation;
 
   RMW_SET_ERROR_MSG("rmw_publish_loaned_message not implemented for rmw_opensplice_cpp");
-  return RMW_RET_ERROR;
+  return RMW_RET_UNSUPPORTED;
 }
 }  // extern "C"
