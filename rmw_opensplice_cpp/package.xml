@@ -3,7 +3,7 @@
 <package format="3">
   <name>rmw_opensplice_cpp</name>
   <version>0.8.0</version>
-  <description>Implement the ROS middleware interface using PrismTech OpenSplice static code generation in C++.</description>
+  <description>Implement the ROS middleware interface using ADLINK OpenSplice static code generation in C++.</description>
   <maintainer email="dthomas@osrfoundation.org">Dirk Thomas</maintainer>
   <license>Apache License 2.0</license>
 
