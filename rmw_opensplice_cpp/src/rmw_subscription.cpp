@@ -249,6 +249,7 @@ rmw_create_subscription(
   memcpy(const_cast<char *>(subscription->topic_name), topic_name, strlen(topic_name) + 1);
   subscription->options = *subscription_options;
 
+  subscription->can_loan_messages = false;
   return subscription;
 fail:
   if (dds_subscriber) {
