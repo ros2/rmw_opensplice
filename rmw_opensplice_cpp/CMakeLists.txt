@@ -79,6 +79,7 @@ add_library(rmw_opensplice_cpp SHARED
   src/rmw_wait_set.cpp
   src/serialization_format.cpp
   src/types.cpp
+  src/rmw_get_topic_info.cpp
 )
 ament_target_dependencies(rmw_opensplice_cpp
   "rcpputils"
