@@ -14,6 +14,7 @@
 
 #include "types.hpp"
 
+#include <iostream>
 #include <algorithm>
 #include <cctype>
 #include <map>
@@ -357,6 +358,7 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
   const DDS::StatusMask mask,
   void * event)
 {
+  std::cout<<"PUbsliher get status called with mask: "<<mask<<std::endl;
   RMW_CHECK_ARGUMENT_FOR_NULL(event, RMW_RET_INVALID_ARGUMENT);
   switch (mask) {
     case DDS::LIVELINESS_LOST_STATUS:
@@ -392,6 +394,23 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
           offered_deadline_missed.total_count_change;
         break;
       }
+    case DDS::OFFERED_INCOMPATIBLE_QOS_STATUS:
+      {
+        DDS::OfferedIncompatibleQosStatus offered_incompatible_qos;
+        DDS::ReturnCode_t dds_return_code =
+          topic_writer->get_offered_incompatible_qos_status(offered_incompatible_qos);
+        rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
+        if (from_dds != RMW_RET_OK) {
+          return from_dds;
+        }
+
+        auto rmw_offered_incompatible_qos =
+          static_cast<rmw_offered_incompatible_qos_status_t *>(event);
+        rmw_offered_incompatible_qos->total_count = offered_incompatible_qos.total_count;
+        rmw_offered_incompatible_qos->total_count_change =
+            offered_incompatible_qos.total_count_change;
+        break;
+      }
     default:
       return RMW_RET_UNSUPPORTED;
   }
@@ -407,6 +426,7 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
   const DDS::StatusMask mask,
   void * event)
 {
+  std::cout<<"Subscriber get status called with mask: "<<mask<<std::endl;
   switch (mask) {
     case DDS::LIVELINESS_CHANGED_STATUS:
       {
@@ -442,6 +462,23 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         rmw_requested_deadline_missed_status->total_count = requested_deadline_missed.total_count;
         rmw_requested_deadline_missed_status->total_count_change =
           requested_deadline_missed.total_count_change;
+        break;
+      }
+    case DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS:
+      {
+        DDS::RequestedIncompatibleQosStatus requested_incompatible_qos;
+        DDS::ReturnCode_t dds_return_code =
+          topic_reader->get_requested_incompatible_qos_status(requested_incompatible_qos);
+        rmw_ret_t from_dds = check_dds_ret_code(dds_return_code);
+        if (from_dds != RMW_RET_OK) {
+          return from_dds;
+        }
+
+        auto rmw_requested_incompatible_qos =
+          static_cast<rmw_requested_incompatible_qos_status_t *>(event);
+        rmw_requested_incompatible_qos->total_count = requested_incompatible_qos.total_count;
+        rmw_requested_incompatible_qos->total_count_change =
+          requested_incompatible_qos.total_count_change;
         break;
       }
     default:

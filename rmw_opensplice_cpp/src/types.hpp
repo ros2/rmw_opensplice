@@ -184,7 +184,6 @@ public:
   virtual void on_publication_matched(
     DDS::DataWriter_ptr writer,
     const DDS::PublicationMatchedStatus & status);
-
   virtual void on_offered_deadline_missed(
     DDS::DataWriter_ptr,
     const DDS::OfferedDeadlineMissedStatus &) {}
