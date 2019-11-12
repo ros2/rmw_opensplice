@@ -358,7 +358,6 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
   const DDS::StatusMask mask,
   void * event)
 {
-  std::cout<<"PUbsliher get status called with mask: "<<mask<<std::endl;
   RMW_CHECK_ARGUMENT_FOR_NULL(event, RMW_RET_INVALID_ARGUMENT);
   switch (mask) {
     case DDS::LIVELINESS_LOST_STATUS:
@@ -409,6 +408,8 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
         rmw_offered_incompatible_qos->total_count = offered_incompatible_qos.total_count;
         rmw_offered_incompatible_qos->total_count_change =
             offered_incompatible_qos.total_count_change;
+        rmw_offered_incompatible_qos->last_policy_id =
+            offered_incompatible_qos.last_policy_id;
         break;
       }
     default:
@@ -426,7 +427,7 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
   const DDS::StatusMask mask,
   void * event)
 {
-  std::cout<<"Subscriber get status called with mask: "<<mask<<std::endl;
+  RMW_CHECK_ARGUMENT_FOR_NULL(event, RMW_RET_INVALID_ARGUMENT);
   switch (mask) {
     case DDS::LIVELINESS_CHANGED_STATUS:
       {
@@ -479,6 +480,8 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         rmw_requested_incompatible_qos->total_count = requested_incompatible_qos.total_count;
         rmw_requested_incompatible_qos->total_count_change =
           requested_incompatible_qos.total_count_change;
+        rmw_requested_incompatible_qos->last_policy_id =
+            requested_incompatible_qos.last_policy_id;
         break;
       }
     default:
