@@ -23,22 +23,22 @@ extern "C"
 {
 rmw_ret_t
 rmw_get_publishers_info_by_topic(
-  const rmw_node_t *,
-  rcutils_allocator_t *,
-  const char *,
-  bool,
-  rmw_topic_info_array_t *)
+  const rmw_node_t * /* unused_param */,
+  rcutils_allocator_t * /* unused_param */,
+  const char * /* unused_param */,
+  bool /* unused_param */,
+  rmw_topic_info_array_t * /* unused_param */)
 {
   return RMW_RET_UNSUPPORTED;
 }
 
 rmw_ret_t
 rmw_get_subscriptions_info_by_topic(
-  const rmw_node_t *,
-  rcutils_allocator_t *,
-  const char *,
-  bool,
-  rmw_topic_info_array_t *)
+  const rmw_node_t * /* unused_param */,
+  rcutils_allocator_t * /* unused_param */,
+  const char * /* unused_param */,
+  bool /* unused_param */,
+  rmw_topic_info_array_t * /* unused_param */)
 {
   return RMW_RET_UNSUPPORTED;
 }
