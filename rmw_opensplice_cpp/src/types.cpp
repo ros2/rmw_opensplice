@@ -14,7 +14,6 @@
 
 #include "types.hpp"
 
-#include <iostream>
 #include <algorithm>
 #include <cctype>
 #include <map>
