@@ -407,9 +407,9 @@ rmw_ret_t OpenSpliceStaticPublisherInfo::get_status(
           static_cast<rmw_offered_incompatible_qos_status_t *>(event);
         rmw_offered_incompatible_qos->total_count = offered_incompatible_qos.total_count;
         rmw_offered_incompatible_qos->total_count_change =
-            offered_incompatible_qos.total_count_change;
+          offered_incompatible_qos.total_count_change;
         rmw_offered_incompatible_qos->last_policy_id =
-            offered_incompatible_qos.last_policy_id;
+          offered_incompatible_qos.last_policy_id;
         break;
       }
     default:
@@ -481,7 +481,7 @@ rmw_ret_t OpenSpliceStaticSubscriberInfo::get_status(
         rmw_requested_incompatible_qos->total_count_change =
           requested_incompatible_qos.total_count_change;
         rmw_requested_incompatible_qos->last_policy_id =
-            requested_incompatible_qos.last_policy_id;
+          requested_incompatible_qos.last_policy_id;
         break;
       }
     default:
