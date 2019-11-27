@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "rmw/error_handling.h"
-#include "rmw/rmw.h"
-#include "rmw/types.h"
+#include "rmw/get_topic_info.h"
+#include "rmw/topic_info_array.h"
 
 #include "identifier.hpp"
 #include "types.hpp"
