@@ -49,6 +49,13 @@ get_datawriter_qos(
   const rmw_qos_profile_t & qos_profile,
   DDS::DataWriterQos & datawriter_qos);
 
+RMW_LOCAL
+bool
+get_topic_qos(
+  DDS::DomainParticipant & participant,
+  const rmw_qos_profile_t & qos_profile,
+  DDS::TopicQos & topic_qos);
+
 template<typename AttributeT>
 void
 dds_qos_to_rmw_qos(
