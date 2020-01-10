@@ -53,7 +53,7 @@ public:
   typedef std::map<GUID_t, TopicInfo> TopicGuidToInfo;
 
   /**
-   * @return a map of topic name to the vector of topic types used.
+   * \return a map of topic name to the vector of topic types used.
    */
   const TopicGuidToInfo & getTopicGuidToInfo() const
   {
@@ -61,7 +61,7 @@ public:
   }
 
   /**
-   * @return a map of participant guid to the vector of topic names used.
+   * \return a map of participant guid to the vector of topic names used.
    */
   const ParticipantToTopicGuidMap & getParticipantToTopicGuidMap() const
   {
@@ -71,10 +71,10 @@ public:
   /**
    * Add a topic based on discovery.
    *
-   * @param participant_guid
-   * @param topic_name
-   * @param type_name
-   * @return true if a change has been recorded
+   * \param participant_guid
+   * \param topic_name
+   * \param type_name
+   * \return true if a change has been recorded
    */
   bool addTopic(
     const GUID_t & participant_guid,
@@ -101,43 +101,43 @@ public:
 
   /**
    * Get topic info based on the topic guid
-   * @param topic_guid to search
-   * @param topic_info [out] result
-   * @return true if it exists
+   * \param topic_guid to search
+   * \param topic_endpoint_info [out] result
+   * \return true if it exists
    */
-  bool getTopic(const GUID_t & topic_guid, TopicInfo & topic_info) const
+  bool getTopic(const GUID_t & topic_guid, TopicInfo & topic_endpoint_info) const
   {
-    auto topic_info_it = topic_guid_to_info_.find(topic_guid);
-    if (topic_info_it == topic_guid_to_info_.end()) {
+    auto topic_endpoint_info_it = topic_guid_to_info_.find(topic_guid);
+    if (topic_endpoint_info_it == topic_guid_to_info_.end()) {
       RCUTILS_LOG_DEBUG_NAMED(
         "rmw_opensplice_shared_cpp",
         "topic not available.");
       return false;
     }
-    topic_info = topic_info_it->second;
+    topic_endpoint_info = topic_endpoint_info_it->second;
     return true;
   }
 
   /**
    * Remove a topic based on discovery.
    *
-   * @param guid
-   * @return true if a change has been recorded
+   * \param guid
+   * \return true if a change has been recorded
    */
   bool removeTopic(const GUID_t & topic_guid)
   {
-    auto topic_info_it = topic_guid_to_info_.find(topic_guid);
-    if (topic_info_it == topic_guid_to_info_.end()) {
+    auto topic_endpoint_info_it = topic_guid_to_info_.find(topic_guid);
+    if (topic_endpoint_info_it == topic_guid_to_info_.end()) {
       RCUTILS_LOG_DEBUG_NAMED(
         "rmw_opensplice_shared_cpp",
         "unexpected topic removal.");
       return false;
     }
 
-    std::string topic_name = topic_info_it->second.name;
-    std::string type_name = topic_info_it->second.type;
+    std::string topic_name = topic_endpoint_info_it->second.name;
+    std::string type_name = topic_endpoint_info_it->second.type;
 
-    auto participant_guid = topic_info_it->second.participant_guid;
+    auto participant_guid = topic_endpoint_info_it->second.participant_guid;
     auto participant_to_topic_guid = participant_to_topic_guids_.find(participant_guid);
     if (participant_to_topic_guid == participant_to_topic_guids_.end()) {
       RCUTILS_LOG_WARN_NAMED(
@@ -158,7 +158,7 @@ public:
       return false;
     }
 
-    topic_guid_to_info_.erase(topic_info_it);
+    topic_guid_to_info_.erase(topic_endpoint_info_it);
     participant_to_topic_guid->second.erase(topic_guid_to_remove);
     if (participant_to_topic_guids_.empty()) {
       participant_to_topic_guids_.erase(participant_to_topic_guid);
@@ -169,8 +169,8 @@ public:
   /**
    * Get topic types by guid.
    *
-   * @param participant_guid to find topic types
-   * @return topic types corresponding to that guid
+   * \param participant_guid to find topic types
+   * \return topic types corresponding to that guid
    */
   TopicsTypes getTopicTypesByGuid(const GUID_t & participant_guid)
   {
@@ -182,16 +182,16 @@ public:
     }
 
     for (auto & topic_guid : participant_to_topic_guids->second) {
-      auto topic_info = topic_guid_to_info_.find(topic_guid);
-      if (topic_info == topic_guid_to_info_.end()) {
+      auto topic_endpoint_info = topic_guid_to_info_.find(topic_guid);
+      if (topic_endpoint_info == topic_guid_to_info_.end()) {
         continue;
       }
-      auto topic_name = topic_info->second.name;
+      auto topic_name = topic_endpoint_info->second.name;
       auto topic_entry = topics_types.find(topic_name);
       if (topic_entry == topics_types.end()) {
         topics_types[topic_name] = std::set<std::string>();
       }
-      topics_types[topic_name].insert(topic_info->second.type);
+      topics_types[topic_name].insert(topic_endpoint_info->second.type);
     }
     return topics_types;
   }
@@ -215,8 +215,8 @@ private:
   /**
    * Helper function to initialize the set inside a participant map.
    *
-   * @param map
-   * @param participant_guid
+   * \param map
+   * \param participant_guid
    */
   void initializeParticipantMap(
     ParticipantToTopicGuidMap & map,

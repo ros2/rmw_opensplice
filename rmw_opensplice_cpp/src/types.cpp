@@ -213,9 +213,9 @@ void CustomDataReaderListener::remove_information(
   const EndPointType endpoint_type)
 {
   if (print_discovery_logging_) {
-    TopicCache<DDS::InstanceHandle_t>::TopicInfo topic_info;
-    if (topic_cache.getTopic(topic, topic_info)) {
-      print_discovery_logging("-", topic_info.name, topic_info.type, endpoint_type);
+    TopicCache<DDS::InstanceHandle_t>::TopicInfo topic_endpoint_info;
+    if (topic_cache.getTopic(topic, topic_endpoint_info)) {
+      print_discovery_logging("-", topic_endpoint_info.name, topic_endpoint_info.type, endpoint_type);
     }
   }
   topic_cache.removeTopic(topic);
