@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "rmw/error_handling.h"
-#include "rmw/get_topic_info.h"
-#include "rmw/topic_info_array.h"
+#include "rmw/get_topic_endpoint_info.h"
+#include "rmw/topic_endpoint_info_array.h"
 
 #include "identifier.hpp"
 #include "types.hpp"
@@ -27,7 +27,7 @@ rmw_get_publishers_info_by_topic(
   rcutils_allocator_t * /* unused_param */,
   const char * /* unused_param */,
   bool /* unused_param */,
-  rmw_topic_info_array_t * /* unused_param */)
+  rmw_topic_endpoint_info_array_t * /* unused_param */)
 {
   return RMW_RET_UNSUPPORTED;
 }
@@ -38,7 +38,7 @@ rmw_get_subscriptions_info_by_topic(
   rcutils_allocator_t * /* unused_param */,
   const char * /* unused_param */,
   bool /* unused_param */,
-  rmw_topic_info_array_t * /* unused_param */)
+  rmw_topic_endpoint_info_array_t * /* unused_param */)
 {
   return RMW_RET_UNSUPPORTED;
 }
