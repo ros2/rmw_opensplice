@@ -38,10 +38,10 @@ extern "C"
  * Check to see if a node name and namespace match the user data QoS policy
  * of a node.
  *
- * @param user_data_qos to inspect
- * @param node_name to match
- * @param node_namespace to match
- * @return true if match
+ * \param user_data_qos to inspect
+ * \param node_name to match
+ * \param node_namespace to match
+ * \return true if match
  */
 bool
 __is_node_match(
@@ -69,12 +69,12 @@ __is_node_match(
  * Get a DDS GUID key for the discovered participant which matches the
  * node_name and node_namepace supplied.
  *
- * @param node_info to discover nodes
- * @param node_name to match
- * @param node_namespace to match
- * @param key [out] key (an InstanceHandle) that matches the node name and namespace
+ * \param node_info to discover nodes
+ * \param node_name to match
+ * \param node_namespace to match
+ * \param key [out] key (an InstanceHandle) that matches the node name and namespace
  *
- * @return RMW_RET_OK if success, ERROR otherwise
+ * \return RMW_RET_OK if success, ERROR otherwise
  */
 rmw_ret_t
 __get_key(
@@ -93,7 +93,7 @@ __get_key(
 
   DDS::DomainParticipantQos dpqos;
   auto dds_ret = participant->get_qos(dpqos);
-  // @todo: ross-desmond implement self discovery
+  // \todo: ross-desmond implement self discovery
   if (dds_ret == DDS::RETCODE_OK && __is_node_match(dpqos.user_data, node_name, node_namespace)) {
     key = node_info->participant->get_instance_handle();
     return RMW_RET_OK;

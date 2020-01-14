@@ -111,11 +111,11 @@ public:
   /**
    * Add topic pub/sub information to discovery cache.
    *
-   * @param participant the topic is related to
-   * @param topic the topic reader/writer unique id
-   * @param topic_name the topic name
-   * @param topic_type the topic type
-   * @param endpoint_type the endpoint type of this topic instance
+   * \param participant the topic is related to
+   * \param topic the topic reader/writer unique id
+   * \param topic_name the topic name
+   * \param topic_type the topic type
+   * \param endpoint_type the endpoint type of this topic instance
    */
   void add_information(
     const DDS::InstanceHandle_t & participant,
@@ -126,8 +126,8 @@ public:
 
   /**
    * Remove topic pub/sub information from the discovery cache.
-   * @param topic the topic reader/writer unique id
-   * @param endpoint_type the endpoint type of this topic instance
+   * \param topic the topic reader/writer unique id
+   * \param endpoint_type the endpoint type of this topic instance
    */
   void remove_information(
     const DDS::InstanceHandle_t & topic,
