@@ -48,7 +48,6 @@ rmw_create_node(
   const char * name, const char * namespace_, size_t domain_id,
   const rmw_node_security_options_t * security_options, bool localhost_only)
 {
-  static_cast<void>(localhost_only);
   RCUTILS_CHECK_ARGUMENT_FOR_NULL(context, nullptr);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     init context,
@@ -99,6 +98,17 @@ rmw_create_node(
 #ifdef _WIN32
     free(ospl_uri);
 #endif
+  }
+
+  // Make sure to use "127.0.0.1" when only local host is allowed.
+  if (localhost_only) {
+    const char *localhost = "127.0.0.1";
+    const char *ospl_network_interface_env = "OSPL_NETWORK_INTERFACE";
+#ifdef _WIN32
+    _putenv_s(ospl_network_interface_env, localhost);
+#else
+    setenv(ospl_network_interface_env, localhost, 1);
+#endif  // _WIN32
   }
 
   // Ensure the ROS_DOMAIN_ID env variable is set, otherwise parsing of the config may fail.
