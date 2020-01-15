@@ -21,6 +21,7 @@
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datareader_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datawriter_qos;
+using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
 
 static bool
 is_time_default(const rmw_time_t & time)
@@ -37,23 +38,52 @@ rmw_time_to_dds(const rmw_time_t & time)
   return duration;
 }
 
-template<typename DDSEntityQos>
-bool set_entity_qos_from_profile_generic(
+static bool
+rmw_qos_to_history(
   const rmw_qos_profile_t & qos_profile,
-  DDSEntityQos & entity_qos)
+  DDS::HistoryQosPolicyKind & kind,
+  DDS::Long & depth)
 {
   switch (qos_profile.history) {
     case RMW_QOS_POLICY_HISTORY_KEEP_LAST:
-      entity_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+      kind = DDS::KEEP_LAST_HISTORY_QOS;
       break;
     case RMW_QOS_POLICY_HISTORY_KEEP_ALL:
-      entity_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+      kind = DDS::KEEP_ALL_HISTORY_QOS;
       break;
     case RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT:
       break;
     default:
       RMW_SET_ERROR_MSG("Unknown QoS history policy");
       return false;
+  }
+
+  if (qos_profile.depth != RMW_QOS_POLICY_DEPTH_SYSTEM_DEFAULT) {
+    if (qos_profile.depth > static_cast<size_t>((std::numeric_limits<DDS::Long>::max)())) {
+      RMW_SET_ERROR_MSG(
+        "failed to set history depth since the requested queue size exceeds the DDS type");
+      return false;
+    }
+    // ensure the history depth is at least the requested queue size
+    if (kind == DDS::KEEP_LAST_HISTORY_QOS && static_cast<size_t>(depth) < qos_profile.depth) {
+      depth = static_cast<DDS::Long>(qos_profile.depth);
+    }
+  }
+
+  return true;
+}
+
+template<typename DDSEntityQos>
+bool set_entity_qos_from_profile_generic(
+  const rmw_qos_profile_t & qos_profile,
+  DDSEntityQos & entity_qos)
+{
+  if (!rmw_qos_to_history(
+      qos_profile,
+      entity_qos.history.kind,
+      entity_qos.history.depth))
+  {
+    return false;
   }
 
   switch (qos_profile.reliability) {
@@ -84,11 +114,6 @@ bool set_entity_qos_from_profile_generic(
       return false;
   }
 
-  if (qos_profile.depth != RMW_QOS_POLICY_DEPTH_SYSTEM_DEFAULT) {
-    entity_qos.history.depth =
-      static_cast<DDS::Long>(qos_profile.depth);
-  }
-
   // DDS_DeadlineQosPolicy has default value of DDS_DURATION_INFINITE, don't touch it for 0
   if (!is_time_default(qos_profile.deadline)) {
     entity_qos.deadline.period = rmw_time_to_dds(qos_profile.deadline);
@@ -112,20 +137,6 @@ bool set_entity_qos_from_profile_generic(
   }
   if (!is_time_default(qos_profile.liveliness_lease_duration)) {
     entity_qos.liveliness.lease_duration = rmw_time_to_dds(qos_profile.liveliness_lease_duration);
-  }
-
-  // ensure the history depth is at least the requested queue size
-  assert(entity_qos.history.depth >= 0);
-  if (
-    entity_qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS &&
-    static_cast<size_t>(entity_qos.history.depth) < qos_profile.depth)
-  {
-    if (qos_profile.depth > static_cast<size_t>((std::numeric_limits<DDS::Long>::max)())) {
-      RMW_SET_ERROR_MSG(
-        "failed to set history depth since the requested queue size exceeds the DDS type");
-      return false;
-    }
-    entity_qos.history.depth = static_cast<DDS::Long>(qos_profile.depth);
   }
 
   return true;
@@ -160,10 +171,12 @@ bool get_datareader_qos(
   if (subscriber == nullptr) {
     datareader_qos = DATAREADER_QOS_DEFAULT;
   } else {
+    const char * err_str;
     DDS::ReturnCode_t status;
     status = subscriber->get_default_datareader_qos(datareader_qos);
-    if (nullptr != (check_get_default_datareader_qos(status))) {
-      RMW_SET_ERROR_MSG(check_get_default_datareader_qos(status));
+    err_str = check_get_default_datareader_qos(status);
+    if (nullptr != err_str) {
+      RMW_SET_ERROR_MSG(err_str);
       return false;
     }
   }
@@ -178,15 +191,48 @@ bool get_datawriter_qos(
   if (publisher == nullptr) {
     datawriter_qos = DATAWRITER_QOS_DEFAULT;
   } else {
+    const char * err_str;
     DDS::ReturnCode_t status;
     status = publisher->get_default_datawriter_qos(datawriter_qos);
-    if (nullptr != check_get_default_datawriter_qos(status)) {
-      RMW_SET_ERROR_MSG(check_get_default_datawriter_qos(status));
+    err_str = check_get_default_datawriter_qos(status);
+    if (nullptr != err_str) {
+      RMW_SET_ERROR_MSG(err_str);
       return false;
     }
   }
 
   return set_entity_qos_from_profile(qos_profile, datawriter_qos);
+}
+
+bool get_topic_qos(
+  DDS::DomainParticipant & participant,
+  const rmw_qos_profile_t & qos_profile,
+  DDS::TopicQos & topic_qos)
+{
+  bool ret = true;
+
+  const char * err_str;
+  DDS::ReturnCode_t status;
+  status = participant.get_default_topic_qos(topic_qos);
+  err_str = check_get_default_topic_qos(status);
+  if (nullptr != err_str) {
+    RMW_SET_ERROR_MSG(err_str);
+    return false;
+  }
+
+  if (qos_profile.durability == RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL) {
+    topic_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    topic_qos.durability_service.service_cleanup_delay = {0, 0};
+    ret = rmw_qos_to_history(
+      qos_profile,
+      topic_qos.durability_service.history_kind,
+      topic_qos.durability_service.history_depth);
+    topic_qos.durability_service.max_samples = DDS::LENGTH_UNLIMITED;
+    topic_qos.durability_service.max_instances = DDS::LENGTH_UNLIMITED;
+    topic_qos.durability_service.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  }
+
+  return ret;
 }
 
 void

@@ -46,8 +46,7 @@
 #include "types.hpp"
 #include "typesupport_macros.hpp"
 
-using rosidl_typesupport_opensplice_cpp::impl::check_get_default_datareader_qos;
-using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
+using rosidl_typesupport_opensplice_cpp::impl::check_get_default_subscriber_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_datareader;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_subscriber;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_topic;
@@ -141,15 +140,16 @@ rmw_create_subscription(
 
   DDS::SubscriberQos subscriber_qos;
   DDS::ReturnCode_t status = participant->get_default_subscriber_qos(subscriber_qos);
-  if (nullptr != check_get_default_datareader_qos(status)) {
-    RMW_SET_ERROR_MSG(check_get_default_datareader_qos(status));
+  const char * err_str = check_get_default_subscriber_qos(status);
+  if (nullptr != err_str) {
+    RMW_SET_ERROR_MSG(err_str);
     return nullptr;
   }
 
   // Past this point, a failure results in unrolling code in the goto fail block.
   rmw_subscription_t * subscription = nullptr;
   DDS::Subscriber * dds_subscriber = nullptr;
-  DDS::TopicQos default_topic_qos;
+  DDS::TopicQos topic_qos;
   DDS::Topic * topic = nullptr;
   DDS::DataReaderQos datareader_qos;
   DDS::DataReader * topic_reader = nullptr;
@@ -190,14 +190,12 @@ rmw_create_subscription(
     goto fail;
   }
 
-  status = participant->get_default_topic_qos(default_topic_qos);
-  if (nullptr != check_get_default_topic_qos(status)) {
-    RMW_SET_ERROR_MSG(check_get_default_topic_qos(status));
+  if (!get_topic_qos(*participant, *qos_profile, topic_qos)) {
     goto fail;
   }
 
   topic = participant->create_topic(
-    topic_str.c_str(), type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic_str.c_str(), type_name.c_str(), topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
     RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;

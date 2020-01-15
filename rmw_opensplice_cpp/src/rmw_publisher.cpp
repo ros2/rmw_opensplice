@@ -48,7 +48,6 @@
 #include "typesupport_macros.hpp"
 
 using rosidl_typesupport_opensplice_cpp::impl::check_get_default_publisher_qos;
-using rosidl_typesupport_opensplice_cpp::impl::check_get_default_topic_qos;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_datawriter;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_publisher;
 using rosidl_typesupport_opensplice_cpp::impl::check_delete_topic;
@@ -143,14 +142,15 @@ rmw_create_publisher(
   DDS::PublisherQos publisher_qos;
   DDS::ReturnCode_t status;
   status = participant->get_default_publisher_qos(publisher_qos);
-  if (nullptr != check_get_default_publisher_qos(status)) {
-    RMW_SET_ERROR_MSG(check_get_default_publisher_qos(status));
+  const char * err_str = check_get_default_publisher_qos(status);
+  if (nullptr != err_str) {
+    RMW_SET_ERROR_MSG(err_str);
     return nullptr;
   }
   // Past this point, a failure results in unrolling code in the goto fail block.
   rmw_publisher_t * publisher = nullptr;
   DDS::Publisher * dds_publisher = nullptr;
-  DDS::TopicQos default_topic_qos;
+  DDS::TopicQos topic_qos;
   DDS::Topic * topic = nullptr;
   DDS::DataWriterQos datawriter_qos;
   DDS::DataWriter * topic_writer = nullptr;
@@ -190,14 +190,12 @@ rmw_create_publisher(
     goto fail;
   }
 
-  status = participant->get_default_topic_qos(default_topic_qos);
-  if (nullptr != check_get_default_topic_qos(status)) {
-    RMW_SET_ERROR_MSG(check_get_default_topic_qos(status));
+  if (!get_topic_qos(*participant, *qos_profile, topic_qos)) {
     goto fail;
   }
 
   topic = participant->create_topic(
-    topic_str.c_str(), type_name.c_str(), default_topic_qos, NULL, DDS::STATUS_MASK_NONE);
+    topic_str.c_str(), type_name.c_str(), topic_qos, NULL, DDS::STATUS_MASK_NONE);
   if (!topic) {
     RMW_SET_ERROR_MSG("failed to create topic");
     goto fail;
