@@ -33,6 +33,7 @@ find_package(rcutils REQUIRED)
 find_package(rmw REQUIRED)
 find_package(rosidl_generator_c REQUIRED)
 find_package(rosidl_generator_cpp REQUIRED)
+find_package(rosidl_runtime_c REQUIRED)
 
 ament_export_dependencies(
   rcutils
@@ -87,6 +88,7 @@ ament_target_dependencies(rmw_opensplice_cpp
   "rmw"
   "rosidl_generator_c"
   "rosidl_generator_cpp"
+  "rosidl_runtime_c"
   "rosidl_typesupport_opensplice_c"
   "rosidl_typesupport_opensplice_cpp"
   "OpenSplice"
