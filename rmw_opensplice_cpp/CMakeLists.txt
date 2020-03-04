@@ -31,15 +31,11 @@ endif()
 find_package(rcpputils REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(rmw REQUIRED)
-find_package(rosidl_generator_c REQUIRED)
-find_package(rosidl_generator_cpp REQUIRED)
 find_package(rosidl_runtime_c REQUIRED)
 
 ament_export_dependencies(
   rcutils
   rmw
-  rosidl_generator_c
-  rosidl_generator_cpp
   rosidl_typesupport_opensplice_c
   rosidl_typesupport_opensplice_cpp
 )
@@ -86,8 +82,6 @@ ament_target_dependencies(rmw_opensplice_cpp
   "rcpputils"
   "rcutils"
   "rmw"
-  "rosidl_generator_c"
-  "rosidl_generator_cpp"
   "rosidl_runtime_c"
   "rosidl_typesupport_opensplice_c"
   "rosidl_typesupport_opensplice_cpp"
